@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Calculator</title>
+		<meta charset="utf-8">
+		<meta name="author" content="Nathaniel Wilson Blakely">
+		<meta name="description" content="Calculator">
+
+		<style>
+			*{
+				margin:0;
+				padding:0;
+			}
+			body{
+				background-color: tan;
+			}
+			main{
+				height:600px;
+				width:400px;
+				background-color:#333;
+				margin:auto;
+				margin-top:20px;
+				border-style:solid;
+				border-width:4px;
+				border-color:black;
+				border-radius:10px;
+			}
+			div{
+				margin:auto;
+				width:80%;
+				border-style:solid;
+				background-color:#BBB;
+			}
+			table{
+				width:100%;
+				border-spacing:20px;
+				table-layout: fixed;
+			}
+			td{
+				position:relative;
+				font-size:30px;
+				height:55px;
+				border-style:outset;
+				border-collapse: collapse;
+				text-align:center;
+				color:#FFF;
+				background-color: #000;
+			}
+			td:hover{
+				border-style:inset;
+			}
+			td span{
+				position:absolute;
+				top:10px;
+				left:10px
+			}
+			p{
+				float:right;
+			}
+			#display{
+				margin-top:30px;
+				height:45px;
+				border-width:1px 1px 0px 1px;
+			}
+			#histdisplay{
+				margin-bottom:30px;
+				height:20px;
+				border-width:0 1px 1px 1px;
+			}
+			#text{
+				margin:5px 5px;
+				font-size:35px;
+			}
+			#histtext{
+				margin-right:4px;
+				font-size:20px;
+				color:#444;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="calculator.js"></script>
+		<main>
+			<div id="display"><p id="text">0</p></div>
+			<div id="histdisplay"><p id="histtext"></p></div>
+			<table>
+				<tr>
+					<td onclick="clearAll()"><span>AC</span></td>
+					<td onclick="clearEntry()"><span style="left:14px;">CE</span></td>
+					<td onclick="keypress('÷')">÷</td>
+					<td onclick="keypress('x')">x</td>
+				</tr>
+				<tr>
+					<td onclick="keypress('1')">1</td>
+					<td onclick="keypress('2')">2</td>
+					<td onclick="keypress('3')">3</td>
+					<td onclick="keypress('-')">-</td>
+				</tr>
+				<tr>
+					<td onclick="keypress('4')">4</td>
+					<td onclick="keypress('5')">5</td>
+					<td onclick="keypress('6')">6</td>
+					<td onclick="keypress('+')">+</td>
+				</tr>
+				<tr>
+					<td onclick="keypress('7')">7</td>
+					<td onclick="keypress('8')">8</td>
+					<td onclick="keypress('9')">9</td>
+					<td onclick="computeAnswer()" id="enter-key" rowspan="2">=</td>
+				</tr>
+				<tr>
+					<td id="zero-key" colspan="2">0</td>
+					<td onclick="keypress('.')">.</td>
+				</tr>
+			</table>
+		</main>
+	</body>
+</html>
