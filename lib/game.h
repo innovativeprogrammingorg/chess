@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include "move.h"
+#include "str.h"
 
 using namespace std;
 

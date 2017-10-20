@@ -2,7 +2,7 @@
 #define _LOCATION_H_
 
 #include <vector>
-#include <cstdlib.h>
+#include <cstdlib>
 
 using namespace std;
 

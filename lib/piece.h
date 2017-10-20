@@ -3,6 +3,7 @@
 
 
 #include "location.h"
+#include "types/chess_types.h"
 #include <iostream>
 
 
@@ -23,8 +24,7 @@ class Piece{
 		void setSpecial(int side);
 
 		void move(Location* loc);
-
-		static uint16_t getPieceName(char FEN);
+		static int getName(char FEN);
 };
 
 

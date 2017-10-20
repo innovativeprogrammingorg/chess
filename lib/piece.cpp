@@ -7,7 +7,7 @@ Piece::Piece(Location* loc,char side,char FEN){
 	this->loc = loc;
 	this->side = side;
 	this->FEN = FEN;
-	this->name = Piece::getPieceName(FEN);
+	this->name = Piece::getName(FEN);
 	if((this->name & PROMOTED_PAWN) != 0){
 		this->promo = true;
 		this->name -= PROMOTED_PAWN;
@@ -15,15 +15,14 @@ Piece::Piece(Location* loc,char side,char FEN){
 		this->promo = false;
 	}
 	this->special = false;
-	return out;
 }
 
 bool Piece::is(int name){
-	return p->name == name;
+	return this->name == name;
 }
 
 bool Piece::canSpecial(){
-	return p->special;
+	return this->special;
 }
 
 int Piece::getName(char FEN){
@@ -65,14 +64,14 @@ int Piece::getName(char FEN){
 
 
 void Piece::setSpecial(int side){
-	if(!this->is(p,PAWN)){
+	if(!this->is(PAWN)){
 		cout<<"Tried to set a special move for a piece that was not a pawn\n";
 		return;
 	}
-	p->special = side;
+	this->special = side;
 }
 
 void Piece::move(Location* loc){
-	delete p->loc;
-	p->loc = loc;
+	delete this->loc;
+	this->loc = loc;
 }

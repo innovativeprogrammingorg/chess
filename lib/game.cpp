@@ -11,7 +11,7 @@ bool isDraw(){
 	int numMoves; 
 	for(int i = 1;i<9;i++)
 		for(int j = 1;j<9;j++){
-			t = this->board->getTile(b,i,j);
+			t = this->board->getTile(i,j);
 			if(t->empty(t)){
 				continue;
 			}
@@ -29,21 +29,21 @@ bool isDraw(){
 	}
 	if(wPieces==1 && !this->inCheck(WHITE)){
 		king = this->board->getKing(WHITE);
-		moves = getAdjacent(king->loc);
-		numMoves = vector_length(moves);
+		moves = king->loc->getAdjacent();
+		numMoves = moves->size();
 		for(i = 0;i<numMoves;i++){
-			if(validMove(king,(Location)vector_get(moves,i),b)){
+			if(Move::validMove(king,moves->at(i),this->board)){
 				return false;
 			}
 		}
 		return true;
 	}
-	if(bPieces==1 && !inCheck(b,BLACK)){
-		king = getKing(b,BLACK);
-		moves = getAdjacent(king->loc);
-		numMoves = vector_length(moves);
+	if(bPieces==1 && !this->board->inCheck(BLACK)){
+		king = this->board->getKing(BLACK);
+		moves = king->loc->getAdjacent();
+		numMoves = moves->size();
 		for(i = 0;i<numMoves;i++){
-			if(validMove(king,(Location)vector_get(moves,i),b)){
+			if(Move::validMove(king,moves.at(i),this->board)){
 				return false;
 			}
 		}
@@ -52,8 +52,6 @@ bool isDraw(){
 	return false;
 }
 
-
-
 bool isCheckmate(char side){
 	if(!this->inCheck(side))
 		return false;
@@ -61,24 +59,22 @@ bool isCheckmate(char side){
 	Piece* king = this->board->getKing(side);
 	vector<Location*>* moves = king->loc->getAdjacent();
 	vector<Piece*> pieces;
-	int i = 0;
-	int j = 0;
 	int l1 = 0;
 	int l2 = 0;
 	Location* block = nullptr;
 	Location* s[2];
 	Tile* t;
 	int numMoves = moves->size();
-	for(i = 0;i<numMoves;i++){
+	for(int i = 0;i<numMoves;i++){
 		if(Move::validMove(king,moves->at(i),b)){
 			return false;
 		}
 	}
 	delete moves;
-	for(i = 1;i<9;i++)
-		for(j = 1;j<9;j++){
+	for(int i = 1;i<9;i++)
+		for(int j = 1;j<9;j++){
 			t = getTile(b,i,j);
-			if(!tileIsEmpty(t) && t->p->side != side && validMove(t->p,king->loc,b)){
+			if(!t->empty(t) && t->p->side != side && Move::validMove(t->p,king->loc,this->board)){
 				pieces.push_back(t->p);
 			}
 	}
@@ -94,9 +90,9 @@ bool isCheckmate(char side){
 		if(l1 == 0 || l2 ==0){
 			return true;
 		}
-		for(i = 0;i<l1;i++){
+		for(int i = 0;i<l1;i++){
 			s[0] = v1->at(i);
-			for(j = 0;j<l2;j++){
+			for(int j = 0;j<l2;j++){
 				s[1] = v2.at(j);
 				if(s[0].equals(s[1])){
 					//block = s[1];
@@ -104,108 +100,103 @@ bool isCheckmate(char side){
 				}
 			}
 		}
-		if(Game::tileCovered(b,block,side)){
-			return FALSE;
-		}else{
-			return TRUE;
-		}
+		return Game::tileCovered(b,block,side);
 	}else{
-		Vector blockSpots = NULL;
-		Piece* p = vector_get(pieces,0);
-		blockSpots = locationsBetween(king->loc,p->loc);
-		l1 = vector_length(blockSpots);
-		for(i = 0;i<l1;i++){
-			block = (Location)vector_get(blockSpots,i);
-			if(tileCovered(b,block,side)){
-				return FALSE;
+		Piece* p = pieces.at(0);
+		vector<Location*>* blockSpots = locationsBetween(king->loc,p->loc);
+		l1 = blockSpots->size();
+		for(int i = 0;i<l1;i++){
+			block = blockSpots.at(i);
+			if(Game::tileCovered(this->board,block,side)){
+				return false;
 			}
 		}
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-uint8_t move(Board b,int r,int c,int r2,int c2,char side){ 
-		Piece p = getTile(b,r,c)->p;
-		Location move = createLocation(r2,c2);
+uint8_t move(int r,int c,int r2,int c2,char side){ 
+		Piece* p = this->board->getTile(r,c)->p;
+		Location* move = new Location(r2,c2);
 		char t;
-		if(p == NULL||p->side != side){
+		if(p == nullptr||p->side != side){
 			return FALSE;
 		}
-		if(!validMove(p,move,b)){
-			printf("IT is not a valid move!\n");
-			if(isPiece(p,PAWN) && canSpecial(b,p)){
-				t = specialMove(p,move,b);
+		if(!Move::validMove(p,move,this->board)){
+			cout<<"IT is not a valid move!\n";
+			if(p->is(p) && p->canSpecial()){
+				t = Move::specialMove(p,move,this->board);
 				if(t == 0){
 					return FALSE;
 				}
-				b->taken = t;
+				this->board->taken = t;
 				return TRUE;
 			}
 			return FALSE;
 		}
-		if(!tileIsEmpty(getTile(b,r2,c2))){
-			b->taken = getTile(b,r2,c2)->p->FEN;
+		if(!this->board->getTile(r2,c2)->empty()){
+			this->board->taken = this->board->getTile(r2,c2)->p->FEN;
 		}
-		if(isPiece(p,KING) && abs(c-c2) ==2){
+		if(p->is(KING) && abs(c-c2) ==2){
 			if(p->side==WHITE){
-				if(c-c2==2 && (b->wCastle & 1)){
-					b->wCastle = FALSE;
-					castle(p,b,QUEEN_SIDE);
+				if(c-c2==2 && (this->board->wCastle & 1)){
+					this->board->wCastle = FALSE;
+					Move::castle(p,this->board,QUEEN_SIDE);
 					return TRUE;//f
 				}
-				if(c2-c==2 && ((b->wCastle >> 1) & 1)){
-					b->wCastle = FALSE;
-					castle(p,b,KING_SIDE);
+				if(c2-c==2 && ((this->board->wCastle >> 1) & 1)){
+					this->board->wCastle = FALSE;
+					Move::castle(p,this->board,KING_SIDE);
 					return TRUE;
 				}
 				return FALSE;
 			}else{
-				if(c-c2==2 && (b->bCastle & 1)){
-					b->bCastle = FALSE;
-					castle(p,b,QUEEN_SIDE);
+				if(c-c2==2 && (this->board->bCastle & 1)){
+					this->board->bCastle = FALSE;
+					Move::castle(p,this->board,QUEEN_SIDE);
 					return TRUE;
 				}
-				if(c2-c==2 && ((b->bCastle >> 1) & 1)){
-					b->bCastle = FALSE;
-					castle(p,b,KING_SIDE);
+				if(c2-c==2 && ((this->board->bCastle >> 1) & 1)){
+					this->board->bCastle = FALSE;
+					Move::castle(p,this->board,KING_SIDE);
 					return TRUE;//f
 				}				
 				return FALSE;
 			}
 		}
-		forceChange(b,r2,c2,getTile(b,r,c)->p->FEN);
-		forceChange(b,r,c,EMPTY_SPACE);
-		if(isPiece(p,PAWN) && abs(r-r2)==2){
-			printf("possible special pawn move\n");
-			if(!tileIsEmpty(getTile(b,r2,c2+1)) && isPiece(getTile(b,r2,c2+1)->p,PAWN) && getTile(b,r2,c2+1)->p->side != p->side){
-				b->special = stradd(concat(itoa(r2),itoa(c2+1),FALSE),'r');
+		this->board->forceChange(r2,c2,this->board->getTile(r,c)->p->FEN);
+		this->board->forceChange(r,c,EMPTY_SPACE);
+		if(p->is(PAWN) && abs(r-r2)==2){
+			cout<<"possible special pawn move\n";
+			if(!this->board->getTile(r2,c2+1)->empty() && this->board->getTile(r2,c2+1)->p->is(PAWN) && this->board->getTile(r2,c2+1)->p->side != p->side){
+				this->board->special = itoa(r2) + itoa(c2+1) +"r";
 			}
-			if(!tileIsEmpty(getTile(b,r2,c2-1)) && isPiece(getTile(b,r2,c2-1)->p,PAWN) && getTile(b,r2,c2-1)->p->side != p->side){
-				if(!strcompare(b->special,"false")){
-					b->special = stradd(concat(itoa(r2),itoa(c2-1),FALSE),'r');
+			if(!this->board->getTile(r2,c2-1)->empty(getTile) && this->board->getTile(r2,c2-1)->p->is(PAWN) && this->board->getTile(r2,c2-1)->p->side != p->side){
+				if(!strcompare(this->board->special,"false")){
+					this->board->special = itoa(r2) + itoa(c2-1) + "r";
 				}else{
-					b->special = concat(b->special,strappend('|',stradd(concat(itoa(r2),itoa(c2-1),FALSE),'r')),FIRST);
+					this->board->special = this->board->special + "|" + itoa(r2) +itoa(c2-1) + "r";
 				}
 				
 			}
 		}
-		if(inCheck(b,side)){
-			printf("The king is in check\n");
+		if(this->inCheck(side)){
+			cout<<"The king is in check\n";
 			return FALSE;
 		}else{
-			printf("The king is not in check\n");
+			cout<<"The king is not in check\n";
 		}
-		if(isPiece(p,KING)){
+		if(p->is(KING)){
 			if(p->side==WHITE){
-				b->wCastle = FALSE;
+				this->board->wCastle = false;
 			}else{
-				b->bCastle = FALSE;
+				this->board->bCastle = false;
 			}
 		}
 		if((p->FEN==WHITE_PAWN && r2==8) || (p->FEN==BLACK_PAWN && r2==1)){
-			free(getTile(b,r,c));
-			forceChange(b,r,c,'X');
+			delete this->board->getTile(r,c);
+			this->board->forceChange(r,c,'X');
 			return PROMOTION;
 		}
 		return TRUE;
@@ -236,7 +227,7 @@ bool Game::isProtected(Board* b,Location* loc,char side){
 	for(int i = 1;i<9;i++) 
 		for(int j = 1;j<9;j++){
 			t = b->getTile(i,j);
-			if(!t->empty() && t->p->side == side && !t->p->loc->equal(loc)){
+			if(!t->empty() && t->p->side == side && !t->p->loc->equals(loc)){
 					FEN = b->getTile(loc->row,loc->col)->p->FEN;
 					b->forceChange(loc->row,loc->col,EMPTY_SPACE);
 					if(Move::validMove(t->p,loc,b)){
@@ -251,20 +242,19 @@ bool Game::isProtected(Board* b,Location* loc,char side){
 
 bool Game::tileCovered(Board* b,Location* loc,char side){
 	Tile* t;
-	int i,j;
-	for(i = 1;i<9;i++)
-		for(j = 1;j<9;j++){
-			t = this->getTile(i,j);
-			if(!t->empty() && t->p->side == side && t->p->is(t->p,KING) && validMove(t->p,loc,b)){
+	for(int i = 1;i<9;i++)
+		for(int j = 1;j<9;j++){
+			t = b->getTile(i,j);
+			if(!t->empty() && t->p->side == side && t->p->is(t->p,KING) && Move::validMove(t->p,loc,b)){
 				return true;
 			}
 		}
 	return false;
 }
 
-bool Game::tileCovered(int r,int c,char side){
+bool Game::tileCovered(Board* b,int r,int c,char side){
 	Location* loc = new Location(r,c);
-	bool out = this->tileCovered(loc,side);
+	bool out = b->tileCovered(loc,side);
 	delete loc;
 	return out;
 }
