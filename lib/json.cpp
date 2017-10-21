@@ -1,30 +1,38 @@
 #include "json.h"
 
+using namespace std;
 
-JSON ati(JSON j,size_t i){
+JSON::JSON(string t){
+	if(t.compare("string") != 0){
+		this->data = (JSON **)malloc(sizeof(JSON*));
+		this->data[0] = nullptr;
+	}
+	this->type = t;
+	this->values = new vector<void*>();
+	this->name = "";
+	this->url = "";
+	this->keys = new vector<string>();
+}
+
+JSON* JSON::at(size_t i){
 	return j->data[i];
 }
 
-JSON atc(JSON j, char * key){
-	size_t index = 0;
-	int i;
-	size_t length = size(j);
-	for(i = 0;i<length;i++){
-		if(strcompare(vector_get(j->keys,i),key)){
-			index = i;
-			break;
+JSON* JSON::at(string key){
+	size_t length = this->size();
+	for(int i = 0;i<length;i++){
+		if(this->keys->at(i).compare(key) == 0){
+			return j->data[i];
 		}
 	}
-	
-	return j->data[index];
+	return nullptr;
 }
 
-char * valueAtc(JSON j, char * key){
+string JSON::valueAt(string key){
 	int index = 0;
-	size_t length = vector_length(j->keys);
-	int i;
-	for(i = 0;i<length;i++){
-		if(strcompare(vector_get(j->keys,i),key)){
+	size_t length = this->keys->size();
+	for(int i = 0;i<length;i++){
+		if(this->keys->at(i).compare(key) == 0){
 			index = i;
 			break;
 		}
@@ -33,34 +41,21 @@ char * valueAtc(JSON j, char * key){
 	return vector_get(j->values,index);
 }
 
-char * valueAti(JSON j, size_t index){		
-	return vector_get(j->values,index);
+string JSON::valueAt(size_t index){		
+	return j->values->at(index);
 }
 
-JSON createJSON(char * t){
-	JSON out = (JSON)malloc(sizeof(struct json));
-	if(!strcompare(t,"string")){
-		out->data = (JSON *)malloc(sizeof(JSON));
-	}
-	out->type = t;
-	out->values = NULL;
-	out->name = NULL;
-	out->url = NULL;
-	out->keys = NULL;
-	return out;
-}
-
-
-void adds(JSON j, char * element){
+void JSON::add(string element){
 	if(!strcompare(j->type,"string")){
-		printf("ERROR, Cannot Add json. Wrong Type\n");
+		cerr<<"ERROR, Cannot Add json. Wrong Type\n";
 		exit(EXIT_FAILURE);
 	}
+	j->values->push_back((void*)element);
 	vector_push(&(j->values),element);
 	vector_push(&(j->keys),itoa(vector_length(j->keys)));
 }
 
-void addj(JSON j,JSON element){
+void JSON::add(JSON j,JSON element){
 	if(!strcompare(j->type,"JSON")&& !strcompare(j->type,"json")){
 		printf("ERROR, Cannot Add json\n");
 		exit(EXIT_FAILURE);
@@ -71,9 +66,9 @@ void addj(JSON j,JSON element){
 	vector_push(&(j->keys),itoa(length));
 }
 
-void addss(JSON j,char * key,char * element){
-	if(!strcompare(j->type,"string")){
-		printf("ERROR, Cannot Add json. Wrong Type\n");
+void JSON::add(JSON j,string key,string element){
+	if(this->type.compare("string") != 0){
+		cout<<"ERROR, Cannot Add json. Wrong Type\n";
 		exit(EXIT_FAILURE);
 	}
 	vector_push(&(j->values),element);
@@ -81,10 +76,10 @@ void addss(JSON j,char * key,char * element){
 }
 
 
-void addsj(JSON j, char * key,JSON element){
-	size_t length = vector_length(j->keys);
-	if(!strcompare(j->type,"JSON")&& !strcompare(j->type,"json")){
-		printf("ERROR, Cannot Add json\n");
+void JSON::add(string key,JSON element){
+	size_t length = this->keys->size();
+	if(j->type.compare("JSON") != 0 && !strcompare(j->type,"json")){
+		cerr<<"ERROR, Cannot Add json\n";
 		exit(EXIT_FAILURE);
 	}
 	j->data = (JSON *)realloc((void *)j->data,sizeof(JSON)*(length+1));
@@ -92,35 +87,34 @@ void addsj(JSON j, char * key,JSON element){
 	vector_push(&(j->keys),key);
 }
 
-char * keyAt(JSON j, size_t index){
+string JSON::keyAt(JSON j, size_t index){
 	return vector_get(j->keys,index);
 }
 
-size_t size(JSON j){
-	return vector_length(j->keys);
+size_t JSON::size(){
+	return j->keys->size();
 }
 
-void addContents(JSON j, Vector input){
+void JSON::addContents(vector<void*>* input){
 	size_t length = vector_length(input);
-	int i;
-	for(i = 0;i<length;i++){
+	for(int i = 0;i<length;i++){
 		adds(j,vector_get(input,i));
 	}
 }
 
-char * jsonToString(JSON data){
-	char * out = NULL;
-	char * type = data->type;
+string JSON::to_string(){
+	string out = NULL;
+	string type = data->type;
 	size_t length = size(data);
-	register uint_fast64_t i = 0;
+	int i = 0;
 	if(length == 0){
-		out = (char *)malloc(sizeof(char)*3);
+		out = (string)malloc(sizeof(char)*3);
 		out[0] = '{';
 		out[1] = '}';
 		out[2] = '\0';
 		return out;
 	}
-	out = (char *)malloc(sizeof(char) * 2);
+	out = (string)malloc(sizeof(char) * 2);
 	out[0] = '{';
 	out[1] = '\0';
 	if(strcompare(type,"string")){

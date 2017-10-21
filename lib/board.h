@@ -7,6 +7,7 @@
 #include "str.h"
 #include "types/chess_types.h"
 #include "tile.h"
+#include "json.h"
 
 using namespace std;
 
@@ -19,7 +20,7 @@ class Board{
 		uint8_t wCastle;
 		char taken;
 		string special;
-		Vector history;
+		vector<string*>* history;
 	public:
 		Board(string FEN, string special, string castle);
 		virtual ~Board();
@@ -28,16 +29,12 @@ class Board{
 		bool placePiece(int r,int c,char FEN);
 		void forceChange(int r,int c,char FEN);
 		Location* findKing(char side);
-		Piece* getKing(char side);
-		
-		
-		
-		
+		Piece* getKing(char side);		
 		string generateFEN();
 		void forceChange(int r,int c,char FEN);
 		string getCastleData();
 		string getBoardData();
-		void castle(Piece* p,,char side);
+		void castle(Piece*,int,char);
 		static char numToCol(int c);
 		static char otherSide(char side);
 };

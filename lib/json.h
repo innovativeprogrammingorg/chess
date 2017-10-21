@@ -1,33 +1,40 @@
 #ifndef json_H
 #define json_H
 
-#include "vector.h"
+#include <vector>
 #include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
 #include "str.h"
 
-typedef struct json* JSON;
-struct json{
-	Vector keys;
-	Vector values;
-	JSON * data;
-	char * type;
-	char * name;
-	char * url;
+using namespace std;
+
+
+
+class JSON{
+	public:
+		vector<string>* keys;
+		vector<void*>* values;
+		JSON** data;
+		string type;
+		string name;
+		string url;
+
+		JSON(string t);
+		JSON at(size_t i);
+		JSON at(,string key);
+		string valueAt(string key);
+		string valueAt(size_t index);
+		
+		void add(string element);
+		void add(JSON element);
+		void add(string key,string element);
+		void add(string key,JSON element);
+		string keyAt(size_t index);
+		size_t size();
+		void addContents(vector<void*>* input);
+		string to_string();
 };
-JSON ati(JSON j,size_t i);
-JSON atc(JSON j,char * key);
-char * valueAtc(JSON j, char * key);
-char * valueAti(JSON j,size_t index);
-JSON createJSON(char * t);
-void adds(JSON j, char * element);
-void addj(JSON j,JSON element);
-void addss(JSON j,char * key,char * element);
-void addsj(JSON j, char * key,JSON element);
-char* keyAt(JSON j, size_t index);
-size_t size(JSON j);
-void addContents(JSON j, Vector input);
-char* jsonToString(JSON data);
+
 
 
 #endif

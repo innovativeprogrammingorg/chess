@@ -13,7 +13,7 @@ Board::Board(string FEN, string spec, string castle){
 	this->wCastle = ((castle.find("wk")==string::npos)? 0 : KING_SIDE) | ((castle.find("wq")==string::npos)? 0 : QUEEN_SIDE);
 	cout<<"done, WHITE - "<<out->wCastle<<" : BLACK - "<<out->bCastle<<endl;
 	this->taken = -1;
-	this->history = nullptr;
+	this->history = new vector<string*>();
 	cout<<"Creating the tiles\n";
 	for(int i = 0;i<8;i++){
 		this->tiles[i] = (Tile**)calloc(sizeof(Tile*),8);
@@ -41,6 +41,7 @@ Board::~Board(){
 		free(this->tiles[i]);
 	}
 	free(this->tiles);
+	delete this->history;
 }
 
 Tile* Board::getTile(int row, int col){
@@ -98,7 +99,7 @@ void Board::forceChange(int r,int c,char FEN){
 }
 
 bool Board::placePiece(int r,int c,char FEN){
-	if(!this->getTile(r,c)->empty() || Piece::getPieceName(FEN)==0){
+	if(!this->getTile(r,c)->empty() || Piece::getName(FEN)==0){
 		return false;
 	}
 	this->forceChange(r,c,FEN);
@@ -143,8 +144,6 @@ char Board::otherSide(char side){
 
 
 
-
-
 string Board::generateFEN(){
 	string output = "";
 	Tile t;
@@ -159,7 +158,6 @@ string Board::generateFEN(){
 		}	
 		if(i>1)
 			output = output + "/";
-	}
 	return output;	
 }
 
@@ -174,16 +172,16 @@ string Board::getCastleData(){
 string Board::getBoardData(){
 	JSON data = createJSON("string");
 	string history = NULL;
-	addss(data,"FEN",generateFEN(b));
-	addss(data,"Castle",getCastleData(b));
-	addss(data,"Taken",(char*)&(b->taken));
-	addss(data,"Special",b->special);
-	size_t length = vector_length(b->history);
+	addss(data,"FEN",this->generateFEN(b));
+	addss(data,"Castle",this->getCastleData());
+	addss(data,"Taken",(char*)&(this->taken));
+	addss(data,"Special",this->special);
+	int length = this->history->size();
 	if(length>0){
-		history = concat(history,(char*)vector_get(b->history,0),FALSE);
+		history += *(this->history.at(0));
 	}
-	for(size_t i = 1;i<length;i++){
-		history = concat(history,(char*)vector_get(b->history,i),FIRST);
+	for(int i = 1;i<length;i++){
+		history += *(this->history.at(i));
 	}
 	addss(data,"History",history);
 	return jsonToString(data);
