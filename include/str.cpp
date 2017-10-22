@@ -1,39 +1,58 @@
 #include "str.h"
 
-Vector explode(char * quan,char * subject){
-	Vector out = NULL;
-	char * subj;
-	register uint_fast64_t i;                                             
-	size_t qlength = strlen(quan);
-	size_t slength = strlen(subject);
-	subj = (char *)malloc(sizeof(char)*(slength+1));
-	strcpy(subj,subject);
-	subj[slength] = '\0';
-	for(i = 0;i<slength-qlength;i++){
-		if(strcompsub(quan,subj,i,qlength)){
-			vector_push(&out,substring(subj,0,i));
-			subj = substr_f(subj,i+1);
+using namespace std;
+
+vector<string>* explode(string quan,string subject){
+	vector<string>* out = new vector<string>();
+	string subj = subject.substr(0);                                          
+	size_t qlength = quan.size();
+	size_t slength = subject.size();
+	
+	for(uint_fast64_t i = 0;i<slength-qlength;i++){
+		if(quan.compare(subj.substr(i,qlength)) == 0){
+			out->push_back(subj.substr(0,i));
+			subj = subj.substr(i+qlength);
 			i = 0;
-			slength = strlen(subj);
+			slength = subj.size();
 		}
 	}
-	free(subj);
+	if(subj.size()>0){
+		out->push_back(subj);
+	}
 	return out;
 }
 
-Vector split(char quan,char * subject){
-	Vector out = NULL;
-	int index = indexOfChar(subject,quan);
-	vector_push(&out,substring(subject,0,index));
-	vector_push(&out,substr(subject,index+1));
+
+vector<string>* c_explode(char quan,string subject){
+	vector<string>* out = new vector<string>();
+	string subj = subject.substr(0);
+	uint_fast64_t i;   
+	size_t slength = subject.size();
+	
+	for(i = 0;i<slength-1;i++){
+		if(quan == subj.at(i)){
+			out->push_back(subj.substr(0,i));
+			subj = subj.substr(i+1);
+			i = 0;
+			slength = subj.size();
+		}
+	}
 	return out;
 }
 
-Vector ssplit(char* quan,char * subject){
-	Vector out = NULL;
-	int index = strpos(subject,quan);
-	vector_push(&out,substring(subject,0,index));
-	vector_push(&out,substr(subject,index+strlen(quan)));
+vector<string>* split(char quan,string subject){
+	vector<string>* out = new vector<string>();
+	int index = subject.find(quan);
+	out->push_back(subject.substr(0,index));
+	out->push_back(subject.substr(index+1));
+	return out;
+}
+
+vector<string>* ssplit(string quan,string subject){
+	vector<string>* out;
+	int index = subject.find(quan);
+	out->push_back(subject.substr(0,index));
+	out->push_back(subject.substr(index+quan.size()));
 	return out;
 }
 
@@ -49,21 +68,10 @@ char * substr_f(char * subject,size_t index){
 	return out;
 }
 
-char* itoa(uint32_t num){
-	char * characters[10] = {"0","1","2","3","4","5","6","7","8","9"};
-	return (num>=10)? concat(itoa(num/10),characters[num%10],FALSE) : characters[num];
-}
-
-char* ltoa(uint64_t num){
-	char * characters[10] = {"0","1","2","3","4","5","6","7","8","9"};
-	return (num>=10)? concat(itoa(num/10),characters[num%10],FALSE) : characters[num];
-}
-
 char* str_reverse(char* str){
 	size_t length = strlen(str);
 	char * out = (char*)malloc(sizeof(char)*(length+1));
-	size_t i = 0;
-	for(i = 0;i<length;i++){
+	for(size_t i = 0;i<length;i++){
 		out[i] = str[(length-1)-i];
 	}
 	out[length] = '\0';
@@ -74,13 +82,12 @@ char* str_reverse(char* str){
 char* strappend(char s,char * str){
 	size_t length = strlength(str);
 	char* out = (char*)malloc(sizeof(char)*(length+2));
-	register size_t i;
 	out[0] = s;
 	if(str==NULL){
 		out[1] = '\0';
 		return out;
 	}
-	for(i = 1;i<length+2;i++){
+	for(size_t i = 1;i<length+2;i++){
 		out[i] = str[i-1];
 	}
 	free(str);
@@ -101,8 +108,8 @@ char* stradd(char * str,char s){
 }
 
 
-char getLast(char * str){
-	return str[strlen(str)-1];
+char getLast(string str){
+	return str[str.size()-1];
 }
 
 char lastChar(char * str){
@@ -114,7 +121,7 @@ char * substring(char * subject,size_t index,int length){
 		return substring(subject,index,(strlen(subject) - (index - length)));
 	}
 	char * out = (char *)malloc(sizeof(char)*(length + 1));
-	register uint_fast64_t i;
+	uint_fast64_t i;
 
 	for(i = 0;i<length;i++){
 		out[i] = subject[i+index];
@@ -127,8 +134,8 @@ char * substring(char * subject,size_t index,int length){
 char* substr_r(char * subject,int index){
 	uint64_t length = strlen(subject);
 	char * out;
-	register uint_fast64_t i = 0;
-	register uint_fast64_t start = length + index;
+	uint_fast64_t i = 0;
+	uint_fast64_t start = length + index;
 	out = (char *)malloc(sizeof(char)*(index*-1 + 1));
 
 	while(subject[i+start]!='\0'){
@@ -145,7 +152,7 @@ char* substr(char* subject,int index){
 	}
 	uint64_t length = strlength(subject);
 	char * out;
-	register uint_fast64_t i = 0;
+	uint_fast64_t i = 0;
 	if(length<index+1){
 		return NULL;
 	}
@@ -159,8 +166,8 @@ char* substr(char* subject,int index){
 }
 
 uint_least8_t strcompare(char * str1, char * str2){
-	register uint64_t l1 = strlen(str1);
-	register uint_fast64_t i;
+	uint64_t l1 = strlen(str1);
+	uint_fast64_t i;
 	if(l1 != strlen(str2)){
 		return FALSE;
 	}
@@ -173,7 +180,7 @@ uint_least8_t strcompare(char * str1, char * str2){
 }
 
 uint_least8_t strcompsub(char * str1,char * str2, size_t index, size_t length){
-	register uint_fast64_t i;
+	uint_fast64_t i;
 	if(length != strlen(str1)){
 		return FALSE;
 	}
@@ -193,11 +200,11 @@ size_t strlength(char * str){
 }
 
 char* concat(char * s1, char * s2, uint8_t mem){
-	register uint_fast64_t l1 = strlength(s1);
-	register uint_fast64_t l2 = strlength(s2);
+	uint_fast64_t l1 = strlength(s1);
+	uint_fast64_t l2 = strlength(s2);
 	size_t length = l1 + l2;
 	char * out = (char *)malloc(sizeof(char)*(length+1));
-	register uint_fast64_t i;
+	uint_fast64_t i;
 	for(i = 0;i<l1;i++){
 		out[i] = s1[i];
 	}
@@ -234,7 +241,7 @@ char* concat_all(int args,...){
 int64_t strpos(char * haystack, char * needle){
 	size_t length = strlen(haystack);
 	size_t nlength = strlen(needle);
-	register uint_fast64_t i;
+	uint_fast64_t i;
 	if(length == 0||nlength>length){
 		return -1;
 	}
@@ -245,10 +252,10 @@ int64_t strpos(char * haystack, char * needle){
 	}
 	return -1;
 }
-int indexOfChar(char * haystack, char needle){
-	size_t length = strlen(haystack);
-	register uint_fast64_t i;
-	for(i = 0;i<length;i++){
+int indexOfChar(string haystack, char needle){
+	size_t length = haystack.size();
+
+	for(uint_fast64_t i = 0;i<length;i++){
 		if(haystack[i]==needle){
 			return i;
 		}
@@ -256,12 +263,9 @@ int indexOfChar(char * haystack, char needle){
 	return -1;
 }
 
-char * ktrim(char* str){
-	return trim(str);
-}
-char * trim(char* str){
-	register uint_fast64_t start = 0;
-	register uint_fast64_t end = strlen(str);
+string trim(string str){
+	uint_fast64_t start = 0;
+	uint_fast64_t end = str.size();
 	while(str[start] == '\n' || str[start]== '\r' || str[start]==' '){
 		start++;
 	}
@@ -269,10 +273,10 @@ char * trim(char* str){
 		end--;
 	}
 	if(end-start ==0){
-		printf("ERROR was found when trimming: %s\n",str);
+		cout<<"ERROR was found when trimming:"<<str<<endl;
 		exit(EXIT_FAILURE);
 	}
-	return substring(str,start,end-start);
+	return str.substr(start,end-start);
 }
 
 
@@ -289,3 +293,36 @@ char* str_replace(char* search,char* replace,char* subject){
 	return str_replace(search,replace,concat(first_chunk,replace,FIRST));
 
 }
+char* to_cstr(string s){
+	int64_t size = s.size();
+	char* out = (char*)calloc(sizeof(char),size + 1);
+	for(uint_fast64_t i = 0;i<size;i++){
+		out[i] = s.at(i);
+	}
+	return out;
+}
+
+
+string itoa(int i){
+	if(i<0){
+		return "-" + itoa(i * -1);
+	}
+	string s[10] = {"0","1","2","3","4","5","6","7","8","9"};
+	return (i>=10)? itoa(i/10) + s[i%10] : s[i];
+}
+
+
+string ltos(int64_t i){
+	if(i<0){
+		return "-" + ltos(i * -1);
+	}
+	string s[10] = {"0","1","2","3","4","5","6","7","8","9"};
+	return (i>=10)? ltos(i/10) + s[i%10] : s[i];
+}
+/*
+int stoi(string s){
+	char* str = to_cstr(s);
+	int out = atoi(str);
+	free(str);
+	return out;
+}*/

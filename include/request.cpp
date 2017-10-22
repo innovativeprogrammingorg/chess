@@ -1,11 +1,11 @@
 #include "request.h"
 
-Request new_request(Client c, char* data){
+/*Request new_request(Client c, char* data){
 	Request out = (Request)malloc(sizeof(struct request));
 	out->client = c;
 	out->data = data;
 	return out;
-}
+}*/
 
 uint8_t is_PHP_request(char * message, char** directory){
 	int i = strpos(message,"\r\n");

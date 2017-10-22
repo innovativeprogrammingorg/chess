@@ -14,8 +14,6 @@
 #include <netdb.h> /* struct hostent, gethostbyname */
 #include "concurrency.h"
 #include "str.h"
-#include "vector.h"
-#include "map.h"
 #include <signal.h>
 /*#include <openssl/bio.h>
 #include <openssl/ssl.h>
@@ -25,7 +23,7 @@
 #include <openssl/x509_vfy.h>*/
 #include <resolv.h>
 #include "client.h"
-#include "./CGI/CGI.h"
+#include <vector>
 
 #ifndef TRUE
 #define TRUE   1

@@ -5,26 +5,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
+#include <string>
 #include <sys/types.h>
-#include <stdint.h>
 #include <time.h>
+#include <map>
+#include <vector>
+
+#include "HTTP.h"
 #include "io.h"
-#include "map.h"
-#include "server.h"
 
-typedef struct cookie * Cookie;
 
-struct cookie{
-	char* value;
-	time_t created;
-	time_t expires;
+using namespace std;
+
+class Cookie{
+	public:
+		string value;
+		time_t created;
+		time_t expires;
+		Cookie(string value = "",time_t created = 0,time_t exp = 0);
+		bool store(string ip,string key);
+		static bool store_cookies(string ip, map<string,Cookie*>* cookies);
+		static map<string,Cookie*>* load_cookies(string ip);
+		static map<string,Cookie*>* parse_cookies(string ip,HTTP_Header* r);
 };
 
-Cookie new_cookie(char* value,time_t created,time_t exp);
-uint8_t store_cookie(char* ip, char* key, Cookie c);
-Map load_cookies(char* ip);
-uint8_t parse_cookies(char* ip,Map header);
+
 
 
 #ifndef COOKIES_DIR

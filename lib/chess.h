@@ -22,17 +22,6 @@
 #include <websock/websock.h>
 
 #include <vector>
-#include "types/types.h"
-#include "utils.h"
-#include "str.h"
-#include "tile.h"
-#include "move.h"
-#include "map.h"
-#include "json.h"
-#include "server/connection.h"
-#include "client.h"
-#include "server/server.h"
-#include "sql.h"
 
 
 

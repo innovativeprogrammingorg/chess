@@ -6,10 +6,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "client.h"
-#include "data_types.h"
 
-Request new_request(Client c, char* data);
+//Request new_request(Client c, char* data);
 uint8_t is_PHP_request(char * message, char** directory);
 
 #ifndef TRUE 

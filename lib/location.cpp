@@ -79,11 +79,11 @@ vector<Location*>* Location::locationsBetween(Location* l1,Location* l2){
 	return out;
 }
 
-uint8_t Location::isAdjacent(Location* l){
+bool Location::isAdjacent(Location* l){
 	return !(this->equals(l)||abs(this->row - l->row) > 1 || abs(this->col - l->col) > 1);
 }
 
-uint8_t Location::equals(Location* l){
+bool Location::equals(Location* l){
 	return this->col == l->col && this->row == l->row;
 }
 

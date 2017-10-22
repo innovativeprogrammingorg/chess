@@ -4,11 +4,13 @@
 CC= g++
 LIB = -I /usr/local/lib/
 VERSION = c++11
-CFLAGS = -std=$(VERSION)  -pthread $(LIB) 
+CFLAGS = -std=$(VERSION)  -pthread 
 FILES = *.cpp 
 LIB_OBJ = $(foreach x, $(basename $(wildcard lib/*.cpp)), $(x).o)
 INCLUDE_OBJ = $(foreach x, $(basename $(wildcard include/*.cpp)), $(x).o)
+
 CGI_OBJ = $(foreach x, $(basename $(wildcard include/CGI*.cpp)), $(x).o)
+
 OBJECTS =  $(LIB_OBJ) $(INCLUDE_OBJ) $(CGI_OBJ)
 
 .PHONY: clean

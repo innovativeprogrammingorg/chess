@@ -3,17 +3,31 @@
 
 #include <unistd.h>
 #include <stdlib.h>
-#include <stdint.h>
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <map>
 #include "cookies.h"
-#include "vector.h"
-#include "map.h"
 #include "str.h"
-#include "data_types.h"
 
+class Client{
+	public:
+		static vector<Client*>* clients;
+		string ip;
+		int port;
+		int fd;
+		map<string,Cookie*> cookies;
+		time_t last_active;
 
-Client new_client(int fd,char* ip,int port);
+		bool equals(Client* c);
+		Client(int fd,char* ip,int port);
+		static Client* find_client_by_ip(string ip);
+		static void add_client(Client* c);
+		static void drop_client(Client* c);
+		static void drop_client(int i);
 
-Client find_client_by_ip(Vector clients,char* ip);
+};
+
 
 
 #ifndef CLIENT_TIMEOUT

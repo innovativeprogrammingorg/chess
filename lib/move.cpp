@@ -1,24 +1,7 @@
-#include "chess.h"
+#include "move.h"
 
+using namespace std;
 
-
-bool Move::valid(Piece* p,Location* move,Board* b){
-	switch(p->name){
-		case PAWN:
-			return Move::valid_pawn(p,move,b);
-		case KNIGHT:
-			return Move::valid_knight(p,move,b);
-		case BISHOP:
-			return Move::valid_bishop(p,move,b);
-		case ROOK:
-			return Move::valid_rook(p,move,b);
-		case QUEEN:
-			return Move::valid_queen(p,move,b);
-		case KING:
-			return Move::valid_king(p,move,b);
-	}
-	return false;
-}
 
 bool Move::valid_queen(Piece* p,Location* move,Board* b){
 	int r = p->loc->row;
@@ -31,11 +14,11 @@ bool Move::valid_queen(Piece* p,Location* move,Board* b){
 		return false;
 	}
 	vector<Location*>* spaces = Location::locationsBetween(p->loc,move);
-	if(!b->getTile(mr,cr)->empty() && b->getTile(mr,mc)->p->side == p->side){
+	if(!b->getTile(mr,mc)->empty() && b->getTile(mr,mc)->p->side == p->side){
 		delete spaces;
 		return false;
 	}
-	length = spaces->size;
+	length = spaces->size();
 	if(length==0){
 		delete spaces;
 		return false;
@@ -64,19 +47,19 @@ bool Move::valid_king(Piece* p, Location* move, Board* b){
 		return false;
 	}
 	if(abs(c-mc) == 2){
-		if(c>mc && !b->tileCovered(r,c-1,Board::otherSide(p->side)) && !b->tileCovered(r,c-2,Board::otherSide(p->side)) && !Game::inCheck(b,p->side)){
+		if(c>mc && !Game::tileCovered(b,r,c-1,Board::otherSide(p->side)) && !Game::tileCovered(b,r,c-2,Board::otherSide(p->side)) && !Game::inCheck(b,p->side)){
 			return true;
 		}
-		if(c<mc && !b->tileCovered(r,c+1,Board::otherSide(p->side)) && !b->tileCovered(r,c+2,Board::otherSide(p->side)) && !Game::inCheck(b,p->side)){
+		if(c<mc && !Game::tileCovered(b,r,c+1,Board::otherSide(p->side)) && !Game::tileCovered(b,r,c+2,Board::otherSide(p->side)) && !Game::inCheck(b,p->side)){
 			return false;
 		}
 		cout<<"The move is a failed attempt to castle\n";
 		return false;
 	}
-	if(abs(r-mr) + abs(c-mc) == 1 && !b->tileCovered(move,Board::otherSide(p->side))){
+	if(abs(r-mr) + abs(c-mc) == 1 && !Game::tileCovered(b,move,Board::otherSide(p->side))){
 		FEN = p->FEN;
 		b->forceChange(r,c,'X');
-		if(b->tileCovered(move,Board::otherSide(p->side))){
+		if(Game::tileCovered(b,move,Board::otherSide(p->side))){
 			b->forceChange(r,c,FEN);
 			return false;
 		}
@@ -85,7 +68,7 @@ bool Move::valid_king(Piece* p, Location* move, Board* b){
 			cout<<"The move is valid since there are no pieces there and it is safe\n";
 			return true;
 		}else if(b->getTile(mr,mc)->p->side != p->side){
-			if(Game::isProtected(b,move,Board::otherSide(p->side))){
+			if(Game::isProtected(move,b,Board::otherSide(p->side))){
 				cout<<"The king can't take the piece\n";
 				return false;
 			}
@@ -103,10 +86,10 @@ bool Move::valid_king(Piece* p, Location* move, Board* b){
 	if(t1==1 && t2==1){
 		if(b->getTile(mr,mc)->empty()){
 			cout<<"Diagonal Move\n";
-			return Game::tileCovered(b,move,otherSide(p->side));
-		}else if(getTile(b,mr,mc)->p->side != p->side){
+			return Game::tileCovered(b,move,Board::otherSide(p->side));
+		}else if(b->getTile(mr,mc)->p->side != p->side){
 			cout<<"Can the king take the piece?\n";
-			return Game::isProtected(b,move,otherSide(p->side));		
+			return Game::isProtected(move,b,Board::otherSide(p->side));		
 		}else{
 			return false;
 		}
@@ -194,14 +177,14 @@ bool Move::valid_bishop(Piece* p,Location* move,Board* b){
 	if(!b->getTile(mr,mc)->empty() && b->getTile(mr,mc)->p->side == p->side){
 		return false;
 	}
-	vector<Location*> spaces = Location::locationsBetween(p->loc,move);
+	vector<Location*>* spaces = Location::locationsBetween(p->loc,move);
 	length = spaces->size();
 	if(length==0){
 		return true;
 	}
 	for(int i = 0;i<length;i++){
-		l = (Location)vector_get(spaces,i);
-		if(!tileIsEmpty(getTile(b,l->row,l->col))){
+		l = spaces->at(i);
+		if(!b->getTile(l->row,l->col)->empty()){
 			return false;
 		}
 	}
@@ -213,7 +196,7 @@ bool Move::valid_knight(Piece* p,Location* move,Board* b){
 	int c = p->loc->col;
 	int mr = move->row;
 	int mc = move->col;
-	return !((mr>8||mr<1||mc>8||mc<1)||abs((r-mr)*(c-mc))!=2||(!tileIsEmpty(getTile(b,mr,mc)) && getTile(b,mr,mc)->p->side==p->side));
+	return !((mr>8||mr<1||mc>8||mc<1)||abs((r-mr)*(c-mc))!=2||(!b->getTile(mr,mc)->empty() && b->getTile(mr,mc)->p->side==p->side));
 }
 
 bool Move::valid_rook(Piece* p,Location* move,Board* b){
@@ -227,7 +210,7 @@ bool Move::valid_rook(Piece* p,Location* move,Board* b){
 		return false;
 	}
 	
-	if(!tileIsEmpty(getTile(b,mr,mc)) && getTile(b,mr,mc)->p->side == p->side){
+	if(!b->getTile(mr,mc)->empty() && b->getTile(mr,mc)->p->side == p->side){
 		return false;
 	}
 	vector<Location*>* spaces = Location::locationsBetween(p->loc,move);
@@ -243,3 +226,24 @@ bool Move::valid_rook(Piece* p,Location* move,Board* b){
 	return true;
 }
 
+bool Move::valid(Piece* p,Location* move,Board* b){
+	switch(p->name){
+		case PAWN:
+			return Move::valid_pawn(p,move,b);
+		case KNIGHT:
+			return Move::valid_knight(p,move,b);
+		case BISHOP:
+			return Move::valid_bishop(p,move,b);
+		case ROOK:
+			return Move::valid_rook(p,move,b);
+		case QUEEN:
+			return Move::valid_queen(p,move,b);
+		case KING:
+			return Move::valid_king(p,move,b);
+	}
+	return false;
+}
+
+bool Move::validMove(Piece* p,Location* move,Board* b){
+	return Move::valid(p,move,b);
+}

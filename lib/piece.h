@@ -1,10 +1,10 @@
 #ifndef _PIECE_H_
 #define _PIECE_H_
 
-
-#include "location.h"
-#include "types/chess_types.h"
 #include <iostream>
+#include "location.h"
+#include "types.h"
+
 
 
 using namespace std;

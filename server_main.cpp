@@ -1,6 +1,8 @@
 #include "./include/server.h"
 
-Vector clients = NULL;
+using namespace std;
+
+vector<Client>* clients = new vector<Client>();
 char * last_input = NULL;
 Client active_client = NULL;
 

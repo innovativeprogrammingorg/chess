@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 #include "str.h"
-#include "types/chess_types.h"
+#include "types.h"
 #include "tile.h"
 #include "json.h"
 
@@ -14,27 +14,27 @@ using namespace std;
 
 
 class Board{
-	private:
+	public:
 		Tile*** tiles;
 		uint8_t bCastle;
 		uint8_t wCastle;
 		char taken;
 		string special;
 		vector<string*>* history;
-	public:
+	
 		Board(string FEN, string special, string castle);
 		virtual ~Board();
 		Tile* getTile(int row, int col);
-		void setSpecial(string data);
+		//void setSpecial(string data);
+		void specialData(string data);
 		bool placePiece(int r,int c,char FEN);
 		void forceChange(int r,int c,char FEN);
 		Location* findKing(char side);
 		Piece* getKing(char side);		
 		string generateFEN();
-		void forceChange(int r,int c,char FEN);
 		string getCastleData();
 		string getBoardData();
-		void castle(Piece*,int,char);
+		void castle(Piece*,char c);
 		static char numToCol(int c);
 		static char otherSide(char side);
 };

@@ -15,7 +15,7 @@ char convertValue(uint8_t a){
 }
 char* convertToBinary(char* input){
 	size_t length = strlen(input);
-	char * out = calloc(sizeof(char),length*8 + 1);
+	char * out = (char*)calloc(sizeof(char),length*8 + 1);
 	uint64_t i = 0;
 	uint8_t tmp;
 	for(i = 0;i<length;i++){

@@ -11,7 +11,7 @@ Board::Board(string FEN, string spec, string castle){
 	cout<<"Processing the Castle data...";
 	this->bCastle = ((castle.find("bk")==string::npos)? 0 : KING_SIDE) | ((castle.find("bq")==string::npos)? 0 : QUEEN_SIDE);
 	this->wCastle = ((castle.find("wk")==string::npos)? 0 : KING_SIDE) | ((castle.find("wq")==string::npos)? 0 : QUEEN_SIDE);
-	cout<<"done, WHITE - "<<out->wCastle<<" : BLACK - "<<out->bCastle<<endl;
+	cout<<"done, WHITE - "<<this->wCastle<<" : BLACK - "<<this->bCastle<<endl;
 	this->taken = -1;
 	this->history = new vector<string*>();
 	cout<<"Creating the tiles\n";
@@ -19,10 +19,10 @@ Board::Board(string FEN, string spec, string castle){
 		this->tiles[i] = (Tile**)calloc(sizeof(Tile*),8);
 		for(int j = 0;j<8;j++){
 			c = getLast(f);
-			f = substring(f,0,-1);
+			f = f.substr(0,f.size()-2);
 			if(c=='/'){
 				c = getLast(f);
-				f = substring(f,0,-1);
+				f = f.substr(0,f.size()-2);
 			}
 			this->tiles[i][j] = new Tile(i+1,j+1,c);
 		}	
@@ -61,10 +61,10 @@ void Board::castle(Piece* p,char side){
 		this->getTile(r,c+1)->p->move(new Location(r,c+1));
 		
 	}else{
-		this->forceChange(b,r,c-2,p->FEN);
-		this->forceChange(b,r,c,EMPTY_SPACE);
-		this->forceChange(b,r,c-1,this->getTile(r,1)->p->FEN);
-		this->forceChange(b,r,1,'X');
+		this->forceChange(r,c-2,p->FEN);
+		this->forceChange(r,c,EMPTY_SPACE);
+		this->forceChange(r,c-1,this->getTile(r,1)->p->FEN);
+		this->forceChange(r,1,'X');
 		p->move(new Location(r,c-2));
 		this->getTile(r,c-1)->p->move(new Location(r,c-1));
 	}
@@ -119,23 +119,9 @@ Location* Board::findKing(char side){
 	return nullptr;
 }
 
-Piece Board::getKing(char side){
+Piece* Board::getKing(char side){
 	Location* loc = this->findKing(side);
 	return this->getTile(loc->row,loc->col)->p;
-}
-
-uint8_t Board::inCheck(char side){
-	Location* loc = this->findKing(side);
-	Tile* t;
-	int i,j;
-	for(int i = 1;i<9;i++)
-		for(int j = 1;j<9;j++){
-			t = this->getTile(i,j);
-			if(!t->empty() && t->p->side != side && t->p->is(KING) && validMove(t->p,loc,this)){
-				return true;
-			}
-	}
-	return false;
 }
 
 char Board::otherSide(char side){
@@ -146,7 +132,7 @@ char Board::otherSide(char side){
 
 string Board::generateFEN(){
 	string output = "";
-	Tile t;
+	Tile* t;
 	for(int i = 8;i>0;i--){ 
 		for(int j = 8;j>0;j--){
 			t = this->getTile(i,j);
@@ -158,33 +144,36 @@ string Board::generateFEN(){
 		}	
 		if(i>1)
 			output = output + "/";
+	}
 	return output;	
 }
 
 string Board::getCastleData(){
-	string out = ((b->bCastle >> 1)&1)?"bk":"";
-	out += (b->bCastle & 1)?"bq":"";
-	out += ((b->wCastle >> 1)&1)?"wk":"";
-	out += (b->wCastle & 1)?"wq":"";
+	string out = ((this->bCastle >> 1)&1)?"bk":"";
+	out += (this->bCastle & 1)?"bq":"";
+	out += ((this->wCastle >> 1)&1)?"wk":"";
+	out += (this->wCastle & 1)?"wq":"";
 	return out;
 }
 
 string Board::getBoardData(){
-	JSON data = createJSON("string");
-	string history = NULL;
-	addss(data,"FEN",this->generateFEN(b));
-	addss(data,"Castle",this->getCastleData());
-	addss(data,"Taken",(char*)&(this->taken));
-	addss(data,"Special",this->special);
+	JSON* data = new JSON("string");
+	string history = "";
+	data->add("FEN",this->generateFEN());
+	data->add("Castle",this->getCastleData());
+	data->add("Taken",new string((char*)&(this->taken)));
+	data->add("Special",this->special);
 	int length = this->history->size();
 	if(length>0){
-		history += *(this->history.at(0));
+		history += *(this->history->at(0));
 	}
 	for(int i = 1;i<length;i++){
-		history += *(this->history.at(i));
+		history += *(this->history->at(i));
 	}
-	addss(data,"History",history);
-	return jsonToString(data);
+	data->add("History",history);
+	string out = data->to_string();
+	delete data;
+	return out;
 }
 
 char Board::numToCol(int c){

@@ -8,9 +8,11 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fstream>
+#include <iostream>
+#include <string>
 #include "str.h"
 #include "base64.h"
-
 #include "response.h"
 /**
  * Read from file descriptor
@@ -26,6 +28,9 @@ char * get_content_type(char* directory);
 void srespond(int fd, char * data);
 void respond(int fd, Response r);
 void force_print(char* in,size_t length);
+void append_to_file(string dir, string filename,string data);
+void write_to_file(string dir, string filename, string data);
+string read_from_file(string dir,string filename = "");
 
 #ifndef FILE_BUFFER_SIZE
 #define FILE_BUFFER_SIZE 1000000

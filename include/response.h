@@ -2,11 +2,13 @@
 #define _RESPONSE_H_
 
 #include "str.h"
-#include "map.h"
+#include "HTTP.h"
+#include <string>
+using namespace std;
 
 struct response{
-	char* header;
-	char* body;
+	string* header;
+	string* body;
 	size_t data_size;
 };
 
@@ -16,12 +18,12 @@ typedef struct response* Response;
 #include "header.h"
 #include "POST.h"
 
-Response new_response(char* header, char* body,size_t data_size);
-Response e404_response(Map header);
-Response e400_response(Map header);
-Response GET_response(Map header);
-char* get_requested_directory(Map m);
-Response POST_response(Map header);
+Response new_response(string* header, string* body,size_t data_size);
+Response e404_response(HTTP_Request* r);
+Response e400_response(HTTP_Request* r);
+Response GET_response(HTTP_Request* r);
+string get_requested_directory(HTTP_Request* r);
+Response POST_response(HTTP_Request* r);
 
 
 #endif

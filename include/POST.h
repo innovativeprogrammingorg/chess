@@ -5,13 +5,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #include <sys/types.h>
-#include "io.h"
-#include "map.h"
+#include <map>
+#include <string>
 
-char* process_through_PHP(Map _POST,char* dir);
-char* parse_PHP_args(Map args);
+#include "io.h"
+
+
+using namespace std;
+string process_through_PHP(map<string*,string*> _POST,string dir);
+string* parse_PHP_args(map<string*,string*> args);
 
 
 #endif

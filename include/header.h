@@ -1,37 +1,35 @@
 #ifndef _HEADER_H_
 #define _HEADER_H_
 
-#include "str.h"
-#include "vector.h"
-#include "map.h"
-#include "response.h"
-#include "request.h"
-#include "./CGI/CGI.h"
-
 #include <stdio.h>
 #include <time.h>
+#include <string>
+#include <iostream>
+#include "str.h"
+#include "response.h"
+#include "request.h"
+#include "HTTP.h"
+
+using namespace std;
 
 
-Map parse_HTTP_header(char * header);
-Map parse_HTTP_body(char * body);
-Map parse_HTTP_message(char * message);
-char * get_status_line(int status);
+string get_status_line(int status);
 /**
  * Checks if the header received is valid
  * @param  m [description]
  * @return   1 if the header appears to be valid, otherwise returns an HTTP error code
  */
-uint16_t check_valid_params(Map m);
-char * get_date_line();
-uint8_t get_request_type(Map m);
-char * get_server_line();
-char* get_content_length_line(uint64_t content_length);
-char* get_connection_line(Map header);
-char* get_content_type_line(char* content);
-Response build_response(Map m);
-char* get_vary_line();
-char* get_content_encoding_line(char * encode);
-char* get_accept_ranges_line();
+uint16_t check_valid_params(HTTP_Request* r);
+string get_date_line();
+uint8_t get_request_type(HTTP_Request* r);
+string get_server_line();
+string get_content_length_line(uint64_t content_length);
+string get_connection_line(HTTP_Request* r);
+string get_content_type_line(string content);
+Response build_response(HTTP_Request* r);
+string get_vary_line();
+string get_content_encoding_line(string encode);
+string get_accept_ranges_line();
 
 /**
  * REQUEST TYPE CONSTANTS

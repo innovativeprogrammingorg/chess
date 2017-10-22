@@ -15,128 +15,120 @@ JSON::JSON(string t){
 }
 
 JSON* JSON::at(size_t i){
-	return j->data[i];
+	return (JSON*)this->data[i];
 }
 
 JSON* JSON::at(string key){
 	size_t length = this->size();
 	for(int i = 0;i<length;i++){
 		if(this->keys->at(i).compare(key) == 0){
-			return j->data[i];
+			return (JSON*)this->data[i];
 		}
 	}
 	return nullptr;
 }
 
-string JSON::valueAt(string key){
-	int index = 0;
+string* JSON::valueAt(string key){
 	size_t length = this->keys->size();
 	for(int i = 0;i<length;i++){
 		if(this->keys->at(i).compare(key) == 0){
-			index = i;
-			break;
+			return (string*)this->values->at(i);
 		}
 	}
 	
-	return vector_get(j->values,index);
+	return nullptr;
 }
 
-string JSON::valueAt(size_t index){		
-	return j->values->at(index);
+string* JSON::valueAt(size_t index){		
+	return (string*)this->values->at(index);
 }
 
-void JSON::add(string element){
-	if(!strcompare(j->type,"string")){
+void JSON::add(string* element){
+	if(this->type.compare("string")){
 		cerr<<"ERROR, Cannot Add json. Wrong Type\n";
 		exit(EXIT_FAILURE);
 	}
-	j->values->push_back((void*)element);
-	vector_push(&(j->values),element);
-	vector_push(&(j->keys),itoa(vector_length(j->keys)));
+	this->values->push_back((void*)element);
+	this->keys->push_back(itoa(this->keys->size()));
 }
 
-void JSON::add(JSON j,JSON element){
-	if(!strcompare(j->type,"JSON")&& !strcompare(j->type,"json")){
-		printf("ERROR, Cannot Add json\n");
+void JSON::add(JSON* element){
+	if(this->type.compare("JSON") != 0 && this->type.compare("json") != 0){
+		cerr<<"ERROR, Cannot Add json\n";
 		exit(EXIT_FAILURE);
 	}
-	size_t length = vector_length(j->keys);
-	j->data = (JSON *)realloc((void *)j->data,sizeof(JSON)*(length+1));
-	j->data[length] = element;
-	vector_push(&(j->keys),itoa(length));
+	size_t length = this->keys->size();
+	this->data = (JSON **)realloc((void *)this->data,sizeof(JSON*)*(length+1));
+	this->data[length] = element;
+	this->keys->push_back(itoa(length));
 }
 
-void JSON::add(JSON j,string key,string element){
+void JSON::add(string key,string* element){
 	if(this->type.compare("string") != 0){
 		cout<<"ERROR, Cannot Add json. Wrong Type\n";
 		exit(EXIT_FAILURE);
 	}
-	vector_push(&(j->values),element);
-	vector_push(&(j->keys),key);
+	this->values->push_back(element);
+	this->keys->push_back(key);
+}
+
+void JSON::add(string key, string element){
+	this->add(key,new string(element));
 }
 
 
-void JSON::add(string key,JSON element){
+void JSON::add(string key,JSON* element){
 	size_t length = this->keys->size();
-	if(j->type.compare("JSON") != 0 && !strcompare(j->type,"json")){
+	if(this->type.compare("JSON") != 0 && this->type.compare("json") != 0){
 		cerr<<"ERROR, Cannot Add json\n";
 		exit(EXIT_FAILURE);
 	}
-	j->data = (JSON *)realloc((void *)j->data,sizeof(JSON)*(length+1));
-	j->data[length] = element;
-	vector_push(&(j->keys),key);
+	this->data = (JSON **)realloc((void *)this->data,sizeof(JSON)*(length+1));
+	this->data[length] = element;
+	this->keys->push_back(key);
 }
 
-string JSON::keyAt(JSON j, size_t index){
-	return vector_get(j->keys,index);
+string JSON::keyAt(size_t index){
+	return this->keys->at(index);
 }
 
 size_t JSON::size(){
-	return j->keys->size();
+	return this->keys->size();
 }
 
 void JSON::addContents(vector<void*>* input){
-	size_t length = vector_length(input);
+	size_t length = input->size();
 	for(int i = 0;i<length;i++){
-		adds(j,vector_get(input,i));
+		this->add((string*)input->at(i));
 	}
 }
 
 string JSON::to_string(){
-	string out = NULL;
-	string type = data->type;
-	size_t length = size(data);
-	int i = 0;
+	string out = "";
+	size_t length = this->size();
 	if(length == 0){
-		out = (string)malloc(sizeof(char)*3);
-		out[0] = '{';
-		out[1] = '}';
-		out[2] = '\0';
-		return out;
+		return "{}";
 	}
-	out = (string)malloc(sizeof(char) * 2);
-	out[0] = '{';
-	out[1] = '\0';
-	if(strcompare(type,"string")){
-		for(i = 0;i<length;i++){
-			out = concat(concat(out,concat("\"",concat(keyAt(data,i),"\":",FALSE),SECOND),FIRST|SECOND),
-					  concat("\"",concat(valueAtc(data,keyAt(data,i)),"\"",FALSE),SECOND),FIRST|SECOND);
-			
+	out = "{";
+	if(this->type.compare("string") == 0){
+		for(int i = 0;i<length;i++){
+			out += "\"" + this->keyAt(i) + "\":";
+			out += "\"" + *(this->valueAt(this->keyAt(i))) + "\"";
 			if(i!=length-1){
-				out = concat(out,",",FIRST);
+				out += ",";
 			}
 		}
 	}
-	if(strcompare(type,"json")||strcompare(type,"JSON")){
-		for(i = 0;i<length;i++){
-			out = concat(concat(out,concat("\"",concat(keyAt(data,i),"\":",FALSE),SECOND),FIRST|SECOND),
-					jsonToString(atc(data,vector_get(data->keys,i))),FIRST|SECOND);
+	if(this->type.compare("JSON") == 0 || this->type.compare("json") == 0){
+		for(int i = 0;i<length;i++){
+			out += "\"" + this->keyAt(i) + "\":";
+			out += this->at(this->keys->at(i))->to_string();
 			if(i!=length-1){
-				out = concat(out,",",FIRST);
+				out += ",";
 			}
 		}
 	}
-	out = concat(out,"}", FIRST);
+	out += "}";
 	return out;
 }
 

@@ -7,10 +7,10 @@
 using namespace std;
 
 class Location{
-	private:
+	public:
 		int col;
 		int row;
-	public:
+	
 		Location(int row, int col);
 		vector<Location*>* getAdjacent();
 		bool equals(Location* l);
