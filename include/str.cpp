@@ -3,20 +3,31 @@
 using namespace std;
 
 vector<string>* explode(string quan,string subject){
+	if(subject.size() == 0 || quan.size()==0){
+		throw "Gave an empty string into explode";
+	}
 	vector<string>* out = new vector<string>();
 	string subj = subject.substr(0);                                          
 	size_t qlength = quan.size();
 	size_t slength = subject.size();
 	
-	for(uint_fast64_t i = 0;i<slength-qlength;i++){
+	for(int_fast64_t i = 0;i<slength-qlength;i++){
 		if(quan.compare(subj.substr(i,qlength)) == 0){
 			out->push_back(subj.substr(0,i));
-			subj = subj.substr(i+qlength);
+			//cout<<"added "<<subj.substr(0,i)<<" to vector"<<endl;
+			if(i+qlength<=subj.size()){
+				subj = subj.substr(i+qlength);
+
+			}else{
+				return out;
+			}
+			
 			i = 0;
 			slength = subj.size();
 		}
 	}
-	if(subj.size()>0){
+	if(trim(subj).size()>0){
+		//cout<<"Adding the final part :"<<subj<<endl;
 		out->push_back(subj);
 	}
 	return out;
@@ -266,15 +277,15 @@ int indexOfChar(string haystack, char needle){
 string trim(string str){
 	uint_fast64_t start = 0;
 	uint_fast64_t end = str.size();
-	while(str[start] == '\n' || str[start]== '\r' || str[start]==' '){
+	while((str[start] == '\n' || str[start]== '\r' || str[start]==' ') && start<=end){
 		start++;
 	}
-	while(str[end] == '\n' || str[end]=='\r' || str[end]==' '){
+	while((str[end] == '\n' || str[end]=='\r' || str[end]==' ') && end>start){
 		end--;
 	}
 	if(end-start ==0){
-		cout<<"ERROR was found when trimming:"<<str<<endl;
-		exit(EXIT_FAILURE);
+		cout<<"Warning: trim() is returning an empty string"<<endl;
+		return "";
 	}
 	return str.substr(start,end-start);
 }

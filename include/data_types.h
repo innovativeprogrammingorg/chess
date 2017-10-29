@@ -3,12 +3,11 @@
 #include <stdint.h>
 #include <time.h>
 #include <pthread.h>
-#include "client.h"
 
 typedef struct request* Request;
 
 struct request{
-	Client* client;
+	void* client;
 	char* data;
 };
 

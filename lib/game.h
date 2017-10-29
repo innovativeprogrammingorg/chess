@@ -2,9 +2,10 @@
 #define _GAME_H_
 
 #include "board.h"
-#include "str.h"
+#include "../include/str.h"
 #include "types.h"
 #include "user.h"
+#include "../include/WebSocket/frame.h"
 
 using namespace std;
 
@@ -30,7 +31,8 @@ class Game{
 		bool isDraw();
 		uint8_t move(int r,int c,int r2,int c2,char side);
 		void store();
-
+		bool send_state_to_opponent(int sd);
+		bool send_state(int sd);
 		static bool inCheck(Board* b, char side);
 		static bool isProtected(Location* loc,Board* b,char side);
 		static bool tileCovered(Board* b,Location* loc,char side);

@@ -13,8 +13,8 @@
 
 
 using namespace std;
-string process_through_PHP(map<string*,string*> _POST,string dir);
-string* parse_PHP_args(map<string*,string*> args);
+string* process_through_PHP(map<string,string*>* _POST,string dir);
+string parse_PHP_args(map<string,string*>* args);
 
 
 #endif

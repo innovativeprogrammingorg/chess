@@ -10,7 +10,7 @@ Cookie::Cookie(string value,time_t created,time_t exp){
 
 bool Cookie::store(string ip, string key){
 	string data = key + "\035" + this->value + "\035" + ltos((int64_t)this->created) + "\035" + ltos((int64_t)this->expires) + "\n";
-	append_to_file(COOKIES_DIR,ip,data);
+	IO::append_to_file(COOKIES_DIR,ip,data);
 	return true;
 }
 
@@ -34,7 +34,7 @@ map<string,Cookie*>* Cookie::load_cookies(string ip){
 	time_t current_time = time(NULL);
 	time_t expires;
 
-	data = read_from_file(loc);
+	data = IO::read_from_file(loc);
 
 	lines = explode("\n",data);
 

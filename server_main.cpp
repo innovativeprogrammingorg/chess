@@ -1,12 +1,14 @@
 #include "./include/server.h"
+#include "./include/WebSocket/handshake.h"
 
 using namespace std;
 
-vector<Client>* clients = new vector<Client>();
-char * last_input = NULL;
-Client active_client = NULL;
+char* last_input = NULL;
+Client* active_client = nullptr;
 
 int main(){
+
+	srand(time(NULL));
 	int opt = TRUE;
 	int master_socket , addrlen , new_socket, activity, i , valread , sd;
 	int max_sd;
@@ -15,9 +17,8 @@ int main(){
 	char buffer[BUFFER_SIZE];  
 	fd_set readfds;
 	int cons = 0;
-	Client c;
-	//start_PHP_CGI(8777);
-	signal(SIGSEGV,segfault_catch);
+	Client* c;
+	//signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
 
 	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
@@ -54,7 +55,7 @@ int main(){
 		 
 		printf("The number of connections is %i\n",cons);
 		for (i = 0 ; i < cons ; i++) {
-			sd = ((Client)vector_get(clients,i))->fd;
+			sd = ((Client*)Client::client_at(i))->fd;
 			if(sd > 0)
 				FD_SET(sd,&readfds);
 			 
@@ -71,37 +72,50 @@ int main(){
 				perror("accept");
 				exit(EXIT_FAILURE);
 			}
-			vector_push(&clients,new_client(new_socket,inet_ntoa(address.sin_addr),ntohs(address.sin_port)));	
+			Client::add_client(new Client(new_socket,inet_ntoa(address.sin_addr),ntohs(address.sin_port)));
 			cons++;
 			continue;
 		}
 		for (i = 0; i < cons; i++){
-			/*printf("Checking on user %i\n",i);*/
-			sd = ((Client)vector_get(clients,i))->fd;
+			//printf("Checking on user %i\n",i);
+			sd = ((Client*)Client::client_at(i))->fd;
 			/*printf("Retrieved the socket of that user\n");*/
 			if (FD_ISSET( sd , &readfds)){
 				/*printf("Checking to see what action occured...\n");*/
 				if ((valread = read( sd , buffer, BUFFER_SIZE - 1)) == 0){
-					/*printf("Removing the User from the list\n");*/
-					vector_pop(&clients,i);
+					active_client = Client::client_at(i);
+					pthread_mutex_lock(active_client->lock);
+					pthread_mutex_unlock(active_client->lock);
+					printf("Removing the User from the list\n");
+					Client::drop_client(i);
 					/*printf("Removed Successfully!\n");*/
 					cons--;
 					close(sd);
 					i = 0;
 				}else{
 					
-					active_client = (Client)vector_get(clients,i);
+					active_client = (Client*)Client::client_at(i);
 					active_client->last_active = time(NULL);
 					/*printf("The socket number for this message is %i\n",sd);*/
+					
 					buffer[valread] = '\0';
 					last_input = buffer;
-					create_new_thread(active_client,buffer);
-					//write(0, buffer, strlen(buffer));
+					
+					if(active_client->handshaked){
+						cout<<"Received a message from the client"<<endl;
+						cout<<"The given size is "<<valread<<endl;
+						data_frame(active_client,buffer);
+					}else{
+						write(0, buffer, strlen(buffer));
+						handshake(active_client,buffer);
+					}
+					
+					
 				}
 			}else{
-				c = (Client)vector_get(clients,i);
+				c = (Client*)Client::client_at(i);
 				if(time(NULL) - c->last_active > CLIENT_TIMEOUT){
-					vector_pop(&clients,i);
+					Client::drop_client(i);
 					cons--;
 					close(sd);
 					i = 0;
@@ -114,12 +128,7 @@ int main(){
 } 
 
 
-
-Vector get_current_clients(){
-	return clients;
-}
-
-Client get_active_client(){
+Client* get_active_client(){
 	return active_client;
 }
 
@@ -132,7 +141,7 @@ void segfault_catch(int signum){
 }
 
 void kill_all(int signum){
-	vector_clean(clients);
+	delete Client::clients;
 	puts("Killed\n");
 	exit(EXIT_SUCCESS);
 }

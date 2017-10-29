@@ -144,6 +144,36 @@ bool Game::isCheckmate(char side){
 	return false;
 }
 
+
+bool Game::send_state(int sd){
+	JSON* json = new JSON("string");
+	json->add("Board",this->board->getBoardData());
+	json->add("Turn",string((char*)&(this->turn)));
+	json->add("WTime",itoa(this->white_time));
+	json->add("BTime",itoa(this->black_time));
+	json->add("ID",itoa(this->id));
+	string data = json->to_string();
+	Frame* out = new Frame();
+	out->add((uint8_t*)data.c_str());
+	out->fin = 1;
+	out->opcode = TEXT;
+	out->send(sd);
+	delete out;
+	delete json;
+	return true;
+}
+
+bool Game::send_state_to_opponent(int sd){
+	if(this->white == nullptr || this->black == nullptr){
+		return false;
+	}
+	if(this->white->sd == sd){
+		return this->send_state(this->black->sd);
+	}else{
+		return this->send_state(this->white->sd);
+	}	
+}
+
 uint8_t Game::move(int r,int c,int r2,int c2,char side){ 
 		Piece* p = this->board->getTile(r,c)->p;
 		Location* move = new Location(r2,c2);

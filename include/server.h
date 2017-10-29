@@ -15,6 +15,7 @@
 #include "concurrency.h"
 #include "str.h"
 #include <signal.h>
+#include <time.h>
 /*#include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -37,6 +38,5 @@
 
 void segfault_catch(int signum);
 void kill_all(int signum);
-Vector get_current_clients();
 
 #endif

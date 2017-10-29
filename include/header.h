@@ -9,6 +9,7 @@
 #include "response.h"
 #include "request.h"
 #include "HTTP.h"
+#include "WebSocket/handshake.h"
 
 using namespace std;
 
@@ -23,13 +24,15 @@ uint16_t check_valid_params(HTTP_Request* r);
 string get_date_line();
 uint8_t get_request_type(HTTP_Request* r);
 string get_server_line();
+string get_upgrade_line();
 string get_content_length_line(uint64_t content_length);
 string get_connection_line(HTTP_Request* r);
 string get_content_type_line(string content);
 Response build_response(HTTP_Request* r);
-string get_vary_line();
+//string get_vary_line();
 string get_content_encoding_line(string encode);
 string get_accept_ranges_line();
+string get_SWA_line(HTTP_Request* r);
 
 /**
  * REQUEST TYPE CONSTANTS

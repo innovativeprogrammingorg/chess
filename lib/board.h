@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "str.h"
+#include "../include/str.h"
 #include "types.h"
 #include "tile.h"
 #include "json.h"
@@ -34,7 +34,6 @@ class Board{
 		string generateFEN();
 		string getCastleData();
 		string getBoardData();
-		void castle(Piece*,char c);
 		static char numToCol(int c);
 		static char otherSide(char side);
 };

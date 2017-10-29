@@ -4,16 +4,21 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <vector>
 #include "data_types.h"
 #include "request.h"
+#include "client.h"
+#include "WebSocket/control.h"
 
-#include <vector>
+
 
 using namespace std;
 
 
 
 WThread new_WThread(Request r);
-void create_new_thread(Client c, char* data);
-void * handle_request(void * wt);
+void handshake(Client* c, char* data);
+void* handle_handshake(void* wt);
+void data_frame(Client* c, char* data);
+void* handle_data_frame(void* wt);
 #endif

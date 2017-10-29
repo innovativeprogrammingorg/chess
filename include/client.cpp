@@ -11,10 +11,14 @@ Client::Client(int fd,string ip,int port){
 	this->port = port;
 	this->cookies = nullptr;
 	this->last_active = time(NULL);
+	this->handshaked = false;
+	this->username = nullptr;
+	this->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(this->lock,NULL);
 }
 
 bool Client::equals(Client* c){
-	return this->fd == c->fd && this->ip.compare(c->ip) == 0 && this->port = c->port;
+	return this->fd == c->fd && this->ip.compare(c->ip) == 0 && this->port == c->port;
 }
 
 Client* Client::find_client_by_ip(string ip){
@@ -44,4 +48,8 @@ void Client::drop_client(Client* c){
 
 void Client::drop_client(int i){
 	Client::clients->erase(Client::clients->begin() + i);
+}
+
+Client* Client::client_at(int i){
+	return Client::clients->at(i);
 }

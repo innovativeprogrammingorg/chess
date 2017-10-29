@@ -49,27 +49,7 @@ Tile* Board::getTile(int row, int col){
 }
 
 
-void Board::castle(Piece* p,char side){
-	int r = p->loc->row;
-	int c = p->loc->col;
-	if(side==KING_SIDE){
-		this->forceChange(r,c+2,p->FEN);
-		this->forceChange(r,c,EMPTY_SPACE);
-		this->forceChange(r,c+1,this->getTile(r,8)->p->FEN);
-		this->forceChange(r,8,EMPTY_SPACE);
-		p->move(new Location(r,c+2));
-		this->getTile(r,c+1)->p->move(new Location(r,c+1));
-		
-	}else{
-		this->forceChange(r,c-2,p->FEN);
-		this->forceChange(r,c,EMPTY_SPACE);
-		this->forceChange(r,c-1,this->getTile(r,1)->p->FEN);
-		this->forceChange(r,1,'X');
-		p->move(new Location(r,c-2));
-		this->getTile(r,c-1)->p->move(new Location(r,c-1));
-	}
-	return;
-}
+
 
 void Board::specialData(string data){
 	cout<<"Getting the data from the string\n";

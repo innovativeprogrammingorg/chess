@@ -247,3 +247,25 @@ bool Move::valid(Piece* p,Location* move,Board* b){
 bool Move::validMove(Piece* p,Location* move,Board* b){
 	return Move::valid(p,move,b);
 }
+
+void Move::castle(Piece* p,Board* b,char side){
+	int r = p->loc->row;
+	int c = p->loc->col;
+	if(side==KING_SIDE){
+		b->forceChange(r,c+2,p->FEN);
+		b->forceChange(r,c,EMPTY_SPACE);
+		b->forceChange(r,c+1,b->getTile(r,8)->p->FEN);
+		b->forceChange(r,8,EMPTY_SPACE);
+		p->move(new Location(r,c+2));
+		b->getTile(r,c+1)->p->move(new Location(r,c+1));
+		
+	}else{
+		b->forceChange(r,c-2,p->FEN);
+		b->forceChange(r,c,EMPTY_SPACE);
+		b->forceChange(r,c-1,b->getTile(r,1)->p->FEN);
+		b->forceChange(r,1,'X');
+		p->move(new Location(r,c-2));
+		b->getTile(r,c-1)->p->move(new Location(r,c-1));
+	}
+	return;
+}

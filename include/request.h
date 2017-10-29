@@ -6,9 +6,14 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <iostream>
+#include <string>
+#include "io.h"
+#include "data_types.h"
 
-//Request new_request(Client c, char* data);
-uint8_t is_PHP_request(char * message, char** directory);
+using namespace std;
+Request new_request(void * client, char* data);
+bool is_PHP_request(string message, string* directory);
 
 #ifndef TRUE 
 #define TRUE 1

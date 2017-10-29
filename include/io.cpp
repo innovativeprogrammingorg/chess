@@ -1,6 +1,6 @@
 #include "io.h"
 
-char* force_concat(char* s1,size_t l1,char*s2,size_t l2,uint8_t mem){
+char* IO::force_concat(char* s1,size_t l1,char*s2,size_t l2,uint8_t mem){
 	size_t length = l1 + l2;
 	char * out = (char *)calloc(sizeof(char),(length+1));
 	register uint_fast64_t i;
@@ -20,49 +20,51 @@ char* force_concat(char* s1,size_t l1,char*s2,size_t l2,uint8_t mem){
 	return out;
 }
 
-char * get_content_type(char* directory){
-	char* command = concat("/usr/bin/file -i ",directory,FALSE);
-	FILE* fd = popen(command,"r");
-	char* file_type;
-	Vector v;
+string IO::get_content_type(string directory){
 
-	free(command);
-	if(!fread_file(fd,&file_type)){
+	string command = "/usr/bin/file -i " + directory;
+	FILE* fd = popen(command.c_str(),"r");
+	char* file_type;
+
+	if(!IO::read_file(fd,&file_type)){
 		puts("Error getting file type.\nAborting");
 		exit(EXIT_FAILURE);
 	}
-	v = split(':',file_type);
-	free(file_type);
-	file_type = vector_get(v,1);
-	if(indexOfChar(file_type,';')!=-1){
-		file_type = substring(file_type,0,indexOfChar(file_type,';'));
+	string out(file_type);
+	//free(file_type);
+	out = out.substr(out.find(':') + 1);
+
+	if(out.find(';')!=string::npos){
+		out = out.substr(0,out.find(';'));
 	}
-	vector_clean(v);
-	printf("Requested item is of type: %s\n",file_type);
-	return file_type;
+	cout<<"Requested item is of type: "<<file_type<<endl;
+	return out;
 }
 
-void create_tmp_file(char* directory){
-	puts("Creating the tmp file");
-	char* src = concat(WEB_ROOT,directory,FALSE);
-	char* dest = concat("./tmp",concat(directory,".gz",FALSE),SECOND);
-	char * command = concat("gzip -c ",concat(src,concat(" > ",dest,SECOND),FIRST|SECOND),SECOND);
-	system(command);
-	free(command);
-	puts("done");
+void IO::create_tmp_file(char* directory){
+	cout<<"Creating the tmp file"<<endl;
+	string src(WEB_ROOT);
+	src.append(directory);
+	string dest("./tmp");
+	dest.append(directory);
+	dest.append(".gz");
+	string command = "gzip -c " + src + " > " + dest;
+	system(command.c_str());
+	cout<<"done"<<endl;
 }
 
 
-uint64_t sread_file(char* directory,char** data){
+uint64_t IO::read_file(char* directory,char** data){
 	char buffer[FILE_BUFFER_SIZE];
 	char* dat = NULL;
 	size_t n;
 	uint64_t out = 0;
-	char* src = concat(WEB_ROOT,directory,FALSE);
+	string src(WEB_ROOT);
+	src.append(directory);
 	/*if(access(src,F_OK)==-1){
 		create_tmp_file(directory);
 	}*/
-	FILE* fd =  fopen(src,"r");
+	FILE* fd =  fopen((char*)src.c_str(),"r");
 	/*printf("reading the contents of the file...");*/
 	while(!feof(fd)){
 		memset(buffer,'\0',FILE_BUFFER_SIZE);
@@ -73,16 +75,16 @@ uint64_t sread_file(char* directory,char** data){
 	*data = dat;
 	printf("done\n");
 	fclose(fd);
-	free(src);
 	return out;
 }
-uint64_t prepare_media(char* directory,char** data){
+uint64_t IO::prepare_media(char* directory,char** data){
 	//char* src = concat("./tmp",concat(directory,".gz",FALSE),SECOND);
 	/*if(access(src,F_OK)==-1){
 		create_tmp_file(directory);
 	}*/
-	char* src = concat(WEB_ROOT,directory,FALSE);
-	FILE* fd =  fopen(src,"r");
+	string src(WEB_ROOT);
+	src.append(directory);
+	FILE* fd =  fopen((char*)src.c_str(),"r");
 	size_t n;
 	char buffer[FILE_BUFFER_SIZE];
 	char* dat = NULL;
@@ -95,11 +97,10 @@ uint64_t prepare_media(char* directory,char** data){
 	}
 	*data = dat;
 	fclose(fd);
-	free(src);
 	return out;
 }
 
-uint64_t fread_file(FILE* fd,char** data){
+uint64_t IO::read_file(FILE* fd,char** data){
 	char buffer[FILE_BUFFER_SIZE];
 	char* dat = NULL;
 	size_t n;
@@ -116,7 +117,7 @@ uint64_t fread_file(FILE* fd,char** data){
 	return out;
 }
 
-uint64_t read_file(int fd,char** data){
+uint64_t IO::read_file(int fd,char** data){
 	char buffer[FILE_BUFFER_SIZE];
 	char* dat = NULL;
 	ssize_t n;
@@ -133,61 +134,75 @@ uint64_t read_file(int fd,char** data){
 	return out;
 }
 
-void srespond(int fd, char* data){
+void IO::respond(int fd, char* data){
 	//printf("HTTP MESSAGE\n%s\n\n\n",data);
 	int chunk_size = 1000;
 	int64_t size = strlen(data); 
 	int chunk = 0;
-	char* buffer;
+	uintptr_t rd_ptr = reinterpret_cast<uintptr_t>(data);
+
 	printf("Sending %ld bytes of data to the client...",size);
 	while(size>0){
 		if(size>=chunk_size){
-			buffer = substring(data,chunk*chunk_size,chunk_size);
-			write(fd,buffer,chunk_size);
+			//buffer = substring(data,chunk*chunk_size,chunk_size);
+			write(fd,(char*)rd_ptr,chunk_size);
 		}else{
-			buffer = substring(data,chunk*chunk_size,size);
-			write(fd,buffer,size);
+			//buffer = substring(data,chunk*chunk_size,size);
+			write(fd,(char*)rd_ptr,size);
 		}
-		free(buffer);
 		size -=  chunk_size;
+		rd_ptr += chunk_size;
 		chunk++;
 	}
 	puts("done");
-	free(data);
 }
-void force_print(char* in,size_t length){
+
+void IO::respond(int fd, string data){
+	IO::respond(fd,(char*)data.c_str());
+}
+void IO::force_print(char* in,size_t length){
 	uint64_t i;
 	for(i = 0;i<length;i++){
 		printf("%c",in[i]);
 	}
 	printf("\n");
 }
-void respond(int fd, Response r){
-	
+
+void IO::respond(int fd, Response r){
+	if(r== NULL || r == nullptr){
+		cerr<<"Response cannot be null"<<endl;
+		exit(1);
+	}
 	int chunk_size = 1000;
 	int64_t size = r->data_size;
 	int chunk = 0;
 	char* buffer;
-	srespond(fd,concat(r->header,"\r\n",FALSE));
+	
+	cout<<"Sending the following header:\n"<<*r->header;
+	IO::respond(fd,*r->header);
+	if(r->body == nullptr){
+		return;
+	}
+
 	printf("Sending %ld bytes of data to the client...",size);
+	uintptr_t rd_ptr = reinterpret_cast<uintptr_t>(r->body);
+
 	while(size>0){
 		if(size>=chunk_size){
-			buffer = substring(r->body,chunk*chunk_size,chunk_size);
-			write(fd,buffer,chunk_size);
+			write(fd,(char*)rd_ptr,chunk_size);
 		}else{
-			buffer = substring(r->body,chunk*chunk_size,size);
-			write(fd,buffer,size);
+			write(fd,(char*)rd_ptr,size);
 		}
-		free(buffer);
 		size = size - chunk_size;
+		rd_ptr += chunk_size;
 		chunk++;
 	}
 	puts("done");
-	if(r->body){
+	if(r->body != NULL){
 		free(r->body);
 	}
-	if(r->header){
-		free(r->header);
+	if(r->header != nullptr){
+		delete r->header;
 	}
 	free(r);
 	/*puts("DATA sent is ______________________________");
@@ -196,7 +211,7 @@ void respond(int fd, Response r){
 }
 
 
-void append_to_file(string dir, string filename,string data){
+void IO::append_to_file(string dir, string filename,string data){
 	string loc = dir + filename;
 	ofstream file;
 	file.open(loc,ios::out|ios::app);
@@ -204,7 +219,7 @@ void append_to_file(string dir, string filename,string data){
 	file.close();
 }
 
-void write_to_file(string dir, string filename,string data){
+void IO::write_to_file(string dir, string filename,string data){
 	string loc = dir + filename;
 	char* tmp = to_cstr(loc);
 	unlink(tmp);
@@ -216,7 +231,7 @@ void write_to_file(string dir, string filename,string data){
 }
 
 
-string read_from_file(string dir,string filename){
+string IO::read_from_file(string dir,string filename){
 	string loc = dir + filename;
 	ifstream file;
 	file.open(loc);
@@ -233,3 +248,26 @@ string read_from_file(string dir,string filename){
 	file.close();
 	return out;
 }
+
+
+uint64_t IO::read_from_file(string dir,string filename, string* data){
+	string loc = dir + filename;
+	ifstream file;
+	file.open(loc);
+	if(!file){
+		throw exception();
+	}
+	string out = "";
+	string tmp;
+	uint64_t size = 0;
+	while(!file.eof()){
+		getline(file,tmp);
+		size +=  tmp.length();
+		out = out + tmp + "\n";
+	}
+	
+	file.close();
+	*data = out;
+	return size;
+}
+

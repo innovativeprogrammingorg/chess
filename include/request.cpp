@@ -1,32 +1,34 @@
 #include "request.h"
 
-/*Request new_request(Client c, char* data){
+using namespace std;
+
+Request new_request(void* c, char* data){
 	Request out = (Request)malloc(sizeof(struct request));
 	out->client = c;
 	out->data = data;
 	return out;
-}*/
+}
 
-uint8_t is_PHP_request(char * message, char** directory){
-	int i = strpos(message,"\r\n");
-	if(i == -1){
-		puts("Unexpected error in is_PHP_request");
+
+
+bool is_PHP_request(string message, string* directory){
+	size_t i = message.find("\r\n");
+	if(i == string::npos){
+		cout<<"Unexpected error in is_PHP_request"<<endl;
 		exit(EXIT_FAILURE);
 	}
-	char* first_line = substring(message,0,i);
-	int start = indexOfChar(first_line,'/');
+	string first_line = message.substr(0,i);
+	size_t start = first_line.find('/');
 	int end = 0;
 	while(first_line[end+start]!=' ' && first_line[end+start]!='\0' && first_line[end+start]!='?'){
 		end++;
 	}
-	char* dir = concat("./www",substring(first_line,start,end),SECOND);
-	free(first_line);
-	char* type = get_content_type(dir);
-	if(strpos(type,"php")!= -1){
+	string dir = "./www" + first_line.substr(start,end);
+	string type = IO::get_content_type(dir);
+	if(type.find("php")!= string::npos){
 		*directory = dir;
-		return TRUE;
+		return true;
 	}
-	free(dir);
-	*directory = NULL;
-	return FALSE;
+	*directory = "";
+	return false;
 }

@@ -12,8 +12,9 @@ class User{
 		string username;
 		bool online;
 		time_t response;
-		User(string name);
-
+		int sd;
+		User() : username(""),online(false),response(time(NULL)),sd(0){}
+		User(string name, int sd);
 };
 
 
