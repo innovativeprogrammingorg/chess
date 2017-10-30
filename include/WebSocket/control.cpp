@@ -44,13 +44,21 @@ void Control::push_frame(Client* c,Frame* frame){
 }
 
 int Control::get_action(Frame* frame,string* data){
-	vector<string>* extract = split(COMMAND,string((char*)frame->data->data()));
-	string command = extract->at(0);
+	vector<string>* extract = nullptr;
+	string command = string((char*)frame->data->data());
 
+	if(command.find(COMMAND) != string::npos){
+		extract = split(COMMAND,command);
+		command = extract->at(0);
+	}
+	
 	if(command.compare("LOGIN")==0){
 		return LOGIN;
 	}
 	if(command.compare("NEW") == 0){
+		return NEW;
+	}
+	if(command.compare("CREATE")==0){
 		return NEW;
 	}
 	if(command.compare("JOIN")==0){
@@ -89,11 +97,25 @@ int Control::get_action(Frame* frame,string* data){
 	if(command.compare("REQUEST_TAKEN") == 0){
 		return REQUEST_TAKEN;
 	}
-
-	if(data != nullptr){
+	if(command.compare("TIME") == 0){
+		return TIME;
+	}
+	if(command.compare("TURN") == 0){
+		return TURN;
+	}
+	if(command.compare("REQUEST_MOVES")==0){
+		return REQUEST_MOVES;
+	}
+	if(command.compare("BOARD")){
+		return BOARD;
+	}
+	if(data != nullptr && extract != nullptr){
 		*data = extract->at(0);
 	}
-	delete extract;
+	if(extract != nullptr){
+		delete extract;
+	}
+	
 
 	return 0;
 }
@@ -123,12 +145,17 @@ void Control::handle_request(Client* c,char* raw_data){
 	string data;
 	int action = Control::get_action(received,&data);
 	Game g;
-	string reply = Game_Manager::process(c,data,action,&g);
+	int sd = 0;
+	string reply = Game_Manager::process(c,data,action,&g,&sd);
 	Frame* response = new Frame();
 	response->add((uint8_t*)reply.c_str());
 	response->fin = 1;
 	response->opcode = TEXT;
 	//SEND REPLY
-	response->send(c->fd);
+	if(sd == 0){
+		response->send(c->fd);
+	}else{
+		response->send(sd);
+	}
 	delete response;
 }

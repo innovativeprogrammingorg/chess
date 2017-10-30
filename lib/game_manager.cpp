@@ -9,7 +9,28 @@ Game_Manager::Game_Manager(){
 	this->games = new vector<Game*>();
 }
 
-string Game_Manager::process(Client* c,string data, int command, Game* out_game){
+string Game_Manager::prepare_message(int args,...){
+	va_list valist;
+	int i = 0;
+	string out = "";
+	va_start(valist, args);
+	for(i = 0;i<args;i++){
+		if(i == 0){
+			out += (string)va_arg(valist, string);
+			out += COMMAND;
+		}else if(i==1){
+			out += (string)va_arg(valist, string);
+			
+		}else{
+			out += DATA_SEP;
+			out += (string)va_arg(valist, string);
+		}
+	}
+	va_end(valist);
+	return out;
+}
+
+string Game_Manager::process(Client* c,string data, int command, Game* out_game, int* sd){
 	switch(command){
 		case MOVE:
 			{
@@ -45,33 +66,83 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game)
 			
 		case NEW:
 			{
-				vector<string>* game_data = explode("#",data);
+				vector<string>* game_data = c_explode(DATA_SEP,data);
+				map<string,string>* args = new map<string,string>();
+				args->insert(pair<string,string>("user",game_data->at(0)));
+				args->insert(pair<string,string>("gid",game_data->at(1)));
+				string info = get_game_info(args);
+				delete args;
+				delete game_data;
+				game_data = c_explode(DATA_SEP,data);
 				Game_Manager::create_game(game_data,c->fd);
-				return "Success";
+				string out = Game_Manager::prepare_message(2,"NEW",game_data->at(FEN_INDEX));
+				delete game_data;
+				return out;
 			}
 		case JOIN:
 			{
-				vector<string>* game_data = explode("#",data);
-				try{
-					Game_Manager::join_game(game_data,c->fd);
-				}catch(const out_of_range& oor){
-					return "Game Not Found";
-				}
-				return "Success";
+				vector<string>* game_data = c_explode(DATA_SEP,data);
+				map<string,string>* args = new map<string,string>();
+				args->insert(pair<string,string>("user",game_data->at(0)));
+				args->insert(pair<string,string>("gid",game_data->at(1)));
+				string info = get_game_info(args);
+				delete args;
+				delete game_data;
+				game_data = c_explode(DATA_SEP,data);
+				Game_Manager::join_game(game_data,c->fd);
+				string out = Game_Manager::prepare_message(2,"JOIN",game_data->at(FEN_INDEX));
+				delete game_data;
+				return out;
 			}
 		case LOGIN:
 			{
 				c->username = new string(data);
-				return "Logged In";
+				return "LOGGED_IN";
 			}
-
-			
-
-
-
-
-
-
+		case OFFER_DRAW:
+			{
+				int64_t gid = Game_Manager::find_game(*c->username);
+				Game* game = Game_Manager::GM->games->at(gid);
+				if(game->white->username == *c->username){
+					*sd = game->black->sd;
+				}else{
+					*sd = game->white->sd;
+				}
+				return "DRAW_OFFERED";
+			}
+		case ACCEPT_DRAW:
+			{
+				int64_t gid = Game_Manager::find_game(*c->username);
+				Game* game = Game_Manager::GM->games->at(gid);
+				if(game->white->username == *c->username){
+					*sd = game->black->sd;
+				}else{
+					*sd = game->white->sd;
+				}
+				return "DRAW_ACCEPTED";
+			}
+		case DECLINE_DRAW:
+			{
+				int64_t gid = Game_Manager::find_game(*c->username);
+				Game* game = Game_Manager::GM->games->at(gid);
+				if(game->white->username == *c->username){
+					*sd = game->black->sd;
+				}else{
+					*sd = game->white->sd;
+				}
+				return "DRAW_DECLINED";
+			}	
+		case RESIGN:
+			{
+				int64_t gid = Game_Manager::find_game(*c->username);
+				Game* game = Game_Manager::GM->games->at(gid);
+				if(game->white->username == *c->username){
+					*sd = game->black->sd;
+				}else{
+					*sd = game->white->sd;
+				}
+				return "RESIGN";
+			}
 	}
 	return "ERROR";
 }
@@ -104,11 +175,15 @@ void Game_Manager::create_game(vector<string>* data, int sd){
 	char turn = data->at(TURN_INDEX)[0];
 	uint64_t inc = stoi(data->at(INC_INDEX));
 	string castle = "bkbqwkwq";
-	uint64_t duration = stoi(data->at(DUR_INDEX));
-
+	if(Game_Manager::find_game(gid)!= -1){
+		Game_Manager::join_game(data,sd);
+		return;
+	}
 	Board* b = new Board(FEN,"",castle);
 	User* u = new User(username,sd);
-	Game* g = new Game(nullptr,nullptr,gid,b,turn,duration,inc);
+	Game* g = new Game(nullptr,nullptr,gid,b,turn,0,inc);
+	g->white_time = stoi(data->at(WTIME_INDEX));
+	g->black_time = stoi(data->at(BTIME_INDEX));
 	if(side == WHITE){
 		g->white = u;
 	}else{
@@ -118,18 +193,18 @@ void Game_Manager::create_game(vector<string>* data, int sd){
 }
 
 void Game_Manager::join_game(vector<string>* data, int sd){
-	int64_t gid = stoi(data->at(3));
+	int64_t gid = stoi(data->at(ID_INDEX));
 	int64_t index = Game_Manager::find_game(gid);
 	if(index == -1){
 		Game_Manager::create_game(data,sd);
 		return;
 	}
 	Game* g = Game_Manager::GM->games->at(index);
-	char side = data->at(1)[0];
+	char side = data->at(SIDE_INDEX)[0];
 	if(side == WHITE){
-		g->white = new User(data->at(2),sd);
+		g->white = new User(data->at(USER_INDEX),sd);
 	}else{
-		g->black = new User(data->at(2),sd);
+		g->black = new User(data->at(USER_INDEX),sd);
 	}
 }
 
@@ -157,7 +232,7 @@ string Game_Manager::get_game_state(int64_t gid){
 
 int* Game_Manager::processMoveData(vector<string>* data){
 	int* out = (int*)malloc(sizeof(int)*4);
-	uint8_t offset = 2;
+	uint8_t offset = 0;
 	out[0] = data->at(offset)[0];
 	out[1] = data->at(offset+1)[0];
 	out[2] = data->at(offset+2)[0];
