@@ -22,7 +22,7 @@ Frame::Frame(): fin(1),rsv1(0), rsv2(0), rsv3(0), mask(1){
 Frame::Frame(uint8_t* in){
 	uint32_t h = (in[0]<<24) + (in[1]<<16) + (in[2]<<8) + in[3];
 	uint32_t loc = 0;
-	cout<<"H is "<<h<<endl;
+	//cout<<"H is "<<h<<endl;
 	this->fin = (h & 1<<31)>>31;
 	this->rsv1 = (h & 1<<30)>>30;
 	this->rsv2 = (h & 1<<29)>>29;
@@ -115,12 +115,21 @@ uint8_t* Frame::encode(uint32_t* out_size){
 	out[size + 6 + this->length] = '\0';
 	out[size++] = 0;
 	out[size++] = 0;
-	uint8_t* mask = c32_to_8(this->mask);
-	out[size++] = mask[0];
-	out[size++] = mask[1];
-	out[size++] = mask[2];
-	out[size++] = mask[3];
-	free(mask);
+	uint8_t* tmp = c32_to_8(h);
+	tmp = (uint8_t*)realloc((void*)tmp,5);
+	tmp[4] = 0;
+	cout<<"\n\nHEADER:"<<convertToBinary((char*)tmp)<<endl<<endl;
+	free(tmp);
+	if(this->mask == 1){
+		
+		uint8_t* mask = c32_to_8(this->mask);
+		out[size++] = mask[0];
+		out[size++] = mask[1];
+		out[size++] = mask[2];
+		out[size++] = mask[3];
+		free(mask);
+	}
+	
 	for(uint32_t i = 0;i<this->length;i++){
 		out[size++] = this->data->at(i);
 	}

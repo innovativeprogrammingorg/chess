@@ -13,6 +13,7 @@
 #include "user.h"
 #include "../include/client.h"
 #include "sql/sql.h"
+#include "chat.h"
 
 using namespace std; 
 class Game_Manager{
@@ -23,6 +24,8 @@ class Game_Manager{
 		 */
 		static Game_Manager* GM;
 		vector<Game*>* games;
+		map<int64_t,Chat*>* chats;
+		Chat* lobby_chat;
 
 		Game_Manager();
 
@@ -65,24 +68,33 @@ enum indexes{
  */
 
 enum action{
-	LOGIN = 0xF1,
-	NEW = 0xF2,
-	JOIN = 0xF3,
-	MOVE = 0xF4,
-	OFFER_DRAW = 0xF5,
-	ACCEPT_DRAW = 0xF6,
-	DECLINE_DRAW = 0xF7,
-	RESIGN = 0xF8,
-	TAKE_BACK = 0xF9,
-	ACCEPT_TAKE_BACK = 0xFA,
-	DECLINE_TAKE_BACK = 0xFB,
-	CANCEL_GAME = 0xFC,
-	PROMOTE = 0xFD,
-	REQUEST_TAKEN = 0xFF,
-	TIME = 0x100,
-	TURN = 0x101,
-	REQUEST_MOVES = 0x102,
-	BOARD = 0x103
+	/**CHESS ACTIONS**/
+	LOGIN = 0x101,
+	NEW = 0x102,
+	JOIN = 0x103,
+	MOVE = 0x104,
+	OFFER_DRAW = 0x105,
+	ACCEPT_DRAW = 0x106,
+	DECLINE_DRAW = 0x107,
+	RESIGN = 0x108,
+	TAKE_BACK = 0x109,
+	ACCEPT_TAKE_BACK = 0x10A,
+	DECLINE_TAKE_BACK = 0x10B,
+	CANCEL_GAME = 0x10C,
+	PROMOTE = 0x10D,
+	REQUEST_TAKEN = 0x10F,
+	TIME = 0x110,
+	TURN = 0x111,
+	REQUEST_MOVES = 0x112,
+	BOARD = 0x113,
+	PLACE_PIECE = 0x114,
+	/***CHAT ACTIONS***/
+	LOBBY_MESSAGE = 0x200,
+	GET_LOBBY_MESSAGES = 0x201,
+	CHESS_MESSAGE = 0x202,
+	GET_CHESS_MESSAGES = 0x203,
+	BUGHOUSE_MESSAGE = 0x204,
+	GET_BUGHOUSE_MESSAGES = 0x205
 };
 
 

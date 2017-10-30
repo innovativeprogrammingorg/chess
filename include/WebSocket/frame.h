@@ -9,6 +9,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
+#include "../base64.h"
 
 using namespace std;
 
@@ -43,24 +44,13 @@ class Frame{
 };
 
 
-#ifndef PING
-#define PING 0x9
-#endif
+enum opcodes{
+	CONTINUE = 0x0,
+	TEXT = 0x1,
+	BINARY = 0x2,
+	PING = 0x9,
+	PONG = 0xA
+};
 
-#ifndef PONG
-#define PONG 0xA
-#endif
-
-#ifndef CONTINUE
-#define CONTINUE 0x0
-#endif
-
-#ifndef TEXT
-#define TEXT 0x1
-#endif
-
-#ifndef BINARY
-#define BINARY 0x2
-#endif
 
 #endif
