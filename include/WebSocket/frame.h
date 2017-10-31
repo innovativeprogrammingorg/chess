@@ -43,13 +43,22 @@ class Frame{
 
 };
 
-
 enum opcodes{
 	CONTINUE = 0x0,
 	TEXT = 0x1,
 	BINARY = 0x2,
 	PING = 0x9,
 	PONG = 0xA
+};
+
+enum class BitLoc{ //1000000 100 111101      1 000 0001 0 0001001
+	FIN = (31 - 0),//21,//31,
+	RSV1 = (31 - 1),//24,//30,//18,
+	RSV2 = (31 - 2),//23,//29,//17,
+	RSV3 = (31 - 3),//22,//28,//16,
+	OPCODE = (31 - 7),//correct!
+	MASK = (31 - 8),//correct!
+	LENGTH = (31 - 15)//16//24//19
 };
 
 

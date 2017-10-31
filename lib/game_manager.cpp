@@ -99,7 +99,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 		case LOGIN:
 		{
 			c->username = new string(data);
-			return "LOGGED_INN";
+			return "LOGGED_IN";
 		}
 		case OFFER_DRAW:
 		{

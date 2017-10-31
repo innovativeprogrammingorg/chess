@@ -106,7 +106,7 @@ int main(){
 						cout<<"The given size is "<<valread<<endl;
 						data_frame(active_client,buffer);
 					}else{
-						write(0, buffer, strlen(buffer));
+						//write(0, buffer, strlen(buffer));
 						handshake(active_client,buffer);
 					}
 					

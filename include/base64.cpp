@@ -14,8 +14,11 @@ char convertValue(uint8_t a){
 	return (a==62)? '+' : '/';
 
 }
-char* convertToBinary(char* input){
-	size_t length = strlen(input);
+char* convertToBinary(char* input,uint64_t size){
+	size_t length = size;
+	if(size == 0){
+		length = strlen(input);
+	}
 	char * out = (char*)calloc(sizeof(char),length*8 + 1);
 	uint64_t i = 0;
 	uint8_t tmp;
@@ -63,8 +66,12 @@ char* convertToBase64(char* input){
 }
 
 
-char* b64_encode(uint8_t* input){
-	size_t size = strlen((char*)input);
+char* b64_encode(uint8_t* input,size_t length){
+	size_t size = length;
+	if(length == 0){
+		size = strlen((char*)input);
+	}	
+	
 	char* out = (char*)malloc(sizeof(char)*(size/3)*4 + 1);
 	uint64_t loc = 0;
 	uint64_t i;

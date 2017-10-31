@@ -85,25 +85,27 @@ uint8_t* Frame::encode(uint32_t* out_size){
 	uint64_t size = 0;
 	uint32_t h = 0;
 	this->length = this->data->size();
-	h = h | (this->fin << 31);
-	h = h | (this->rsv1 << 30);
-	h = h | (this->rsv2 << 29);
-	h = h | (this->rsv3 << 28);
-	h = h | (this->opcode << 24);
-	h = h | (this->mask << 23);
+
+	h = h | (this->fin << static_cast<int>(BitLoc::FIN));
+	h = h | (this->rsv1 << static_cast<int>(BitLoc::RSV1));
+	h = h | (this->rsv2 << static_cast<int>(BitLoc::RSV2));
+	h = h | (this->rsv3 << static_cast<int>(BitLoc::RSV3));
+	h = h | (this->opcode << static_cast<int>(BitLoc::OPCODE));
+	h = h | (this->mask << static_cast<int>(BitLoc::MASK));
 	if(this->length>125){
 		if(this->length>0xFFFF){
-			h = h | (0x7F << 16);
+			h = h | (0x7F << static_cast<int>(BitLoc::LENGTH));
 		}else{
-			h = h | (0x7E << 16);
-			h = h | this->length;
+			h = h | (0x7E << static_cast<int>(BitLoc::LENGTH));
+			h = h | (this->length + 2);
 		}
 	}else{
-		h = h | (this->length<<16);
+		h = h | ((this->length + 4)<< static_cast<int>(BitLoc::LENGTH));
 	}
 	out = Frame::c32_to_8(h);
+
 	size = 4;
-	if((h>>16 & 0x7F) == 0x7F){
+	if((h >> static_cast<int>(BitLoc::LENGTH) & 0x7F) == 0x7F){
 		out = (uint8_t*)realloc((void*)out,8);
 		out[4] = this->length >> 24;
 		out[5] = (this->length >> 16) & 0xFF; 
@@ -115,11 +117,9 @@ uint8_t* Frame::encode(uint32_t* out_size){
 	out[size + 6 + this->length] = '\0';
 	out[size++] = 0;
 	out[size++] = 0;
-	uint8_t* tmp = c32_to_8(h);
-	tmp = (uint8_t*)realloc((void*)tmp,5);
-	tmp[4] = 0;
-	cout<<"\n\nHEADER:"<<convertToBinary((char*)tmp)<<endl<<endl;
-	free(tmp);
+	//uint8_t* tmp = c32_to_8(h);
+	cout<<"\n\nHEADER:"<<convertToBinary((char*)out,2)<<endl<<endl;
+	//free(tmp);
 	if(this->mask == 1){
 		
 		uint8_t* mask = c32_to_8(this->mask);
