@@ -37,6 +37,7 @@ class Chat{
 		void disconnect(int sd);
 		void broadcast(Frame* frame, int sd = 0);
 		string to_string(char sep);
+		string get_last(char sep);
 
 };
 

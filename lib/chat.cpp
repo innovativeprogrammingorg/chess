@@ -56,6 +56,11 @@ string Chat::to_string(char sep){
 		out += *m->message;
 	}
 	pthread_mutex_unlock(this->lock);
+	if(out.compare("") == 0){
+		out = "System";
+		out += sep;
+		out += "No Messages";
+	}
 	return out;
 }
 
@@ -102,3 +107,17 @@ void Chat::broadcast(Frame* frame, int sd){
 	}
 	pthread_mutex_unlock(this->lock);
 }
+
+
+string Chat::get_last(char sep){
+	string out = "";
+	pthread_mutex_lock(this->lock);
+	Message* m = this->messages->back();
+	out = *m->user;
+	out += sep;
+	out += *m->message;
+	pthread_mutex_unlock(this->lock);
+	return out;
+}
+
+

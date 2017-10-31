@@ -9,6 +9,7 @@ Game_Manager::Game_Manager(){
 	this->games = new vector<Game*>();
 	this->chats = new map<int64_t,Chat*>();
 	this->lobby_chat = new Chat();
+	this->lobby = new Lobby();
 }
 
 string Game_Manager::prepare_message(int args,...){
@@ -153,21 +154,40 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			Game_Manager::GM->lobby_chat->connect(c->fd);
 			string msg = "CHAT";
 			msg += COMMAND;
-			msg += Game_Manager::GM->lobby_chat->to_string(DATA_SEP);
+			msg += Game_Manager::GM->lobby_chat->get_last(DATA_SEP);
 
 			Frame* frame = new Frame();
 			frame->add((uint8_t*)msg.c_str());
-			frame->fin = 0;
+			frame->fin = 1;
 			frame->mask = 0;
 			frame->mask_key = 0;
 			frame->opcode = TEXT;
 			Game_Manager::GM->lobby_chat->broadcast(frame);
+			delete frame;
 			return "";
 		}
 		case GET_LOBBY_MESSAGES:
 		{
 			Game_Manager::GM->lobby_chat->connect(c->fd);
-			return Game_Manager::prepare_message(2,"CHAT",Game_Manager::GM->lobby_chat->to_string(DATA_SEP));
+			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string(DATA_SEP));
+		}
+
+		case GET_LOBBY_USERS:
+		{
+			Game_Manager::GM->lobby->add_user(*c->username,c->fd);
+			cout<<"ADDED USER"<<endl;
+			cout<<"Current Users: "<<Game_Manager::GM->lobby->get_users(' ')<<endl;
+			string msg = "LOBBY_USERS";
+			msg += COMMAND;
+			msg += Game_Manager::GM->lobby->get_users(DATA_SEP);
+			Frame* frame = new Frame();
+			frame->add((uint8_t*)msg.c_str());
+			frame->fin = 1;
+			frame->mask = 0;
+			frame->opcode = TEXT;
+			Game_Manager::GM->lobby->broadcast(frame);
+			delete frame;
+			return "";
 		}
 
 	}

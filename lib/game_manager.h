@@ -14,6 +14,7 @@
 #include "../include/client.h"
 #include "sql/sql.h"
 #include "chat.h"
+#include "lobby.h"
 
 using namespace std; 
 class Game_Manager{
@@ -26,6 +27,7 @@ class Game_Manager{
 		vector<Game*>* games;
 		map<int64_t,Chat*>* chats;
 		Chat* lobby_chat;
+		Lobby* lobby;
 
 		Game_Manager();
 
@@ -94,7 +96,13 @@ enum action{
 	CHESS_MESSAGE = 0x202,
 	GET_CHESS_MESSAGES = 0x203,
 	BUGHOUSE_MESSAGE = 0x204,
-	GET_BUGHOUSE_MESSAGES = 0x205
+	GET_BUGHOUSE_MESSAGES = 0x205,
+	/***LOBBY ACTIONS***/
+	CREATE_LOBBY_GAME = 0x300,
+	REMOVE_LOBBY_GAME = 0x301,
+	GET_LOBBY_GAMES = 0x302,
+	GET_LOBBY_USERS = 0x303
+
 };
 
 

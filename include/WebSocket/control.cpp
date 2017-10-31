@@ -45,15 +45,17 @@ void Control::push_frame(Client* c,Frame* frame){
 
 int Control::get_action(Frame* frame,string* data){
 	vector<string>* extract = nullptr;
-	string command = string((char*)frame->data->data());
+	frame->data->push_back('\0');
 
+	string command = string((char*)frame->data->data());
+	
 	if(command.find(COMMAND) != string::npos){
 		extract = split(COMMAND,command);
 		command = extract->at(0);
 	}
 
 	if(data != nullptr && extract != nullptr){
-		*data = extract->at(0);
+		*data = extract->at(1);
 	}
 	if(extract != nullptr){
 		delete extract;
@@ -71,9 +73,9 @@ int Control::get_action(Frame* frame,string* data){
 		}
 		case 'B':
 		{
-			if(command.compare("BOARD") == 0)
+			if(command.compare("BOARD")==0)
 				return BOARD;
-			if(command.compare("BUGHOUSE_MESSAGE") == 0)
+			if(command.compare("BUGHOUSE_MESSAGE")==0)
 				return BUGHOUSE_MESSAGE;
 			break;
 		}
@@ -83,13 +85,15 @@ int Control::get_action(Frame* frame,string* data){
 				return NEW;
 			if(command.compare("CANCEL_GAME")==0)
 				return CANCEL_GAME;
-			if(command.compare("CHESS_MESSAGE") == 0)
+			if(command.compare("CHESS_MESSAGE")==0)
 				return CHESS_MESSAGE;
+			if(command.compare("CREATE_LOBBY_GAME")==0)
+				return CREATE_LOBBY_GAME;
 			break;
 		}
 		case 'D':
 		{
-			if(command.compare("DECLINE_DRAW") == 0)
+			if(command.compare("DECLINE_DRAW")==0)
 				return DECLINE_DRAW;
 			if(command.compare("DECLINE_TAKE_BACK")==0)
 				return DECLINE_TAKE_BACK;
@@ -97,12 +101,16 @@ int Control::get_action(Frame* frame,string* data){
 		}
 		case 'G':
 		{
-			if(command.compare("GET_LOBBY_MESSAGES") == 0)
+			if(command.compare("GET_LOBBY_MESSAGES")==0)
 				return GET_LOBBY_MESSAGES;
-			if(command.compare("GET_CHESS_MESSAGES"))
+			if(command.compare("GET_CHESS_MESSAGES")==0)
 				return GET_CHESS_MESSAGES;
-			if(command.compare("GET_BUGHOUSE_MESSAGES") == 0)
+			if(command.compare("GET_BUGHOUSE_MESSAGES")==0)
 				return GET_BUGHOUSE_MESSAGES;
+			if(command.compare("GET_LOBBY_GAMES")==0)
+				return GET_LOBBY_GAMES;
+			if(command.compare("GET_LOBBY_USERS")==0)
+				return GET_LOBBY_USERS;			
 			break;
 		}
 		case 'J':
@@ -130,7 +138,6 @@ int Control::get_action(Frame* frame,string* data){
 			if(command.compare("NEW")==0)
 				return NEW;
 			break;
-			
 		}
 		case 'O':
 		{	
@@ -154,15 +161,17 @@ int Control::get_action(Frame* frame,string* data){
 				return REQUEST_TAKEN;
 			if(command.compare("REQUEST_MOVES")==0)
 				return REQUEST_MOVES;
+			if(command.compare("REMOVE_LOBBY_GAME")==0)
+				return REMOVE_LOBBY_GAME;
 			break;
 		}
 		case 'T':
 		{
 			if(command.compare("TAKE_BACK")==0)
 				return TAKE_BACK;
-			if(command.compare("TIME") == 0)
+			if(command.compare("TIME")==0)
 				return TIME;
-			if(command.compare("TURN") == 0)
+			if(command.compare("TURN")==0)
 				return TURN;
 			break;			
 		}	
