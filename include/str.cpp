@@ -48,6 +48,9 @@ vector<string>* c_explode(char quan,string subject){
 			slength = subj.size();
 		}
 	}
+	if(trim(subj).size()>0){
+		out->push_back(subj);
+	}
 	return out;
 }
 

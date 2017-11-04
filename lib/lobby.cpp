@@ -15,10 +15,12 @@ Lobby_Game::Lobby_Game(int type,int sec,int min,int inc,char side,string host){
 	this->side = side;
 	this->host = host;
 	this->id = Lobby_Game::game_id++;
+	this->players = new vector<User*>();
+	this->ready = 0;
 }
 
 Lobby_Game::~Lobby_Game(){
-
+	delete this->players;
 }
 
 string Lobby_Game::get_type(){
@@ -37,20 +39,27 @@ string Lobby_Game::get_type(){
 
 string Lobby_Game::to_string(char sep){
 	string out = "";
-	out += this->get_type();
+	out += this->get_type();//0
 	out += sep;
-	out += itoa(this->sec);
+	out += itoa(this->sec);//1
 	out += sep;
-	out += itoa(this->min);
+	out += itoa(this->min);//2
 	out += sep;
-	out += itoa(this->inc);
+	out += itoa(this->inc);//3
 	out += sep;
-	out += this->side;
+	out += this->side;//4
 	out += sep;
-	out += this->host;
+	out += this->host;//5
 	out += sep;
-	out += ltos(this->id);
+	out += ltos(this->id);//6
+	out += sep;
+	out += itoa(this->ready);//7
 	return out;
+}
+
+void Lobby_Game::add_player(User* player){
+	this->players->push_back(player);
+	this->ready++;
 }
 
 
@@ -65,6 +74,10 @@ Lobby::~Lobby(){
 	delete this->games;
 	delete this->users;
 	pthread_mutex_destroy(this->lock);
+}
+
+bool Lobby::has_games(){
+	return this->games->size()>0;
 }
 
 bool Lobby::has_user(int sd){
@@ -91,6 +104,18 @@ bool Lobby::has_user(string username){
 	return false;
 }
 
+User* Lobby::get_user(string username){
+	pthread_mutex_lock(this->lock);
+	for(int64_t i = 0;i<this->users->size();i++){
+		if(this->users->at(i)->username.compare(username) == 0){
+			pthread_mutex_unlock(this->lock);
+			return this->users->at(i);
+		}
+	}
+	pthread_mutex_unlock(this->lock);
+	return nullptr;
+}
+
 void Lobby::add_user(User* user){
 
 	if(this->has_user(user->sd)){
@@ -106,24 +131,44 @@ void Lobby::add_user(string name, int sd){
 }
 
 void Lobby::add_game(Lobby_Game* lg){
+	cout<<"Passed the game parameter"<<endl;
+	User* user = this->get_user(lg->host);
+
+	if(user != nullptr){
+		lg->add_player(user);
+	}
 	pthread_mutex_lock(this->lock);
 	this->games->push_back(lg);
 	pthread_mutex_unlock(this->lock);
 }
 
 void Lobby::add_game(int type, int sec,int min,int inc,char side,string host){
+	
 	this->add_game(new Lobby_Game(type,sec,min,inc,side,host));
 }
 
 void Lobby::add_game(vector<string>* data,string host){
+	//cout<<"DATA LENGTH IS: "<<data->size()<<endl;
+	if(data->size()<5){
+		cout<<"Failed to create game"<<endl;
+		return;
+	}
+	string in_type = data->at(0);
+	int type = REGULAR;
+	if(in_type.compare("Bug House")==0){
+		type = BUG_HOUSE;
+	}
+	cout<<"Creating the game..."<<endl;
+	cout<<"Parameters"<<endl<<type<<endl<<data->at(1)<<endl<<data->at(2)<<endl;
 	this->add_game(new Lobby_Game(
-		stoi(data->at(0)),
+		type,
 		stoi(data->at(1)),
 		stoi(data->at(2)),
 		stoi(data->at(3)),
 		(char)data->at(4)[0],
 		host
 		));
+	cout<<"Created game successfully"<<endl;
 }
 
 Lobby_Game* Lobby::remove_game(string host){

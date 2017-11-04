@@ -86,7 +86,7 @@ string get_connection_line(HTTP_Request* r){
 
 uint16_t check_valid_params(HTTP_Request* r){
 	if(!r->header->has_param("Upgrade")){
-		cout<<"Missing Host parameter"<<endl;
+		cout<<"Missing Upgrade parameter"<<endl;
 		return 400;
 	}
 	if(!r->header->has_param("Sec-WebSocket-Key")){

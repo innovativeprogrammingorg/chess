@@ -10,18 +10,18 @@ int main(){
 
 	srand(time(NULL));
 	int opt = TRUE;
-	int master_socket , addrlen , new_socket, activity, i , valread , sd;
+	int master_socket , addrlen , new_socket, activity, valread , sd;
 	int max_sd;
 	int port = 8989;
 	struct sockaddr_in address;
 	char buffer[BUFFER_SIZE];  
 	fd_set readfds;
-	int cons = 0;
 	Client* c;
+	Client::init();
 	//signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
 
-	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
+	if( (master_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
 		perror("socket failed");
 		exit(EXIT_FAILURE);
 	}
@@ -33,7 +33,7 @@ int main(){
  	
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons( port );
+	address.sin_port = htons(port);
 	
 	if (bind(master_socket, (struct sockaddr *)&address, sizeof(address))<0) {
 		perror("bind failed");
@@ -48,14 +48,14 @@ int main(){
 	/*puts("Listener created successfully");*/
 	
 	addrlen = sizeof(address);	 
-	while(TRUE) {
+	for(;;) {
 		FD_ZERO(&readfds);
 		FD_SET(master_socket, &readfds);
 		max_sd = master_socket;
 		 
-		printf("The number of connections is %i\n",cons);
-		for (i = 0 ; i < cons ; i++) {
-			sd = ((Client*)Client::client_at(i))->fd;
+		printf("The number of connections is %lu\n",Client::clients->size());
+		for (auto it = Client::clients->begin();(it != Client::clients->end()) && !Client::clients->empty(); it++) {
+			sd = ((Client*) *it)->fd;
 			if(sd > 0)
 				FD_SET(sd,&readfds);
 			 
@@ -73,28 +73,23 @@ int main(){
 				exit(EXIT_FAILURE);
 			}
 			Client::add_client(new Client(new_socket,inet_ntoa(address.sin_addr),ntohs(address.sin_port)));
-			cons++;
 			continue;
 		}
-		for (i = 0; i < cons; i++){
-			//printf("Checking on user %i\n",i);
-			sd = ((Client*)Client::client_at(i))->fd;
+		for(auto it = Client::clients->begin();(it != Client::clients->end()) && !Client::clients->empty(); it++){
+			active_client = *it;
+			
+			sd = active_client->fd;
 			/*printf("Retrieved the socket of that user\n");*/
 			if (FD_ISSET( sd , &readfds)){
 				/*printf("Checking to see what action occured...\n");*/
 				if ((valread = read( sd , buffer, BUFFER_SIZE - 1)) == 0){
-					active_client = Client::client_at(i);
-					pthread_mutex_lock(active_client->lock);
-					pthread_mutex_unlock(active_client->lock);
 					printf("Removing the User from the list\n");
-					Client::drop_client(i);
+					Client::drop_client(active_client);
 					/*printf("Removed Successfully!\n");*/
-					cons--;
 					close(sd);
-					i = 0;
+					it = Client::clients->begin();
 				}else{
 					
-					active_client = (Client*)Client::client_at(i);
 					active_client->last_active = time(NULL);
 					/*printf("The socket number for this message is %i\n",sd);*/
 					
@@ -103,7 +98,7 @@ int main(){
 					
 					if(active_client->handshaked){
 						cout<<"Received a message from the client"<<endl;
-						cout<<"The given size is "<<valread<<endl;
+						//cout<<"The given size is "<<valread<<endl;
 						data_frame(active_client,buffer);
 					}else{
 						//write(0, buffer, strlen(buffer));
@@ -112,15 +107,8 @@ int main(){
 					
 					
 				}
-			}else{
-				c = (Client*)Client::client_at(i);
-				if(time(NULL) - c->last_active > CLIENT_TIMEOUT){
-					Client::drop_client(i);
-					cons--;
-					close(sd);
-					i = 0;
-				}
 			}
+		
 		}
 		memset(&buffer,0,BUFFER_SIZE);
 	}

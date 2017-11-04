@@ -110,13 +110,18 @@ int Control::get_action(Frame* frame,string* data){
 			if(command.compare("GET_LOBBY_GAMES")==0)
 				return GET_LOBBY_GAMES;
 			if(command.compare("GET_LOBBY_USERS")==0)
-				return GET_LOBBY_USERS;			
+				return GET_LOBBY_USERS;
+			if(command.compare("GET_LOBBY_ALL")==0)
+				return GET_LOBBY_ALL;			
 			break;
 		}
 		case 'J':
 		{
 			if(command.compare("JOIN")==0)
 				return JOIN;
+			if(command.compare("JOIN_LOBBY_GAME")==0){
+				return JOIN_LOBBY_GAME;
+			}
 			break;
 		}
 		case 'L':
@@ -181,7 +186,7 @@ int Control::get_action(Frame* frame,string* data){
 
 void Control::handle_request(Client* c,char* raw_data){
 	Frame* received = new Frame((uint8_t*)raw_data);
-	received->debug();
+	//received->debug();
 	cout<<(char*)received->get_cstr()<<endl;
 	if(received->opcode == PING){
 		received->opcode = PONG;
@@ -214,7 +219,7 @@ void Control::handle_request(Client* c,char* raw_data){
 	response->fin = 1;
 	response->opcode = TEXT;
 	response->mask = 0;
-	response->debug();
+	//response->debug();
 	//SEND REPLY
 	if(sd == 0){
 		response->send(c->fd);

@@ -175,7 +175,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 		case GET_LOBBY_USERS:
 		{
 			Game_Manager::GM->lobby->add_user(*c->username,c->fd);
-			cout<<"ADDED USER"<<endl;
+			//cout<<"ADDED USER"<<endl;
 			cout<<"Current Users: "<<Game_Manager::GM->lobby->get_users(' ')<<endl;
 			string msg = "LOBBY_USERS";
 			msg += COMMAND;
@@ -189,7 +189,83 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			delete frame;
 			return "";
 		}
+		case CREATE_LOBBY_GAME:
+		{
+			vector<string>* game_data = c_explode(DATA_SEP,data);
+			Game_Manager::GM->lobby->add_game(game_data,*c->username);
+			if(!Game_Manager::GM->lobby->has_games()){
+				delete game_data;
+				return "ERROR";
+			}
+			string msg = "LOBBY_GAMES";
+			msg += COMMAND;
+			msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
+			Frame* frame = new Frame();
+			frame->add((uint8_t*)msg.c_str());
+			frame->fin = 1;
+			frame->mask = 0;
+			frame->opcode = TEXT;
+			Game_Manager::GM->lobby->broadcast(frame);
+			delete frame;
+			delete game_data;
+			return "";
+		}
+		case GET_LOBBY_GAMES:
+		{
+			if(!Game_Manager::GM->lobby->has_games()){
+				return "";
+			}
+			string msg = "LOBBY_GAMES";
+			msg += COMMAND;
+			msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
+			return msg;
+		}
+		case GET_LOBBY_ALL:
+		{
 
+			Game_Manager::GM->lobby->add_user(*c->username,c->fd);
+			string msg = "LOBBY_USERS";
+			msg += COMMAND;
+			msg += Game_Manager::GM->lobby->get_users(DATA_SEP);
+			Frame* frame = new Frame();
+			frame->add((uint8_t*)msg.c_str());
+			frame->fin = 1;
+			frame->mask = 0;
+			frame->opcode = TEXT;
+			Game_Manager::GM->lobby->broadcast(frame);
+			if(Game_Manager::GM->lobby->has_games()){
+				msg = "LOBBY_GAMES";
+				msg += COMMAND;
+				msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
+				frame = new Frame();
+				frame->add((uint8_t*)msg.c_str());
+				frame->fin = 1;
+				frame->mask = 0;
+				frame->opcode = TEXT;
+				frame->send(c->fd);
+			}
+			delete frame;
+			Game_Manager::GM->lobby_chat->connect(c->fd);
+			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string(DATA_SEP));
+		}
+
+		case REMOVE_LOBBY_GAME:
+			Game_Manager::GM->lobby->remove_game(stoi(data));
+			string msg = "LOBBY_GAMES";
+			msg += COMMAND;
+			if(Game_Manager::GM->lobby->has_games()){
+				msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
+			}else{
+				msg+= "none";
+			}
+			Frame* frame = new Frame();
+			frame->add((uint8_t*)msg.c_str());
+			frame->fin = 1;
+			frame->mask = 0;
+			frame->opcode = TEXT;
+			Game_Manager::GM->lobby->broadcast(frame);
+			delete frame;
+			return "";
 	}
 	return "ERROR";
 }

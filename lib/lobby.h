@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <cstdint>
+#include <iostream>
 #include "user.h"
 #include "../include/str.h"
 #include "../include/WebSocket/frame.h"
@@ -29,8 +30,11 @@ class Lobby_Game{
 		char side;
 		string host;
 		int64_t id;
+		vector<User*>* players;
+		int ready;
 		Lobby_Game(int type,int sec,int min,int inc,char side,string host);
 		virtual ~Lobby_Game();
+		void add_player(User* player);
 		string get_type();
 		string to_string(char sep);
 };
@@ -43,9 +47,10 @@ class Lobby{
 		vector<Lobby_Game*>* games;
 		Lobby();
 		virtual ~Lobby();
+		bool has_games();
 		bool has_user(int sd);
 		bool has_user(string username);
-		
+		User* get_user(string username);
 		void add_user(string name, int sd);
 		void add_user(User* user);
 		void add_game(Lobby_Game* lg);
