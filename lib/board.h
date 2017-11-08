@@ -11,8 +11,6 @@
 
 using namespace std;
 
-
-
 class Board{
 	public:
 		Tile*** tiles;
@@ -20,7 +18,6 @@ class Board{
 		uint8_t wCastle;
 		char taken;
 		string special;
-		vector<string*>* history;
 	
 		Board(string FEN, string special, string castle);
 		virtual ~Board();
@@ -34,6 +31,7 @@ class Board{
 		string generateFEN();
 		string getCastleData();
 		string getBoardData();
+		string to_string();
 		static char numToCol(int c);
 		static char otherSide(char side);
 };

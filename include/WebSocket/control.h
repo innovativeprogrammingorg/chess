@@ -26,8 +26,10 @@ class Control{
 		 */
 		map<Client*, Frame_Buffer*>* data;
 		static Control* control;
-		Control();
+		static map<string,int>* lookup_table;
 
+		Control();
+		static void init_tables();
 		static void flush_frames(Client* c);
 		static Frame_Buffer* get_frames(Client* c);
 		static void push_frame(Client* c,Frame* frame);

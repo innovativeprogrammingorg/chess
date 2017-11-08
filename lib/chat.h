@@ -6,6 +6,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <cstdint>
+#include "user.h"
 #include "../include/WebSocket/frame.h"
 
 
@@ -26,15 +27,17 @@ class Chat{
 		pthread_mutex_t* lock;
 	public:
 		vector<Message*>* messages;
-		vector<int>* users;
+		vector<User*>* users;
 		Chat();
 		virtual ~Chat();
 		void add(Message* m);
 		void add(string user, string msg);
 		void add(string* user, string* msg);
-		int64_t indexOf(int sd);
-		void connect(int sd);
-		void disconnect(int sd);
+		int64_t indexOf(string name);
+		void connect(User* user);
+		void connect(string name);
+		void disconnect(User* user);
+		void disconnect(string name);
 		void broadcast(Frame* frame, int sd = 0);
 		string to_string(char sep);
 		string get_last(char sep);
@@ -42,7 +45,7 @@ class Chat{
 };
 
 #ifndef MAX_MESSAGES
-#define MAX_MESSAGES 40
+#define MAX_MESSAGES 10
 #endif
 
 #endif

@@ -1,67 +1,6 @@
 #include "lobby.h"
 
 using namespace std;
-/**
- * In the future, this should be updated from the database
- */
-int64_t Lobby_Game::game_id = 0;
-
-
-Lobby_Game::Lobby_Game(int type,int sec,int min,int inc,char side,string host){
-	this->type = type;
-	this->sec = sec;
-	this->min = min;
-	this->inc = inc;
-	this->side = side;
-	this->host = host;
-	this->id = Lobby_Game::game_id++;
-	this->players = new vector<User*>();
-	this->ready = 0;
-}
-
-Lobby_Game::~Lobby_Game(){
-	delete this->players;
-}
-
-string Lobby_Game::get_type(){
-	switch(this->type){
-		case REGULAR:
-		{
-			return "REGULAR";
-		}
-		case BUG_HOUSE:
-		{
-			return "BUG_HOUSE";
-		}
-	}
-	return "UNKNOWN";
-}
-
-string Lobby_Game::to_string(char sep){
-	string out = "";
-	out += this->get_type();//0
-	out += sep;
-	out += itoa(this->sec);//1
-	out += sep;
-	out += itoa(this->min);//2
-	out += sep;
-	out += itoa(this->inc);//3
-	out += sep;
-	out += this->side;//4
-	out += sep;
-	out += this->host;//5
-	out += sep;
-	out += ltos(this->id);//6
-	out += sep;
-	out += itoa(this->ready);//7
-	return out;
-}
-
-void Lobby_Game::add_player(User* player){
-	this->players->push_back(player);
-	this->ready++;
-}
-
 
 Lobby::Lobby(){
 	this->games = new vector<Lobby_Game*>();
@@ -80,17 +19,6 @@ bool Lobby::has_games(){
 	return this->games->size()>0;
 }
 
-bool Lobby::has_user(int sd){
-	pthread_mutex_lock(this->lock);
-	for(int64_t i = 0;i<this->users->size();i++){
-		if(this->users->at(i)->sd == sd){
-			pthread_mutex_unlock(this->lock);
-			return true;
-		}
-	}
-	pthread_mutex_unlock(this->lock);
-	return false;
-}
 
 bool Lobby::has_user(string username){
 	pthread_mutex_lock(this->lock);
@@ -118,7 +46,7 @@ User* Lobby::get_user(string username){
 
 void Lobby::add_user(User* user){
 
-	if(this->has_user(user->sd)){
+	if(this->has_user(user->username)){
 		return;
 	}
 	pthread_mutex_lock(this->lock);
@@ -126,17 +54,11 @@ void Lobby::add_user(User* user){
 	pthread_mutex_unlock(this->lock);
 }
 
-void Lobby::add_user(string name, int sd){
-	this->add_user(new User(name,sd));
+void Lobby::add_user(string name){
+	this->add_user(new User(name));
 }
 
 void Lobby::add_game(Lobby_Game* lg){
-	cout<<"Passed the game parameter"<<endl;
-	User* user = this->get_user(lg->host);
-
-	if(user != nullptr){
-		lg->add_player(user);
-	}
 	pthread_mutex_lock(this->lock);
 	this->games->push_back(lg);
 	pthread_mutex_unlock(this->lock);
@@ -144,7 +66,10 @@ void Lobby::add_game(Lobby_Game* lg){
 
 void Lobby::add_game(int type, int sec,int min,int inc,char side,string host){
 	
-	this->add_game(new Lobby_Game(type,sec,min,inc,side,host));
+	Lobby_Game* lg = new Lobby_Game(type,sec,min,inc,host);
+	User* p1 = new User(host,side);
+	lg->add_player(p1);
+	this->add_game(lg);
 }
 
 void Lobby::add_game(vector<string>* data,string host){
@@ -160,16 +85,29 @@ void Lobby::add_game(vector<string>* data,string host){
 	}
 	cout<<"Creating the game..."<<endl;
 	cout<<"Parameters"<<endl<<type<<endl<<data->at(1)<<endl<<data->at(2)<<endl;
-	this->add_game(new Lobby_Game(
+	
+	this->add_game(
 		type,
 		stoi(data->at(1)),
 		stoi(data->at(2)),
 		stoi(data->at(3)),
 		(char)data->at(4)[0],
-		host
-		));
+		host);
 	cout<<"Created game successfully"<<endl;
 }
+
+Lobby_Game* Lobby::get_game(int64_t id){
+	if(!this->has_games()){
+		return nullptr;
+	}
+	for(auto it = this->games->begin();it!= this->games->end();it++){
+		if((*it)->id == id){
+			return *it;
+		}
+	}
+	return nullptr;
+}
+
 
 Lobby_Game* Lobby::remove_game(string host){
 	Lobby_Game* out;
@@ -232,7 +170,10 @@ void Lobby::broadcast(Frame* frame){
 	pthread_mutex_lock(this->lock);
 	
 	for(int64_t i = 0;i<this->users->size();i++){
-		frame->send(this->users->at(i)->sd);
+		frame->send(this->users->at(i)->sd());
 	}
 	pthread_mutex_unlock(this->lock);
 }
+
+
+

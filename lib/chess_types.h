@@ -5,6 +5,7 @@
 #define KING_SIDE 2
 #define QUEEN_SIDE 1
 #define PROMOTION 64
+#define CASTLE 32
 #define WHITE 'w'
 #define BLACK 'b'
 

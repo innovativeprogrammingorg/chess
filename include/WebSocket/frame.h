@@ -31,6 +31,7 @@ class Frame{
 		uint32_t length;
 
 		Frame();
+		Frame(uint8_t fin,uint8_t rsv1, uint8_t rsv2,uint8_t rsv3,uint8_t mask,uint8_t opcode);
 		Frame(uint8_t* in);
 		virtual ~Frame();
 		void add(uint8_t* data);
@@ -40,6 +41,7 @@ class Frame{
 		static uint8_t* c32_to_8(uint32_t in);
 		uint8_t* encode(uint32_t* out_size = nullptr);
 		void send(int sd);
+		void clear();
 
 };
 

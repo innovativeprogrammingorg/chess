@@ -6,10 +6,11 @@ using namespace std;
 Game_Manager* Game_Manager::GM = new Game_Manager();
 
 Game_Manager::Game_Manager(){
-	this->games = new vector<Game*>();
-	this->chats = new map<int64_t,Chat*>();
+	this->games = new vector<Chess*>();
 	this->lobby_chat = new Chat();
 	this->lobby = new Lobby();
+	this->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(this->lock,NULL);
 }
 
 string Game_Manager::prepare_message(int args,...){
@@ -47,24 +48,13 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 				cout<<"GAME NOT FOUND"<<endl;
 				return "ERROR";
 			}
-			Game* game = Game_Manager::GM->games->at(gi);
+			Chess* game = Game_Manager::GM->games->at(gi);
 			if(out_game != nullptr){
-				*out_game = *game;
+				*out_game = *(game->game);
 			}
-			uint8_t results = game->move(move[0],move[1],move[2],move[3],move_data->at(SIDE_INDEX)[0]);
-			delete move_data;
-			free(move);
-			if(!results){
-				return "Illegal Move";
-			}
-
-			if(results == PROMOTION){
-				return "Promotion";//Waits for choice before sending
-			}else{
-				game->send_state_to_opponent(c->fd);
-				return "Move Success";
-			}
-			break;
+			game->move(move[0],move[1],move[2],move[3],move_data->at(SIDE_INDEX)[0]);
+			
+			return "";
 		}
 
 		case NEW:
@@ -77,7 +67,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			delete args;
 			delete game_data;
 			game_data = c_explode(DATA_SEP,data);
-			Game_Manager::create_game(game_data,c->fd);
+			Game_Manager::create_game(game_data,c->sd);
 			string out = Game_Manager::prepare_message(2,"NEW",game_data->at(FEN_INDEX));
 			delete game_data;
 			return out;
@@ -90,9 +80,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			args->insert(pair<string,string>("gid",game_data->at(1)));
 			string info = get_game_info(args);
 			delete args;
-			delete game_data;
-			game_data = c_explode(DATA_SEP,data);
-			Game_Manager::join_game(game_data,c->fd);
+			Game_Manager::join_game(game_data,c->sd);
 			string out = Game_Manager::prepare_message(2,"JOIN",game_data->at(FEN_INDEX));
 			delete game_data;
 			return out;
@@ -105,45 +93,25 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 		case OFFER_DRAW:
 		{
 			int64_t gid = Game_Manager::find_game(*c->username);
-			Game* game = Game_Manager::GM->games->at(gid);
-			if(game->white->username == *c->username){
-				*sd = game->black->sd;
-			}else{
-				*sd = game->white->sd;
-			}
+			Game_Manager::GM->games->at(gid)->offer_draw(*c->username);
 			return "DRAW_OFFERED";
 		}
 		case ACCEPT_DRAW:
 		{
 			int64_t gid = Game_Manager::find_game(*c->username);
-			Game* game = Game_Manager::GM->games->at(gid);
-			if(game->white->username == *c->username){
-				*sd = game->black->sd;
-			}else{
-				*sd = game->white->sd;
-			}
-			return "DRAW_ACCEPTED";
+			Game_Manager::GM->games->at(gid)->accept_draw(*c->username);
+			return "";
 		}
 		case DECLINE_DRAW:
 		{
 			int64_t gid = Game_Manager::find_game(*c->username);
-			Game* game = Game_Manager::GM->games->at(gid);
-			if(game->white->username == *c->username){
-				*sd = game->black->sd;
-			}else{
-				*sd = game->white->sd;
-			}
+			Game_Manager::GM->games->at(gid)->decline_draw(*c->username);
 			return "DRAW_DECLINED";
 		}	
 		case RESIGN:
 		{
 			int64_t gid = Game_Manager::find_game(*c->username);
-			Game* game = Game_Manager::GM->games->at(gid);
-			if(game->white->username == *c->username){
-				*sd = game->black->sd;
-			}else{
-				*sd = game->white->sd;
-			}
+			Game_Manager::GM->games->at(gid)->resign(*c->username);
 			return "RESIGN";
 		}
 		/**Chat Handlers**/
@@ -151,40 +119,33 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 		{
 			//vector<string>* msg_data = c_explode(DATA_SEP,data);
 			Game_Manager::GM->lobby_chat->add(*c->username,data);
-			Game_Manager::GM->lobby_chat->connect(c->fd);
+			//Game_Manager::GM->lobby_chat->connect(*c->username);
 			string msg = "CHAT";
 			msg += COMMAND;
 			msg += Game_Manager::GM->lobby_chat->get_last(DATA_SEP);
 
-			Frame* frame = new Frame();
+			Frame* frame = new Frame(1,0,0,0,0,TEXT);
 			frame->add((uint8_t*)msg.c_str());
-			frame->fin = 1;
-			frame->mask = 0;
-			frame->mask_key = 0;
-			frame->opcode = TEXT;
 			Game_Manager::GM->lobby_chat->broadcast(frame);
 			delete frame;
 			return "";
 		}
 		case GET_LOBBY_MESSAGES:
 		{
-			Game_Manager::GM->lobby_chat->connect(c->fd);
+			Game_Manager::GM->lobby_chat->connect(*c->username);
 			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string(DATA_SEP));
 		}
 
 		case GET_LOBBY_USERS:
 		{
-			Game_Manager::GM->lobby->add_user(*c->username,c->fd);
+			Game_Manager::GM->lobby->add_user(*c->username);
 			//cout<<"ADDED USER"<<endl;
 			cout<<"Current Users: "<<Game_Manager::GM->lobby->get_users(' ')<<endl;
 			string msg = "LOBBY_USERS";
 			msg += COMMAND;
 			msg += Game_Manager::GM->lobby->get_users(DATA_SEP);
-			Frame* frame = new Frame();
+			Frame* frame = new Frame(1,0,0,0,0,TEXT);
 			frame->add((uint8_t*)msg.c_str());
-			frame->fin = 1;
-			frame->mask = 0;
-			frame->opcode = TEXT;
 			Game_Manager::GM->lobby->broadcast(frame);
 			delete frame;
 			return "";
@@ -200,11 +161,8 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			string msg = "LOBBY_GAMES";
 			msg += COMMAND;
 			msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
-			Frame* frame = new Frame();
+			Frame* frame = new Frame(1,0,0,0,0,TEXT);
 			frame->add((uint8_t*)msg.c_str());
-			frame->fin = 1;
-			frame->mask = 0;
-			frame->opcode = TEXT;
 			Game_Manager::GM->lobby->broadcast(frame);
 			delete frame;
 			delete game_data;
@@ -223,11 +181,11 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 		case GET_LOBBY_ALL:
 		{
 
-			Game_Manager::GM->lobby->add_user(*c->username,c->fd);
+			Game_Manager::GM->lobby->add_user(*c->username);
 			string msg = "LOBBY_USERS";
 			msg += COMMAND;
 			msg += Game_Manager::GM->lobby->get_users(DATA_SEP);
-			Frame* frame = new Frame();
+			Frame* frame = new Frame(1,0,0,0,0,TEXT);
 			frame->add((uint8_t*)msg.c_str());
 			frame->fin = 1;
 			frame->mask = 0;
@@ -237,19 +195,17 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 				msg = "LOBBY_GAMES";
 				msg += COMMAND;
 				msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
-				frame = new Frame();
+				frame->clear();
 				frame->add((uint8_t*)msg.c_str());
-				frame->fin = 1;
-				frame->mask = 0;
-				frame->opcode = TEXT;
-				frame->send(c->fd);
+				frame->send(c->sd);
 			}
 			delete frame;
-			Game_Manager::GM->lobby_chat->connect(c->fd);
+			Game_Manager::GM->lobby_chat->connect(*c->username);
 			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string(DATA_SEP));
 		}
 
 		case REMOVE_LOBBY_GAME:
+		{
 			Game_Manager::GM->lobby->remove_game(stoi(data));
 			string msg = "LOBBY_GAMES";
 			msg += COMMAND;
@@ -258,14 +214,70 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			}else{
 				msg+= "none";
 			}
-			Frame* frame = new Frame();
+			Frame* frame = new Frame(1,0,0,0,0,TEXT);
 			frame->add((uint8_t*)msg.c_str());
-			frame->fin = 1;
-			frame->mask = 0;
-			frame->opcode = TEXT;
 			Game_Manager::GM->lobby->broadcast(frame);
 			delete frame;
 			return "";
+		}
+
+		case JOIN_LOBBY_GAME:
+		{
+			int64_t id = stoi(data);
+			Lobby_Game* lg = Game_Manager::GM->lobby->get_game(id);
+			lg->add_player(*c->username);
+			if(lg->is_ready()){
+				Game* g = lg->create_game();
+				Chess* game = new Chess(g);
+
+				Game_Manager::GM->lobby->remove_game(id);
+				Game_Manager::create_game(game);
+				game->start();
+			}
+			return "";
+		}
+		case GET_GAME_ALL:
+		{
+			int64_t id = stoi(data);
+			Chess* game;
+			try{
+				game = Game_Manager::GM->games->at(Game_Manager::find_game(id));
+			}catch(const out_of_range& err){
+				return prepare_message(2,"ERROR","Game Not Found");
+			}
+			/**
+			 * Send chat history
+			 */
+			string msg = Game_Manager::prepare_message(2,"CHAT_ALL",game->chat->to_string(DATA_SEP));
+			Frame* frame = new Frame(1,0,0,0,0,TEXT);
+			frame->add((uint8_t*)msg.c_str());
+			frame->send(c->sd);
+			delete frame;
+			/**
+			 * Send board position
+			 */
+			game->send_board();
+		}
+
+		case CHESS_MESSAGE:
+		{	
+			vector<string>* msg_data = c_explode(DATA_SEP,data);
+			if(msg_data->size()<2){
+				return "ERROR";
+			}
+			int64_t id = stoi(msg_data->at(0));
+			Chess* game;
+			try{
+				game = Game_Manager::GM->games->at(Game_Manager::find_game(id));
+			}catch(const out_of_range& err){
+				return prepare_message(2,"ERROR","Game Not Found");
+			}
+			game->message(*c->username,msg_data->at(1));
+			delete msg_data;
+			return "";
+		}
+
+			
 	}
 	return "ERROR";
 }
@@ -273,7 +285,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 int64_t Game_Manager::find_game(int64_t id){
 	int64_t i = 0;
 	for(int64_t i = 0;i<Game_Manager::GM->games->size();i++){
-		if(Game_Manager::GM->games->at(i)->id == id){
+		if(Game_Manager::GM->games->at(i)->game->id == id){
 			return i;
 		}
 	}
@@ -283,7 +295,8 @@ int64_t Game_Manager::find_game(int64_t id){
 int64_t Game_Manager::find_game(string username){
 	int64_t i = 0;
 	for(int64_t i = 0;i<Game_Manager::GM->games->size();i++){
-		if(Game_Manager::GM->games->at(i)->white->username == username || Game_Manager::GM->games->at(i)->black->username == username){
+		if(Game_Manager::GM->games->at(i)->game->white->username.compare(username)==0
+			 || Game_Manager::GM->games->at(i)->game->black->username.compare(username)==0){
 			return i;
 		}
 	}
@@ -312,6 +325,11 @@ void Game_Manager::create_game(vector<string>* data, int sd){
 	}else{
 		g->black = u;
 	}
+	Chess* game = new Chess(g);
+	Game_Manager::GM->games->push_back(game);
+}
+
+void Game_Manager::create_game(Chess* g){
 	Game_Manager::GM->games->push_back(g);
 }
 
@@ -322,35 +340,13 @@ void Game_Manager::join_game(vector<string>* data, int sd){
 		Game_Manager::create_game(data,sd);
 		return;
 	}
-	Game* g = Game_Manager::GM->games->at(index);
+	Chess* g = Game_Manager::GM->games->at(index);
 	char side = data->at(SIDE_INDEX)[0];
 	if(side == WHITE){
-		g->white = new User(data->at(USER_INDEX),sd);
+		g->game->white = new User(data->at(USER_INDEX),sd);
 	}else{
-		g->black = new User(data->at(USER_INDEX),sd);
+		g->game->black = new User(data->at(USER_INDEX),sd);
 	}
-}
-
-string Game_Manager::get_game_state(int64_t gid){
-	JSON* data = new JSON("string");
-	int64_t index = Game_Manager::find_game(gid);
-	if(index == -1){
-		return "";
-	}
-	Game* g = Game_Manager::GM->games->at(index);
-	data->add("Black",g->black->username);
-	data->add("White",g->white->username);
-	data->add("Board",g->board->getBoardData());
-	data->add("Turn",new string((char*)&(g->turn)));
-	data->add("Start",itoa(g->start));
-	data->add("Duration",itoa(g->duration));
-	data->add("Inc",itoa(g->inc));
-	data->add("WTime",itoa(g->white_time));
-	data->add("BTime",itoa(g->black_time));
-	data->add("ID",itoa(gid));
-	string out = data->to_string();
-	delete data;
-	return out;
 }
 
 int* Game_Manager::processMoveData(vector<string>* data){
@@ -364,8 +360,8 @@ int* Game_Manager::processMoveData(vector<string>* data){
 }
 
 void Game_Manager::disconnectClient(int64_t id){
-	int64_t index = Game_Manager::GM->find_game(id);
-	Game_Manager::GM->games->at(index)->store();
-
+	/**
+	 * does nothing
+	 */
 }
 

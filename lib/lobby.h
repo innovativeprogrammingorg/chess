@@ -12,32 +12,11 @@
 #include "../include/str.h"
 #include "../include/WebSocket/frame.h"
 
+#include "lobby_game.h"
+
 
 using namespace std;
 
-enum Game_Type{
-	REGULAR = 0x1,
-	BUG_HOUSE = 0x2
-};
-
-class Lobby_Game{
-	public:
-		static int64_t game_id;
-		int type;
-		int sec;
-		int min;
-		int inc;
-		char side;
-		string host;
-		int64_t id;
-		vector<User*>* players;
-		int ready;
-		Lobby_Game(int type,int sec,int min,int inc,char side,string host);
-		virtual ~Lobby_Game();
-		void add_player(User* player);
-		string get_type();
-		string to_string(char sep);
-};
 
 class Lobby{
 	private:
@@ -48,15 +27,14 @@ class Lobby{
 		Lobby();
 		virtual ~Lobby();
 		bool has_games();
-		bool has_user(int sd);
 		bool has_user(string username);
 		User* get_user(string username);
-		void add_user(string name, int sd);
+		void add_user(string name);
 		void add_user(User* user);
 		void add_game(Lobby_Game* lg);
 		void add_game(int type, int sec,int min,int inc,char side,string host);
 		void add_game(vector<string>* data,string host);
-		void remove_user(int sd);
+		Lobby_Game* get_game(int64_t id);
 		void remove_user(string username); 
 		Lobby_Game* remove_game(string host);
 		Lobby_Game* remove_game(int id);

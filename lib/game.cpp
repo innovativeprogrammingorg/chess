@@ -7,7 +7,6 @@ Game::Game(){
 	this->black = nullptr;
 	this->white = nullptr;
 	this->turn = WHITE;
-	this->duration = 0;
 	this->inc = 0;
 }
 
@@ -16,12 +15,11 @@ Game::Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t d
 	this->black = black;
 	this->white = white;
 	this->turn = turn;
-	this->duration = duration;
 	this->inc = inc;
-	this->white_time = 0;
-	this->black_time = 0;
-	this->start = 0;
+	this->white_time = duration;
+	this->black_time = duration;
 	this->id = id;
+	
 }
 
 Game::~Game(){
@@ -29,6 +27,8 @@ Game::~Game(){
 	delete this->black;
 	delete this->white;
 }
+
+
 
 bool Game::isDraw(){
 	int wPieces = 0;
@@ -167,10 +167,10 @@ bool Game::send_state_to_opponent(int sd){
 	if(this->white == nullptr || this->black == nullptr){
 		return false;
 	}
-	if(this->white->sd == sd){
-		return this->send_state(this->black->sd);
+	if(this->white->sd() == sd){
+		return this->send_state(this->black->sd());
 	}else{
-		return this->send_state(this->white->sd);
+		return this->send_state(this->white->sd());
 	}	
 }
 
@@ -201,24 +201,24 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 				if(c-c2==2 && (this->board->wCastle & 1)){
 					this->board->wCastle = FALSE;
 					Move::castle(p,this->board,QUEEN_SIDE);
-					return TRUE;//f
+					return CASTLE;//f
 				}
 				if(c2-c==2 && ((this->board->wCastle >> 1) & 1)){
 					this->board->wCastle = FALSE;
 					Move::castle(p,this->board,KING_SIDE);
-					return TRUE;
+					return CASTLE;
 				}
 				return FALSE;
 			}else{
 				if(c-c2==2 && (this->board->bCastle & 1)){
 					this->board->bCastle = FALSE;
 					Move::castle(p,this->board,QUEEN_SIDE);
-					return TRUE;
+					return CASTLE;
 				}
 				if(c2-c==2 && ((this->board->bCastle >> 1) & 1)){
 					this->board->bCastle = FALSE;
 					Move::castle(p,this->board,KING_SIDE);
-					return TRUE;//f
+					return CASTLE;//f
 				}				
 				return FALSE;
 			}

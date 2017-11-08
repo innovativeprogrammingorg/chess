@@ -13,7 +13,6 @@ Board::Board(string FEN, string spec, string castle){
 	this->wCastle = ((castle.find("wk")==string::npos)? 0 : KING_SIDE) | ((castle.find("wq")==string::npos)? 0 : QUEEN_SIDE);
 	cout<<"done, WHITE - "<<this->wCastle<<" : BLACK - "<<this->bCastle<<endl;
 	this->taken = -1;
-	this->history = new vector<string*>();
 	cout<<"Creating the tiles\n";
 	for(int i = 0;i<8;i++){
 		this->tiles[i] = (Tile**)calloc(sizeof(Tile*),8);
@@ -28,7 +27,10 @@ Board::Board(string FEN, string spec, string castle){
 		}	
 	}
 	cout<<"Created tiles\n";
-	this->specialData(spec);
+	if(spec.size()>1){
+		this->specialData(spec);
+	}
+	this->special = spec;
 	cout<<"Processed the special data\n";
 	
 }
@@ -41,15 +43,11 @@ Board::~Board(){
 		free(this->tiles[i]);
 	}
 	free(this->tiles);
-	delete this->history;
 }
 
 Tile* Board::getTile(int row, int col){
 	return this->tiles[row-1][col-1];
 }
-
-
-
 
 void Board::specialData(string data){
 	cout<<"Getting the data from the string\n";
@@ -143,16 +141,17 @@ string Board::getBoardData(){
 	data->add("Castle",this->getCastleData());
 	data->add("Taken",new string((char*)&(this->taken)));
 	data->add("Special",this->special);
-	int length = this->history->size();
-	if(length>0){
-		history += *(this->history->at(0));
-	}
-	for(int i = 1;i<length;i++){
-		history += *(this->history->at(i));
-	}
-	data->add("History",history);
 	string out = data->to_string();
 	delete data;
+	return out;
+}
+
+string Board::to_string(){
+	string out = this->generateFEN();
+	out += ";";
+	out += this->getCastleData();
+	out += ";";
+	out += this->special;
 	return out;
 }
 

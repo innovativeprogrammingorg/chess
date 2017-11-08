@@ -6,11 +6,10 @@ using namespace std;
 vector<Client*>* Client::clients = new vector<Client*>();
 pthread_mutex_t* Client::check_lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 
-Client::Client(int fd,string ip,int port){
-	this->fd = fd;
+Client::Client(int sd,string ip,int port){
+	this->sd = sd;
 	this->ip = ip;
 	this->port = port;
-	this->cookies = nullptr;
 	this->last_active = time(NULL);
 	this->handshaked = false;
 	this->username = nullptr;
@@ -19,9 +18,23 @@ Client::Client(int fd,string ip,int port){
 }
 
 bool Client::equals(Client* c){
-	return this->fd == c->fd && this->ip.compare(c->ip) == 0 && this->port == c->port;
+	return this->sd == c->sd && this->ip.compare(c->ip) == 0 && this->port == c->port;
 }
 
+Client* Client::find_client(string username){
+	pthread_mutex_lock(Client::check_lock);
+	size_t length = Client::clients->size();
+	Client* c = nullptr;
+	for(uint_fast64_t i = 0;i<length;i++){
+		c = Client::clients->at(i);
+		if(username.compare(*c->username) == 0){
+			pthread_mutex_unlock(Client::check_lock);
+			return c;
+		}
+	}
+	pthread_mutex_unlock(Client::check_lock);
+	return nullptr;
+}
 Client* Client::find_client_by_ip(string ip){
 	pthread_mutex_lock(Client::check_lock);
 	size_t length = Client::clients->size();
@@ -80,7 +93,7 @@ static void* check_clients_activity(void* ign){
 		for(auto it = Client::clients->begin();it != Client::clients->end();it++){
 			Client* c = *it;
 			if(t - c->last_active > CLIENT_TIMEOUT){
-				close(c->fd);
+				close(c->sd);
 				Client::drop_client(c);
 			}
 		}

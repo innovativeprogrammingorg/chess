@@ -17,7 +17,7 @@ Chat::Chat(){
 	this->messages = new vector<Message*>();
 	this->lock = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(this->lock,NULL);
-	this->users = new vector<int>();
+	this->users = new vector<User*>();
 }
 
 Chat::~Chat(){
@@ -57,17 +57,15 @@ string Chat::to_string(char sep){
 	}
 	pthread_mutex_unlock(this->lock);
 	if(out.compare("") == 0){
-		out = "System";
-		out += sep;
-		out += "No Messages";
+		out = "none";
 	}
 	return out;
 }
 
-int64_t Chat::indexOf(int sd){
+int64_t Chat::indexOf(string name){
 	pthread_mutex_lock(this->lock);
 	for(int64_t i = 0;i<this->users->size();i++){
-		if(this->users->at(i) == sd){
+		if(this->users->at(i)->username.compare(name) == 0){
 			pthread_mutex_unlock(this->lock);
 			return i;
 		}
@@ -75,24 +73,30 @@ int64_t Chat::indexOf(int sd){
 	pthread_mutex_unlock(this->lock);
 	return -1;
 }
-
-void Chat::connect(int sd){
-	
-	if(this->indexOf(sd) != -1){
+void Chat::connect(User* user){
+	if(this->indexOf(user->username) != -1){
 		return;
 	}
 	pthread_mutex_lock(this->lock);
-	this->users->push_back(sd);
+	this->users->push_back(user);
 	pthread_mutex_unlock(this->lock);
 }
 
-void Chat::disconnect(int sd){
-	int64_t index = this->indexOf(sd);
+void Chat::connect(string name){
+	this->connect(new User(name));	
+}
+
+void Chat::disconnect(string name){
+	int64_t index = this->indexOf(name);
 	pthread_mutex_lock(this->lock);
-	if(index == -1){
+	if(index != -1){
 		this->users->erase(this->users->begin() + index);
 	}
 	pthread_mutex_unlock(this->lock);
+}
+
+void Chat::disconnect(User* user){
+	this->disconnect(user->username);
 }
 
 void Chat::broadcast(Frame* frame, int sd){
@@ -103,7 +107,7 @@ void Chat::broadcast(Frame* frame, int sd){
 		return;
 	}
 	for(int64_t i = 0;i<this->users->size();i++){
-		frame->send(this->users->at(i));
+		frame->send(this->users->at(i)->sd());
 	}
 	pthread_mutex_unlock(this->lock);
 }

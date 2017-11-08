@@ -5,7 +5,10 @@
 #include "../include/str.h"
 #include "types.h"
 #include "user.h"
+#include <time.h>
 #include "../include/WebSocket/frame.h"
+#include "sql/sql.h"
+
 
 using namespace std;
 
@@ -15,13 +18,13 @@ class Game{
 		User* white;
 		Board* board;
 		uint8_t turn;
-		uint64_t start;
-		uint64_t duration;
+		time_t last_move_time;
 		uint64_t inc;
-		uint64_t white_time;
-		uint64_t black_time;
+		time_t white_time;
+		time_t black_time;
 		uint64_t id;
 		uint64_t turns;
+		vector<string>* history;
 
 		Game();
 		Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t duration,uint64_t inc);

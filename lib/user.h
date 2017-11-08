@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdint>
 #include <ctime>
+#include "../include/client.h"
 
 using namespace std;
 
@@ -12,9 +13,11 @@ class User{
 		string username;
 		bool online;
 		time_t response;
-		int sd;
-		User() : username(""),online(false),response(time(NULL)),sd(0){}
-		User(string name, int sd);
+		char side;
+		User() : username(""),online(false),response(time(NULL)){}
+		User(string name);
+		User(string name, char side);
+		int sd();
 };
 
 

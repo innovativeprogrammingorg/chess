@@ -9,7 +9,6 @@
 #include <time.h>
 #include <map>
 #include <pthread.h>
-#include "cookies.h"
 #include "str.h"
 
 using namespace std;
@@ -19,8 +18,7 @@ class Client{
 		static pthread_mutex_t* check_lock;
 		string ip;
 		int port;
-		int fd;
-		map<string,Cookie*>* cookies;
+		int sd;
 		time_t last_active;
 		bool handshaked;
 		string* username;
@@ -32,9 +30,9 @@ class Client{
 		 */
 		bool equals(Client* c);
 		Client(int fd,string ip,int port);
-
 		static void init();
 		static Client* find_client_by_ip(string ip);
+		static Client* find_client(string username);
 		static void add_client(Client* c);
 		static void drop_client(Client* c);
 		static void drop_client(int i);

@@ -11,6 +11,21 @@ uint8_t* Frame::c32_to_8(uint32_t in){
 	return out;
 }
 
+Frame::Frame(uint8_t fin,uint8_t rsv1, uint8_t rsv2,uint8_t rsv3,uint8_t mask,uint8_t opcode){
+	this->fin = fin;
+	this->rsv1 = rsv1;
+	this->rsv2 = rsv2;
+	this->rsv3 = rsv3;
+	this->mask = mask;
+	if(mask){
+		this->mask_key = rand()<<1;
+		this->mask_key += (this->mask_key%2 == 0)? 0 : 1;
+	}else{
+		this->mask_key = 0;
+	}
+	this->opcode = opcode;
+}
+
 Frame::Frame(): fin(1),rsv1(0), rsv2(0), rsv3(0), mask(1){
 	this->mask_key = rand()<<1;
 	this->mask_key += (this->mask_key%2 == 0)? 0 : 1;
@@ -54,7 +69,7 @@ void Frame::add(uint8_t* data){
 	for(uint32_t i = 0;data[i]!='\0';i++){
 		this->data->push_back(data[i]);
 	}
-	this->length = this->data->size();
+	this->length += this->data->size();
 }
 
 
@@ -150,4 +165,9 @@ void Frame::merge(Frame* frame){
 		this->data->push_back(frame->data->at(i));
 	}
 	this->length = this->data->size();
+}
+
+void Frame::clear(){
+	this->data->clear();
+	this->length = 0;
 }

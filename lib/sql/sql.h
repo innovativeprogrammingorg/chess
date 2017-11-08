@@ -12,5 +12,6 @@ using namespace std;
 
 
 string get_game_info(map<string,string>* data);
+void store_game(map<string,string>* game);
 
 #endif

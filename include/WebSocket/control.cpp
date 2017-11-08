@@ -5,16 +5,66 @@ using namespace std;
 Frame_Buffer::~Frame_Buffer(){
 	delete this->data;
 }
-
+map<string,int>* Control::lookup_table =  new map<string,int>();
 Control* Control::control = new Control();
+
+void Control::init_tables(){
+	Control::lookup_table->insert(pair<string,int>("ACCEPT_DRAW",ACCEPT_DRAW));
+	Control::lookup_table->insert(pair<string,int>("ACCEPT_TAKE_BACK",ACCEPT_TAKE_BACK));
+
+	Control::lookup_table->insert(pair<string,int>("BOARD",BOARD));
+	Control::lookup_table->insert(pair<string,int>("BUGHOUSE_MESSAGE",BUGHOUSE_MESSAGE));
+
+	Control::lookup_table->insert(pair<string,int>("CREATE",NEW));
+	Control::lookup_table->insert(pair<string,int>("CANCEL_GAME",CANCEL_GAME));
+	Control::lookup_table->insert(pair<string,int>("CHESS_MESSAGE",CHESS_MESSAGE));
+	Control::lookup_table->insert(pair<string,int>("CREATE_LOBBY_GAME",CREATE_LOBBY_GAME));
+
+	Control::lookup_table->insert(pair<string,int>("DECLINE_DRAW",DECLINE_DRAW));
+	Control::lookup_table->insert(pair<string,int>("DECLINE_TAKE_BACK",DECLINE_TAKE_BACK));
+
+	Control::lookup_table->insert(pair<string,int>("GET_LOBBY_MESSAGES",GET_LOBBY_MESSAGES));
+	Control::lookup_table->insert(pair<string,int>("GET_CHESS_MESSAGES",GET_CHESS_MESSAGES));
+	Control::lookup_table->insert(pair<string,int>("GET_BUGHOUSE_MESSAGES",GET_BUGHOUSE_MESSAGES));
+	Control::lookup_table->insert(pair<string,int>("GET_LOBBY_GAMES",GET_LOBBY_GAMES));
+	Control::lookup_table->insert(pair<string,int>("GET_LOBBY_USERS",GET_LOBBY_USERS));
+	Control::lookup_table->insert(pair<string,int>("GET_LOBBY_ALL",GET_LOBBY_ALL));
+	Control::lookup_table->insert(pair<string,int>("GET_GAME_ALL",GET_GAME_ALL));
+
+	Control::lookup_table->insert(pair<string,int>("JOIN",JOIN));
+	Control::lookup_table->insert(pair<string,int>("JOIN_LOBBY_GAME",JOIN_LOBBY_GAME));
+
+	Control::lookup_table->insert(pair<string,int>("LOGIN",LOGIN));
+	Control::lookup_table->insert(pair<string,int>("LOBBY_MESSAGE",LOBBY_MESSAGE));
+
+	Control::lookup_table->insert(pair<string,int>("MOVE",MOVE));
+
+	Control::lookup_table->insert(pair<string,int>("NEW",NEW));
+
+	Control::lookup_table->insert(pair<string,int>("OFFER_DRAW",OFFER_DRAW));
+
+	Control::lookup_table->insert(pair<string,int>("PROMOTE",PROMOTE));
+	Control::lookup_table->insert(pair<string,int>("PLACE_PIECE",PLACE_PIECE));
+
+	Control::lookup_table->insert(pair<string,int>("RESIGN",RESIGN));
+	Control::lookup_table->insert(pair<string,int>("REQUEST_TAKEN",REQUEST_TAKEN));
+	Control::lookup_table->insert(pair<string,int>("REQUEST_MOVES",REQUEST_MOVES));
+	Control::lookup_table->insert(pair<string,int>("REMOVE_LOBBY_GAME",REMOVE_LOBBY_GAME));
+
+	Control::lookup_table->insert(pair<string,int>("TAKE_BACK",TAKE_BACK));
+	Control::lookup_table->insert(pair<string,int>("TIME",TIME));
+	Control::lookup_table->insert(pair<string,int>("TURN",TURN));
+
+}
 
 Control::Control(){
 	this->data = new map<Client*, Frame_Buffer*>();
+	Control::init_tables();
 }
 
 void Control::flush_frames(Client* c){
 	for(auto it = Control::control->data->begin();it!=Control::control->data->end();it++){
-		if(it->first->fd == c->fd){
+		if(it->first->sd == c->sd){
 			Control::control->data->erase(it);
 			return;
 		}
@@ -23,7 +73,7 @@ void Control::flush_frames(Client* c){
 
 Frame_Buffer* Control::get_frames(Client* c){
 	for(auto it = Control::control->data->begin();it!=Control::control->data->end();it++){
-		if(it->first->fd == c->fd){
+		if(it->first->sd == c->sd){
 			return it->second;
 		}
 	}
@@ -60,128 +110,12 @@ int Control::get_action(Frame* frame,string* data){
 	if(extract != nullptr){
 		delete extract;
 	}
-	char first = (char)command[0];
-
-	switch(first){
-		case 'A':
-		{
-			if(command.compare("ACCEPT_DRAW")==0)
-				return ACCEPT_DRAW;
-			if(command.compare("ACCEPT_TAKE_BACK")==0)
-				return ACCEPT_TAKE_BACK;
-			break;	
-		}
-		case 'B':
-		{
-			if(command.compare("BOARD")==0)
-				return BOARD;
-			if(command.compare("BUGHOUSE_MESSAGE")==0)
-				return BUGHOUSE_MESSAGE;
-			break;
-		}
-		case 'C':
-		{
-			if(command.compare("CREATE")==0)
-				return NEW;
-			if(command.compare("CANCEL_GAME")==0)
-				return CANCEL_GAME;
-			if(command.compare("CHESS_MESSAGE")==0)
-				return CHESS_MESSAGE;
-			if(command.compare("CREATE_LOBBY_GAME")==0)
-				return CREATE_LOBBY_GAME;
-			break;
-		}
-		case 'D':
-		{
-			if(command.compare("DECLINE_DRAW")==0)
-				return DECLINE_DRAW;
-			if(command.compare("DECLINE_TAKE_BACK")==0)
-				return DECLINE_TAKE_BACK;
-			break;
-		}
-		case 'G':
-		{
-			if(command.compare("GET_LOBBY_MESSAGES")==0)
-				return GET_LOBBY_MESSAGES;
-			if(command.compare("GET_CHESS_MESSAGES")==0)
-				return GET_CHESS_MESSAGES;
-			if(command.compare("GET_BUGHOUSE_MESSAGES")==0)
-				return GET_BUGHOUSE_MESSAGES;
-			if(command.compare("GET_LOBBY_GAMES")==0)
-				return GET_LOBBY_GAMES;
-			if(command.compare("GET_LOBBY_USERS")==0)
-				return GET_LOBBY_USERS;
-			if(command.compare("GET_LOBBY_ALL")==0)
-				return GET_LOBBY_ALL;			
-			break;
-		}
-		case 'J':
-		{
-			if(command.compare("JOIN")==0)
-				return JOIN;
-			if(command.compare("JOIN_LOBBY_GAME")==0){
-				return JOIN_LOBBY_GAME;
-			}
-			break;
-		}
-		case 'L':
-		{
-			if(command.compare("LOGIN")==0)
-				return LOGIN;
-			if(command.compare("LOBBY_MESSAGE")==0)
-	 			return LOBBY_MESSAGE;
-			break;
-		}
-		case 'M':
-		{
-			if(command.compare("MOVE")==0)
-				return MOVE;
-			break;
-		}
-		case 'N':
-		{
-			if(command.compare("NEW")==0)
-				return NEW;
-			break;
-		}
-		case 'O':
-		{	
-			if(command.compare("OFFER_DRAW")==0)
-				return OFFER_DRAW;
-			break;
-		}
-		case 'P':
-		{
-			if(command.compare("PROMOTE")==0)
-				return PROMOTE;
-			if(command.compare("PLACE_PIECE")==0)
-				return PLACE_PIECE;
-			break;
-		}
-		case 'R':
-		{
-			if(command.compare("RESIGN")==0)
-				return RESIGN;
-			if(command.compare("REQUEST_TAKEN")==0)
-				return REQUEST_TAKEN;
-			if(command.compare("REQUEST_MOVES")==0)
-				return REQUEST_MOVES;
-			if(command.compare("REMOVE_LOBBY_GAME")==0)
-				return REMOVE_LOBBY_GAME;
-			break;
-		}
-		case 'T':
-		{
-			if(command.compare("TAKE_BACK")==0)
-				return TAKE_BACK;
-			if(command.compare("TIME")==0)
-				return TIME;
-			if(command.compare("TURN")==0)
-				return TURN;
-			break;			
-		}	
+	try{
+		int out = Control::lookup_table->at(command);
+		return out;
+	}catch(const out_of_range& err){
+		return 0;
 	}
-	return 0;
 }
 
 void Control::handle_request(Client* c,char* raw_data){
@@ -190,7 +124,7 @@ void Control::handle_request(Client* c,char* raw_data){
 	cout<<(char*)received->get_cstr()<<endl;
 	if(received->opcode == PING){
 		received->opcode = PONG;
-		received->send(c->fd);
+		received->send(c->sd);
 		return;
 	}
 	if(received->fin != 1){
@@ -222,7 +156,7 @@ void Control::handle_request(Client* c,char* raw_data){
 	//response->debug();
 	//SEND REPLY
 	if(sd == 0){
-		response->send(c->fd);
+		response->send(c->sd);
 	}else{
 		response->send(sd);
 	}

@@ -20,6 +20,7 @@ int main(){
 	Client::init();
 	//signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
+	signal(SIGPIPE,SIG_IGN);
 
 	if( (master_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
 		perror("socket failed");
@@ -55,7 +56,7 @@ int main(){
 		 
 		printf("The number of connections is %lu\n",Client::clients->size());
 		for (auto it = Client::clients->begin();(it != Client::clients->end()) && !Client::clients->empty(); it++) {
-			sd = ((Client*) *it)->fd;
+			sd = ((Client*) *it)->sd;
 			if(sd > 0)
 				FD_SET(sd,&readfds);
 			 
@@ -78,11 +79,11 @@ int main(){
 		for(auto it = Client::clients->begin();(it != Client::clients->end()) && !Client::clients->empty(); it++){
 			active_client = *it;
 			
-			sd = active_client->fd;
+			sd = active_client->sd;
 			/*printf("Retrieved the socket of that user\n");*/
 			if (FD_ISSET( sd , &readfds)){
 				/*printf("Checking to see what action occured...\n");*/
-				if ((valread = read( sd , buffer, BUFFER_SIZE - 1)) == 0){
+				if ((valread = read( sd , buffer, BUFFER_SIZE - 1)) <= 0){
 					printf("Removing the User from the list\n");
 					Client::drop_client(active_client);
 					/*printf("Removed Successfully!\n");*/
@@ -99,7 +100,7 @@ int main(){
 					if(active_client->handshaked){
 						cout<<"Received a message from the client"<<endl;
 						//cout<<"The given size is "<<valread<<endl;
-						data_frame(active_client,buffer);
+						data_frame(active_client,buffer,valread);
 					}else{
 						//write(0, buffer, strlen(buffer));
 						handshake(active_client,buffer);

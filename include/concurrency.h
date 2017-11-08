@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <vector>
+#include <string.h>
 #include "data_types.h"
 #include "request.h"
 #include "client.h"
@@ -19,6 +20,6 @@ using namespace std;
 WThread new_WThread(Request r);
 void handshake(Client* c, char* data);
 void* handle_handshake(void* wt);
-void data_frame(Client* c, char* data);
+void data_frame(Client* c, char* data,size_t size);
 void* handle_data_frame(void* wt);
 #endif

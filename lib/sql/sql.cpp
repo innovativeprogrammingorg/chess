@@ -29,3 +29,7 @@ string process_through_PHP(map<string,string>* _POST,string dir){
 string get_game_info(map<string,string>* data){
 	return process_through_PHP(data,"./lib/sql/getGame.php");
 }
+
+void store_game(map<string,string>* game){
+	
+}
