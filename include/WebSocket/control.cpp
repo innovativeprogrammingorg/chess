@@ -145,7 +145,7 @@ void Control::handle_request(Client* c,char* raw_data){
 	Game g;
 	int sd = 0;
 	string reply = Game_Manager::process(c,data,action,&g,&sd);
-	if(reply.compare("") == 0){
+	if(reply.size() == 0){
 		return;
 	}
 	Frame* response = new Frame();

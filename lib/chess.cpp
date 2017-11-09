@@ -69,7 +69,7 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 
 void Chess::offer_draw(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	int sd = (this->game->white->username.compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
+	int sd = (this->game->white->username->compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
 	string msg = "DRAW_OFFERED";
 	frame->add((uint8_t*)msg.c_str());
 	frame->send(sd);
@@ -78,7 +78,7 @@ void Chess::offer_draw(string user){
 
 void Chess::accept_draw(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	int sd = (this->game->white->username.compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
+	int sd = (this->game->white->username->compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
 	string msg = "DRAW_ACCEPTED";
 	frame->add((uint8_t*)msg.c_str());
 	frame->send(sd);
@@ -87,7 +87,7 @@ void Chess::accept_draw(string user){
 
 void Chess::decline_draw(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	int sd = (this->game->white->username.compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
+	int sd = (this->game->white->username->compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
 	string msg = "DRAW_DECLINED";
 	frame->add((uint8_t*)msg.c_str());
 	frame->send(sd);
@@ -96,7 +96,7 @@ void Chess::decline_draw(string user){
 
 void Chess::resign(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	int sd = (this->game->white->username.compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
+	int sd = (this->game->white->username->compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
 	string msg = "RESIGN";
 	frame->add((uint8_t*)msg.c_str());
 	frame->send(sd);
@@ -108,7 +108,7 @@ void Chess::take_back(string user){
 		Frame* frame = new Frame(1,0,0,0,0,TEXT);
 		string msg = "NA";
 		frame->add((uint8_t*)msg.c_str());
-		int sd = (this->game->white->username.compare(user) == 0) ? this->game->white->sd() : this->game->black->sd();
+		int sd = (this->game->white->username->compare(user) == 0) ? this->game->white->sd() : this->game->black->sd();
 		frame->send(sd);
 		delete frame;
 		return;
@@ -116,7 +116,7 @@ void Chess::take_back(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = "TAKEBACK_REQUESTED";
 	frame->add((uint8_t*)msg.c_str());
-	int sd = (this->game->white->username.compare(user) != 0) ? this->game->white->sd() : this->game->black->sd();
+	int sd = (this->game->white->username->compare(user) != 0) ? this->game->white->sd() : this->game->black->sd();
 	frame->send(sd);
 	delete frame;
 }

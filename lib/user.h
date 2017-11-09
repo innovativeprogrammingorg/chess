@@ -10,13 +10,13 @@ using namespace std;
 
 class User{
 	public:
-		string username;
+		string* username;
 		bool online;
 		time_t response;
 		char side;
-		User() : username(""),online(false),response(time(NULL)){}
 		User(string name);
 		User(string name, char side);
+		virtual ~User();
 		int sd();
 };
 

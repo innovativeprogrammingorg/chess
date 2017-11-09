@@ -24,6 +24,7 @@ Frame::Frame(uint8_t fin,uint8_t rsv1, uint8_t rsv2,uint8_t rsv3,uint8_t mask,ui
 		this->mask_key = 0;
 	}
 	this->opcode = opcode;
+	this->data = new vector<uint8_t>();
 }
 
 Frame::Frame(): fin(1),rsv1(0), rsv2(0), rsv3(0), mask(1){

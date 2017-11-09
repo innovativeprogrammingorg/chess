@@ -12,8 +12,7 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <netdb.h> /* struct hostent, gethostbyname */
-#include "concurrency.h"
-#include "str.h"
+
 #include <signal.h>
 #include <time.h>
 /*#include <openssl/bio.h>
@@ -23,8 +22,12 @@
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>*/
 #include <resolv.h>
-#include "client.h"
+
 #include <vector>
+#include "client.h"
+#include "WebSocket/handshake.h"
+#include "concurrency.h"
+#include "str.h"
 
 #ifndef TRUE
 #define TRUE   1

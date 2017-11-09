@@ -65,7 +65,7 @@ string Chat::to_string(char sep){
 int64_t Chat::indexOf(string name){
 	pthread_mutex_lock(this->lock);
 	for(int64_t i = 0;i<this->users->size();i++){
-		if(this->users->at(i)->username.compare(name) == 0){
+		if(this->users->at(i)->username->compare(name) == 0){
 			pthread_mutex_unlock(this->lock);
 			return i;
 		}
@@ -74,7 +74,7 @@ int64_t Chat::indexOf(string name){
 	return -1;
 }
 void Chat::connect(User* user){
-	if(this->indexOf(user->username) != -1){
+	if(this->indexOf(*user->username) != -1){
 		return;
 	}
 	pthread_mutex_lock(this->lock);
@@ -96,7 +96,7 @@ void Chat::disconnect(string name){
 }
 
 void Chat::disconnect(User* user){
-	this->disconnect(user->username);
+	this->disconnect(*user->username);
 }
 
 void Chat::broadcast(Frame* frame, int sd){

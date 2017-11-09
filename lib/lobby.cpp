@@ -23,7 +23,7 @@ bool Lobby::has_games(){
 bool Lobby::has_user(string username){
 	pthread_mutex_lock(this->lock);
 	for(int64_t i = 0;i<this->users->size();i++){
-		if(this->users->at(i)->username.compare(username) == 0){
+		if(this->users->at(i)->username->compare(username) == 0){
 			pthread_mutex_unlock(this->lock);
 			return true;
 		}
@@ -35,7 +35,7 @@ bool Lobby::has_user(string username){
 User* Lobby::get_user(string username){
 	pthread_mutex_lock(this->lock);
 	for(int64_t i = 0;i<this->users->size();i++){
-		if(this->users->at(i)->username.compare(username) == 0){
+		if(this->users->at(i)->username->compare(username) == 0){
 			pthread_mutex_unlock(this->lock);
 			return this->users->at(i);
 		}
@@ -46,7 +46,7 @@ User* Lobby::get_user(string username){
 
 void Lobby::add_user(User* user){
 
-	if(this->has_user(user->username)){
+	if(this->has_user(*user->username)){
 		return;
 	}
 	pthread_mutex_lock(this->lock);
@@ -73,7 +73,7 @@ void Lobby::add_game(int type, int sec,int min,int inc,char side,string host){
 }
 
 void Lobby::add_game(vector<string>* data,string host){
-	//cout<<"DATA LENGTH IS: "<<data->size()<<endl;
+	cout<<"DATA LENGTH IS: "<<data->size()<<endl;
 	if(data->size()<5){
 		cout<<"Failed to create game"<<endl;
 		return;
@@ -142,12 +142,13 @@ Lobby_Game* Lobby::remove_game(int id){
 string Lobby::get_users(char sep){
 	string out = "";
 	pthread_mutex_lock(this->lock);
+	this->check();
 	for(int64_t i = 0;i<this->users->size();i++){
 		User* user = this->users->at(i);
 		if(i != 0){
 			out += sep;
 		}
-		out += user->username;
+		out += *user->username;
 	}
 	pthread_mutex_unlock(this->lock);
 	return out;
@@ -173,6 +174,27 @@ void Lobby::broadcast(Frame* frame){
 		frame->send(this->users->at(i)->sd());
 	}
 	pthread_mutex_unlock(this->lock);
+}
+
+void Lobby::notify(){
+	
+}
+
+void Lobby::check(){
+	if(this->users->size()==0){
+		return;
+	}
+	for(auto it = this->users->begin();it != this->users->end();it++){
+		if((*it)->sd() == -1){
+			this->users->erase(it);
+			if(this->users->size()>0){
+				it = this->users->begin();
+			}else{
+				return;
+			}
+			
+		}
+	}
 }
 
 

@@ -41,6 +41,9 @@ class Lobby{
 		string get_users(char sep);
 		string get_games(char sep);
 		void broadcast(Frame* frame);
+		void notify();
+	private:
+		void check();
 
 
 };

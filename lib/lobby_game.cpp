@@ -92,7 +92,7 @@ void Lobby_Game::drop_player(string user){
 		return;
 	}
 	for(auto it = this->players->begin();it != this->players->end();it++){
-		if((*it)->username.compare(user) == 0){
+		if((*it)->username->compare(user) == 0){
 			this->players->erase(it);
 			return;
 		}

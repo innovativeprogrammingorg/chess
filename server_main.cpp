@@ -1,5 +1,5 @@
 #include "./include/server.h"
-#include "./include/WebSocket/handshake.h"
+
 
 using namespace std;
 
@@ -98,7 +98,7 @@ int main(){
 					last_input = buffer;
 					
 					if(active_client->handshaked){
-						cout<<"Received a message from the client"<<endl;
+						//cout<<"Received a message from the client"<<endl;
 						//cout<<"The given size is "<<valread<<endl;
 						data_frame(active_client,buffer,valread);
 					}else{

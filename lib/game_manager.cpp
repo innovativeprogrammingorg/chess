@@ -200,6 +200,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 				frame->send(c->sd);
 			}
 			delete frame;
+			cout<<"Sending lobby messages"<<endl;
 			Game_Manager::GM->lobby_chat->connect(*c->username);
 			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string(DATA_SEP));
 		}
@@ -248,7 +249,9 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			/**
 			 * Send chat history
 			 */
-			string msg = Game_Manager::prepare_message(2,"CHAT_ALL",game->chat->to_string(DATA_SEP));
+			string msg = "CHAT_ALL";
+			msg += COMMAND;
+			msg += game->chat->to_string(DATA_SEP);
 			Frame* frame = new Frame(1,0,0,0,0,TEXT);
 			frame->add((uint8_t*)msg.c_str());
 			frame->send(c->sd);
@@ -295,8 +298,8 @@ int64_t Game_Manager::find_game(int64_t id){
 int64_t Game_Manager::find_game(string username){
 	int64_t i = 0;
 	for(int64_t i = 0;i<Game_Manager::GM->games->size();i++){
-		if(Game_Manager::GM->games->at(i)->game->white->username.compare(username)==0
-			 || Game_Manager::GM->games->at(i)->game->black->username.compare(username)==0){
+		if(Game_Manager::GM->games->at(i)->game->white->username->compare(username)==0
+			 || Game_Manager::GM->games->at(i)->game->black->username->compare(username)==0){
 			return i;
 		}
 	}
