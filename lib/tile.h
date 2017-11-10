@@ -8,7 +8,7 @@ using namespace std;
 class Tile{
 	public:
 		Piece* p;
-		Tile(int row, int col,char p);
+		Tile(int row, int col,char fen);
 		bool empty();
 };
 

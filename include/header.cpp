@@ -131,8 +131,7 @@ uint8_t get_request_type(HTTP_Request* r){
 Response build_response(HTTP_Request* r){
 	Response out;
 	if(1 != check_valid_params(r)){
-		out = e400_response(r);
-		return out;
+		return NULL;
 	}
 	uint8_t request = get_request_type(r);
 	switch(request){

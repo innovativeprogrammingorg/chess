@@ -8,20 +8,20 @@ Board::Board(string FEN, string spec, string castle){
 	this->tiles = (Tile***)calloc(sizeof(Tile**),8);
 	string f = FEN;
 	char c;
-	cout<<"Processing the Castle data...";
+	//cout<<"Processing the Castle data...";
 	this->bCastle = ((castle.find("bk")==string::npos)? 0 : KING_SIDE) | ((castle.find("bq")==string::npos)? 0 : QUEEN_SIDE);
 	this->wCastle = ((castle.find("wk")==string::npos)? 0 : KING_SIDE) | ((castle.find("wq")==string::npos)? 0 : QUEEN_SIDE);
-	cout<<"done, WHITE - "<<(int)this->wCastle<<" : BLACK - "<<(int)this->bCastle<<endl;
+	//cout<<"done, WHITE - "<<(int)this->wCastle<<" : BLACK - "<<(int)this->bCastle<<endl;
 	this->taken = -1;
-	cout<<"Creating the tiles\n";
+	//cout<<"Creating the tiles\n";
 	for(int i = 0;i<8;i++){
 		this->tiles[i] = (Tile**)calloc(sizeof(Tile*),8);
 		for(int j = 0;j<8;j++){
 			c = getLast(f);
-			f = f.substr(0,f.size()-2);
-			if(c=='/'){
+			f.pop_back();
+			if(c == '/'){
 				c = getLast(f);
-				f = f.substr(0,f.size()-2);
+				f.pop_back();
 			}
 			this->tiles[i][j] = new Tile(i+1,j+1,c);
 		}	
@@ -31,7 +31,9 @@ Board::Board(string FEN, string spec, string castle){
 		this->specialData(spec);
 	}
 	this->special = spec;
-	cout<<"Processed the special data\n";
+	//cout<<"Processed the special data\n";
+	cout<<"Given: "<<FEN<<endl;
+	cout<<"Produced: "<<this->to_string()<<endl;
 	
 }
 
@@ -46,7 +48,10 @@ Board::~Board(){
 }
 
 Tile* Board::getTile(int row, int col){
-	if((uint32_t)row>8 || (uint32_t)col>8)
+	if((uint32_t)row>8 || (uint32_t)col>8 ){
+		return nullptr;
+		
+	}
 	return this->tiles[row-1][col-1];
 }
 
@@ -115,6 +120,10 @@ string Board::generateFEN(){
 	for(int i = 8;i>0;i--){ 
 		for(int j = 8;j>0;j--){
 			t = this->getTile(i,j);
+			if(t == nullptr){
+				cerr<<"Tile is null"<<endl;
+				return "ERROR";
+			}
 			if(t->empty()){
 				output += EMPTY_SPACE;
 			}else{
