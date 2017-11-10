@@ -20,8 +20,6 @@ class Chess{
 		bool waiting_for_promotion;
 		int promotion_row;
 		int promotion_col;
-		static char cmd;
-		static char data_sep;
 		Chess(Game* game);
 		virtual ~Chess();
 		void start();

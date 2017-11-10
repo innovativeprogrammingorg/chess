@@ -1,8 +1,6 @@
 #include "chess.h"
 using namespace std;
 
-char Chess::cmd = '\005';
-char Chess::data_sep = '\037';
 static char rows[8] = {'a','b','c','d','e','f','g'};
 
 Chess::Chess(Game* game){
@@ -25,7 +23,7 @@ Chess::~Chess(){
 
 void Chess::start(){
 	string msg = "GAME_START";
-	msg += Chess::cmd;
+	msg += COMMAND;
 	msg += ltos(this->game->id);
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	frame->add((uint8_t*)msg.c_str());
@@ -129,8 +127,8 @@ void Chess::message(string user,string msg){
 	this->chat->add(user,msg);
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string res = "CHAT";
-	res += Chess::cmd;
-	res += this->chat->get_last(Chess::data_sep);
+	res += COMMAND;
+	res += this->chat->get_last();
 	frame->add((uint8_t*)res.c_str());
 	frame->send(this->game->white->sd());
 	frame->send(this->game->black->sd());
@@ -140,7 +138,7 @@ void Chess::message(string user,string msg){
 void Chess::send_board(){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = "BOARD";
-	msg += Chess::cmd;
+	msg += COMMAND;
 	msg += this->game->board->generateFEN();
 	frame->add((uint8_t*)msg.c_str());
 	frame->send(this->game->white->sd());
@@ -157,7 +155,7 @@ void Chess::send_time(){
 void Chess::send_move(string move){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = "MOVE";
-	msg += Chess::cmd;
+	msg += COMMAND;
 	msg += move;
 	frame->add((uint8_t*)msg.c_str());
 	frame->send(this->game->white->sd());
@@ -168,13 +166,13 @@ void Chess::send_move(string move){
 void Chess::send_moves(){
 	string msg = "MOVES_ALL";
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	msg += Chess::cmd;
+	msg += COMMAND;
 	if(this->moves->size()==0){
 		msg += "none";
 	}else{
 		for(auto it = this->moves->begin();it!=this->moves->end();it++){
 			if(it != this->moves->begin()){
-				msg += Chess::data_sep;
+				msg += DATA_SEP;
 			}
 			msg += *it;
 		}
