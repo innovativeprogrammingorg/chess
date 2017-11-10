@@ -64,5 +64,12 @@ enum class BitLoc{
 	LENGTH = 16
 };
 
+#ifndef COMMAND
+#define COMMAND '\005'
+#endif
+
+#ifndef DATA_SEP
+#define DATA_SEP '\037'
+#endif
 
 #endif

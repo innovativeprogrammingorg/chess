@@ -38,14 +38,18 @@ class Chat{
 		void connect(string name);
 		void disconnect(User* user);
 		void disconnect(string name);
-		void broadcast(Frame* frame, int sd = 0);
-		string to_string(char sep);
-		string get_last(char sep);
+		void broadcast(Frame* frame);
+		string to_string();
+		string get_last();
+		void send_last();
+		void send_all(int sd);
 
 };
 
 #ifndef MAX_MESSAGES
 #define MAX_MESSAGES 10
 #endif
+
+
 
 #endif

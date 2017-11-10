@@ -38,9 +38,11 @@ class Lobby{
 		void remove_user(string username); 
 		Lobby_Game* remove_game(string host);
 		Lobby_Game* remove_game(int id);
-		string get_users(char sep);
-		string get_games(char sep);
+		string get_users();
+		string get_games();
 		void broadcast(Frame* frame);
+		void notify_users();
+		void notify_games();
 		void notify();
 	private:
 		void check();

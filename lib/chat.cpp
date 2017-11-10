@@ -43,16 +43,16 @@ void Chat::add(string user, string msg){
 	this->add(new string(user),new string(msg));
 }
 
-string Chat::to_string(char sep){
+string Chat::to_string(){
 	pthread_mutex_lock(this->lock);
 	string out = "";
 	for(int i = 0;i<this->messages->size();i++){
 		if(i!=0){ 
-			out += sep; 
+			out += DATA_SEP; 
 		}
 		Message* m  = this->messages->at(i);
 		out += *m->user;
-		out += sep;
+		out += DATA_SEP;
 		out += *m->message;
 	}
 	pthread_mutex_unlock(this->lock);
@@ -99,13 +99,8 @@ void Chat::disconnect(User* user){
 	this->disconnect(*user->username);
 }
 
-void Chat::broadcast(Frame* frame, int sd){
+void Chat::broadcast(Frame* frame){
 	pthread_mutex_lock(this->lock);
-	if(sd != 0){
-		frame->send(sd);
-		pthread_mutex_unlock(this->lock);
-		return;
-	}
 	for(int64_t i = 0;i<this->users->size();i++){
 		frame->send(this->users->at(i)->sd());
 	}
@@ -113,15 +108,34 @@ void Chat::broadcast(Frame* frame, int sd){
 }
 
 
-string Chat::get_last(char sep){
+string Chat::get_last(){
 	string out = "";
 	pthread_mutex_lock(this->lock);
 	Message* m = this->messages->back();
 	out = *m->user;
-	out += sep;
+	out += DATA_SEP;
 	out += *m->message;
 	pthread_mutex_unlock(this->lock);
 	return out;
 }
 
+void Chat::send_last(){
+	string msg = "CHAT";
+	msg += COMMAND;
+	msg += this->get_last();
+	Frame* frame = new Frame(1,0,0,0,0,TEXT);
+	frame->add((uint8_t*)msg.c_str());
+	this->broadcast(frame);
+	delete frame;
+}
+
+void Chat::send_all(int sd){
+	string msg = "CHAT_ALL";
+	msg += COMMAND;
+	msg += this->to_string();
+	Frame* frame = new Frame(1,0,0,0,0,TEXT);
+	frame->add((uint8_t*)msg.c_str());
+	frame->send(sd);
+	delete frame;
+}
 

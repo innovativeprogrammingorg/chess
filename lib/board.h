@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cstdint>
 #include "../include/str.h"
 #include "types.h"
 #include "tile.h"

@@ -13,6 +13,7 @@
 #include "json.h"
 #include "user.h"
 #include "../include/client.h"
+#include "../include/WebSocket/frame.h"
 #include "sql/sql.h"
 #include "chat.h"
 #include "lobby.h"
@@ -42,17 +43,7 @@ class Game_Manager{
 		static int64_t find_game(int64_t id);
 		static int64_t find_game(string username);
 		static int* processMoveData(vector<string>* data);
-		static void disconnectClient(int64_t id);
 };
-
-
-#ifndef COMMAND
-#define COMMAND '\005'
-#endif
-
-#ifndef DATA_SEP
-#define DATA_SEP '\037'
-#endif
 
 
 

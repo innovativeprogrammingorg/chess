@@ -117,37 +117,20 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 		/**Chat Handlers**/
 		case LOBBY_MESSAGE:
 		{
-			//vector<string>* msg_data = c_explode(DATA_SEP,data);
 			Game_Manager::GM->lobby_chat->add(*c->username,data);
-			//Game_Manager::GM->lobby_chat->connect(*c->username);
-			string msg = "CHAT";
-			msg += COMMAND;
-			msg += Game_Manager::GM->lobby_chat->get_last(DATA_SEP);
-
-			Frame* frame = new Frame(1,0,0,0,0,TEXT);
-			frame->add((uint8_t*)msg.c_str());
-			Game_Manager::GM->lobby_chat->broadcast(frame);
-			delete frame;
+			Game_Manager::GM->lobby_chat->send_last();
 			return "";
 		}
 		case GET_LOBBY_MESSAGES:
 		{
 			Game_Manager::GM->lobby_chat->connect(*c->username);
-			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string(DATA_SEP));
+			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string());
 		}
 
 		case GET_LOBBY_USERS:
 		{
 			Game_Manager::GM->lobby->add_user(*c->username);
-			//cout<<"ADDED USER"<<endl;
-			cout<<"Current Users: "<<Game_Manager::GM->lobby->get_users(' ')<<endl;
-			string msg = "LOBBY_USERS";
-			msg += COMMAND;
-			msg += Game_Manager::GM->lobby->get_users(DATA_SEP);
-			Frame* frame = new Frame(1,0,0,0,0,TEXT);
-			frame->add((uint8_t*)msg.c_str());
-			Game_Manager::GM->lobby->broadcast(frame);
-			delete frame;
+			Game_Manager::GM->lobby->notify_users();
 			return "";
 		}
 		case CREATE_LOBBY_GAME:
@@ -158,13 +141,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 				delete game_data;
 				return "ERROR";
 			}
-			string msg = "LOBBY_GAMES";
-			msg += COMMAND;
-			msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
-			Frame* frame = new Frame(1,0,0,0,0,TEXT);
-			frame->add((uint8_t*)msg.c_str());
-			Game_Manager::GM->lobby->broadcast(frame);
-			delete frame;
+			Game_Manager::GM->lobby->notify_games();
 			delete game_data;
 			return "";
 		}
@@ -173,52 +150,20 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			if(!Game_Manager::GM->lobby->has_games()){
 				return "";
 			}
-			string msg = "LOBBY_GAMES";
-			msg += COMMAND;
-			msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
-			return msg;
+			return Game_Manager::prepare_message(2,"LOBBY_GAMES",Game_Manager::GM->lobby->get_games());
 		}
 		case GET_LOBBY_ALL:
 		{
-
 			Game_Manager::GM->lobby->add_user(*c->username);
-			string msg = "LOBBY_USERS";
-			msg += COMMAND;
-			msg += Game_Manager::GM->lobby->get_users(DATA_SEP);
-			Frame* frame = new Frame(1,0,0,0,0,TEXT);
-			frame->add((uint8_t*)msg.c_str());
-			frame->fin = 1;
-			frame->mask = 0;
-			frame->opcode = TEXT;
-			Game_Manager::GM->lobby->broadcast(frame);
-			if(Game_Manager::GM->lobby->has_games()){
-				msg = "LOBBY_GAMES";
-				msg += COMMAND;
-				msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
-				frame->clear();
-				frame->add((uint8_t*)msg.c_str());
-				frame->send(c->sd);
-			}
-			delete frame;
-			cout<<"Sending lobby messages"<<endl;
 			Game_Manager::GM->lobby_chat->connect(*c->username);
-			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string(DATA_SEP));
+			Game_Manager::GM->lobby->notify();
+			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string());
 		}
 
 		case REMOVE_LOBBY_GAME:
 		{
 			Game_Manager::GM->lobby->remove_game(stoi(data));
-			string msg = "LOBBY_GAMES";
-			msg += COMMAND;
-			if(Game_Manager::GM->lobby->has_games()){
-				msg += Game_Manager::GM->lobby->get_games(DATA_SEP);
-			}else{
-				msg+= "none";
-			}
-			Frame* frame = new Frame(1,0,0,0,0,TEXT);
-			frame->add((uint8_t*)msg.c_str());
-			Game_Manager::GM->lobby->broadcast(frame);
-			delete frame;
+			Game_Manager::GM->lobby->notify_games();
 			return "";
 		}
 
@@ -246,20 +191,9 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			}catch(const out_of_range& err){
 				return prepare_message(2,"ERROR","Game Not Found");
 			}
-			/**
-			 * Send chat history
-			 */
-			string msg = "CHAT_ALL";
-			msg += COMMAND;
-			msg += game->chat->to_string(DATA_SEP);
-			Frame* frame = new Frame(1,0,0,0,0,TEXT);
-			frame->add((uint8_t*)msg.c_str());
-			frame->send(c->sd);
-			delete frame;
-			/**
-			 * Send board position
-			 */
+			game->chat->send_all(c->sd);
 			game->send_board();
+			return "";
 		}
 
 		case CHESS_MESSAGE:
@@ -362,9 +296,4 @@ int* Game_Manager::processMoveData(vector<string>* data){
 	return out;
 }
 
-void Game_Manager::disconnectClient(int64_t id){
-	/**
-	 * does nothing
-	 */
-}
 

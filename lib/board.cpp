@@ -11,7 +11,7 @@ Board::Board(string FEN, string spec, string castle){
 	cout<<"Processing the Castle data...";
 	this->bCastle = ((castle.find("bk")==string::npos)? 0 : KING_SIDE) | ((castle.find("bq")==string::npos)? 0 : QUEEN_SIDE);
 	this->wCastle = ((castle.find("wk")==string::npos)? 0 : KING_SIDE) | ((castle.find("wq")==string::npos)? 0 : QUEEN_SIDE);
-	cout<<"done, WHITE - "<<this->wCastle<<" : BLACK - "<<this->bCastle<<endl;
+	cout<<"done, WHITE - "<<(int)this->wCastle<<" : BLACK - "<<(int)this->bCastle<<endl;
 	this->taken = -1;
 	cout<<"Creating the tiles\n";
 	for(int i = 0;i<8;i++){
@@ -46,6 +46,7 @@ Board::~Board(){
 }
 
 Tile* Board::getTile(int row, int col){
+	if((uint32_t)row>8 || (uint32_t)col>8)
 	return this->tiles[row-1][col-1];
 }
 
