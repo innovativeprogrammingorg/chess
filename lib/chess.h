@@ -23,6 +23,8 @@ class Chess{
 		Chess(Game* game);
 		virtual ~Chess();
 		void start();
+		void notify_sides();
+		void notify_turn();
 		void move(int r,int c, int r2, int c2,char side);
 		void offer_draw(string user);
 		void accept_draw(string user);

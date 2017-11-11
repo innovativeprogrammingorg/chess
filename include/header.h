@@ -7,7 +7,6 @@
 #include <iostream>
 #include "str.h"
 #include "response.h"
-#include "request.h"
 #include "HTTP.h"
 #include "WebSocket/handshake.h"
 

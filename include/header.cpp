@@ -138,13 +138,8 @@ Response build_response(HTTP_Request* r){
 		case GET:
 			out = GET_response(r);
 			break;
-		case POST:
-			puts("Received a POST request!");
-			out = e400_response(r);
-			break;
 		default:
-			out = e400_response(r);
-			break;
+			return NULL;
 	}
 	return out;
 }	

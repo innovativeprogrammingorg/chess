@@ -6,7 +6,6 @@
 #include <vector>
 #include <cstdint>
 #include <map>
-#include <stdarg.h>
 #include <pthread.h>
 #include "game.h"
 #include "types.h"
@@ -35,7 +34,6 @@ class Game_Manager{
 
 		Game_Manager();
 
-		static string prepare_message(int args,...);
 		static string process(Client* c,string data,int command,Game* out_game = nullptr,int* sd = NULL);
 		static void create_game(vector<string>* data,int sd);
 		static void create_game(Chess* g);
@@ -46,7 +44,9 @@ class Game_Manager{
 };
 
 
-
+/**
+ * Obsolete
+ */
 enum indexes{
 	SIDE_INDEX = 0x0,
 	USER_INDEX = 0x01,

@@ -9,6 +9,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdarg.h>
+#include <string>
 #include "../base64.h"
 
 using namespace std;
@@ -42,6 +44,8 @@ class Frame{
 		uint8_t* encode(uint32_t* out_size = nullptr);
 		void send(int sd);
 		void clear();
+
+		static string prepare_message(int args,...);
 
 };
 

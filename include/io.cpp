@@ -171,7 +171,7 @@ void IO::force_print(char* in,size_t length){
 void IO::respond(int fd, Response r){
 	if(r== NULL || r == nullptr){
 		cerr<<"Response cannot be null"<<endl;
-		exit(1);
+		return;
 	}
 	int chunk_size = 1000;
 	int64_t size = r->data_size;

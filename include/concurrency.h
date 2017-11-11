@@ -7,7 +7,6 @@
 #include <vector>
 #include <string.h>
 #include "data_types.h"
-#include "request.h"
 #include "client.h"
 #include "WebSocket/control.h"
 
@@ -16,7 +15,7 @@
 using namespace std;
 
 
-
+Request new_request(void * client, char* data);
 WThread new_WThread(Request r);
 void handshake(Client* c, char* data);
 void* handle_handshake(void* wt);

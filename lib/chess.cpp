@@ -32,6 +32,29 @@ void Chess::start(){
 	delete frame;
 }
 
+void Chess::notify_sides(){
+	Frame* frame = new Frame(1,0,0,0,0,TEXT);
+	string msg = Frame::prepare_message(2,"SIDE","w");
+	frame->add((uint8_t*)msg.c_str());
+	frame->send(this->game->white->sd());
+	frame->clear();
+	msg = msg = Frame::prepare_message(2,"SIDE","b");
+	frame->add((uint8_t*)msg.c_str());
+	frame->send(this->game->black->sd());
+	delete frame;
+}
+
+void Chess::notify_turn(){
+	string msg = "TURN";
+	msg += COMMAND;
+	msg += (char)this->game->turn;
+	Frame* frame = new Frame(1,0,0,0,0,TEXT);
+	frame->add((uint8_t*)msg.c_str());
+	frame->send(this->game->white->sd());
+	frame->send(this->game->black->sd());
+	delete frame;
+}
+
 void Chess::move(int r,int c, int r2, int c2,char side){
 	time_t hold = time(NULL);
 	this->store(this->game->board);
@@ -126,9 +149,7 @@ void Chess::store(Board* board){
 void Chess::message(string user,string msg){
 	this->chat->add(user,msg);
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	string res = "CHAT";
-	res += COMMAND;
-	res += this->chat->get_last();
+	string res = Frame::prepare_message(2,"CHAT",this->chat->get_last());
 	frame->add((uint8_t*)res.c_str());
 	frame->send(this->game->white->sd());
 	frame->send(this->game->black->sd());
@@ -137,9 +158,7 @@ void Chess::message(string user,string msg){
 
 void Chess::send_board(){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	string msg = "BOARD";
-	msg += COMMAND;
-	msg += this->game->board->generateFEN();
+	string msg = Frame::prepare_message(2,"BOARD",this->game->board->generateFEN());
 	frame->add((uint8_t*)msg.c_str());
 	frame->send(this->game->white->sd());
 	frame->send(this->game->black->sd());
@@ -147,16 +166,33 @@ void Chess::send_board(){
 }
 
 void Chess::send_time(){
-	/**
-	 * For when time is implemented
-	 */
+	int wsec = this->game->white_time % 60;
+	int wmin = (int)(this->game->white_time / 60);
+	int bsec = this->game->black_time % 60;
+	int bmin = (int)(this->game->black_time / 60);
+	string wtime = itoa(wmin);
+	wtime += ":";
+	if(wsec<10){
+		wtime += "0";	
+	}
+	wtime += itoa(wsec);
+	string btime = itoa(bmin);
+	btime += ":";
+	if(bsec<10){
+		btime += "0";	
+	}
+	btime += itoa(bsec);
+	string msg = Frame::prepare_message(3,"TIME",wtime,btime);
+	Frame* frame = new Frame(1,0,0,0,0,TEXT);
+	frame->add((uint8_t*)msg.c_str());
+	frame->send(this->game->white->sd());
+	frame->send(this->game->black->sd());
+	delete frame;
 }
 
 void Chess::send_move(string move){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	string msg = "MOVE";
-	msg += COMMAND;
-	msg += move;
+	string msg = Frame::prepare_message(2,"MOVE",move);
 	frame->add((uint8_t*)msg.c_str());
 	frame->send(this->game->white->sd());
 	frame->send(this->game->black->sd());
@@ -188,12 +224,9 @@ void Chess::send_all(){
 }
 
 void Chess::invalid_move(){
-	Frame* frame = new Frame();
+	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = "INVALID_MOVE";
 	frame->add((uint8_t*)msg.c_str());
-	frame->fin = 1;
-	frame->mask = 0;
-	frame->opcode = TEXT;
 	int sd = (this->game->turn == WHITE) ? this->game->white->sd() : this->game->black->sd();
 	frame->send(sd);
 	delete frame;

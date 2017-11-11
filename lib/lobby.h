@@ -11,7 +11,6 @@
 #include "user.h"
 #include "../include/str.h"
 #include "../include/WebSocket/frame.h"
-
 #include "lobby_game.h"
 
 
@@ -31,20 +30,25 @@ class Lobby{
 		User* get_user(string username);
 		void add_user(string name);
 		void add_user(User* user);
+		void remove_user(string username); 
+		string get_users();
+
 		void add_game(Lobby_Game* lg);
 		void add_game(int type, int sec,int min,int inc,char side,string host);
 		void add_game(vector<string>* data,string host);
 		Lobby_Game* get_game(int64_t id);
-		void remove_user(string username); 
 		Lobby_Game* remove_game(string host);
 		Lobby_Game* remove_game(int id);
-		string get_users();
 		string get_games();
+
 		void broadcast(Frame* frame);
 		void notify_users();
 		void notify_games();
 		void notify();
 	private:
+		/**
+		 * Removes all users who are not connected
+		 */
 		void check();
 
 

@@ -1,6 +1,13 @@
 #include "concurrency.h"
 
-static uint64_t threads = 0;
+//static uint64_t threads = 0;
+
+Request new_request(void* c, char* data){
+	Request out = (Request)malloc(sizeof(struct request));
+	out->client = c;
+	out->data = data;
+	return out;
+}
 
 WThread new_WThread(Request r){
 	WThread out = (WThread)malloc(sizeof(struct thread_wrapper));
@@ -14,7 +21,7 @@ void handshake(Client* c, char* data){
 	char* dat = (char*)calloc(sizeof(char),strlen(data)+1);
 	strcpy(dat,data);
 	//cout<<"PASSED TO PARAM:::::\n"<<dat<<endl;
-	threads++;
+	//threads++;
 	WThread t = new_WThread(new_request((void*)c,dat));
 	pthread_create(t->thread,NULL,handle_handshake,t);
 }
@@ -34,7 +41,7 @@ void* handle_handshake(void * wt){
 	free(t->req);
 	free(t->thread);
 	free(t);
-	threads--;
+	//threads--;
 	return NULL;
 }
 
@@ -42,8 +49,8 @@ void data_frame(Client* c, char* data,size_t size){
 	char* dat = (char*)calloc(sizeof(char),size+1);
 	memcpy(dat,data,size);
 	WThread t = new_WThread(new_request((void*)c,dat));
-	threads++;
-	cout<<"There are "<<threads<<" threads running"<<endl;
+	//threads++;
+	//cout<<"There are "<<threads<<" threads running"<<endl;
 	pthread_create(t->thread,NULL,handle_data_frame,t);
 }
 
@@ -51,7 +58,7 @@ void* handle_data_frame(void* wt){
 	WThread t = (WThread)wt;
 	pthread_mutex_lock(((Client*)t->req->client)->lock);
 	Control::handle_request((Client*)t->req->client,t->req->data);
-	threads--;
+	//threads--;
 	pthread_mutex_unlock(((Client*)t->req->client)->lock);
 	free(t->req->data);
 	free(t->req);

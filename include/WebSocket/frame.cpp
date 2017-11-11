@@ -172,3 +172,25 @@ void Frame::clear(){
 	this->data->clear();
 	this->length = 0;
 }
+
+
+string Frame::prepare_message(int args,...){
+	va_list valist;
+	int i = 0;
+	string out = "";
+	va_start(valist, args);
+	for(i = 0;i<args;i++){
+		if(i == 0){
+			out += (string)va_arg(valist, string);
+			out += COMMAND;
+		}else if(i==1){
+			out += (string)va_arg(valist, string);
+			
+		}else{
+			out += DATA_SEP;
+			out += (string)va_arg(valist, string);
+		}
+	}
+	va_end(valist);
+	return out;
+}

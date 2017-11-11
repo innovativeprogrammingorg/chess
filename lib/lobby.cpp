@@ -73,7 +73,7 @@ void Lobby::add_game(int type, int sec,int min,int inc,char side,string host){
 }
 
 void Lobby::add_game(vector<string>* data,string host){
-	cout<<"DATA LENGTH IS: "<<data->size()<<endl;
+	//cout<<"DATA LENGTH IS: "<<data->size()<<endl;
 	if(data->size()<5){
 		cout<<"Failed to create game"<<endl;
 		return;
@@ -83,8 +83,8 @@ void Lobby::add_game(vector<string>* data,string host){
 	if(in_type.compare("Bug House")==0){
 		type = BUG_HOUSE;
 	}
-	cout<<"Creating the game..."<<endl;
-	cout<<"Parameters"<<endl<<type<<endl<<data->at(1)<<endl<<data->at(2)<<endl;
+	//cout<<"Creating the game..."<<endl;
+	cout<<"Game Parameters"<<endl<<type<<endl<<data->at(1)<<endl<<data->at(2)<<endl;
 	
 	this->add_game(
 		type,
@@ -93,7 +93,7 @@ void Lobby::add_game(vector<string>* data,string host){
 		stoi(data->at(3)),
 		(char)data->at(4)[0],
 		host);
-	cout<<"Created game successfully"<<endl;
+	//cout<<"Created game successfully"<<endl;
 }
 
 Lobby_Game* Lobby::get_game(int64_t id){

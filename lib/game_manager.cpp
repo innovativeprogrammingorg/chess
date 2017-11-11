@@ -13,26 +13,7 @@ Game_Manager::Game_Manager(){
 	pthread_mutex_init(this->lock,NULL);
 }
 
-string Game_Manager::prepare_message(int args,...){
-	va_list valist;
-	int i = 0;
-	string out = "";
-	va_start(valist, args);
-	for(i = 0;i<args;i++){
-		if(i == 0){
-			out += (string)va_arg(valist, string);
-			out += COMMAND;
-		}else if(i==1){
-			out += (string)va_arg(valist, string);
-			
-		}else{
-			out += DATA_SEP;
-			out += (string)va_arg(valist, string);
-		}
-	}
-	va_end(valist);
-	return out;
-}
+
 
 string Game_Manager::process(Client* c,string data, int command, Game* out_game, int* sd){
 	switch(command){
@@ -68,7 +49,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			delete game_data;
 			game_data = c_explode(DATA_SEP,data);
 			Game_Manager::create_game(game_data,c->sd);
-			string out = Game_Manager::prepare_message(2,"NEW",game_data->at(FEN_INDEX));
+			string out = Frame::prepare_message(2,"NEW",game_data->at(FEN_INDEX));
 			delete game_data;
 			return out;
 		}
@@ -81,7 +62,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			string info = get_game_info(args);
 			delete args;
 			Game_Manager::join_game(game_data,c->sd);
-			string out = Game_Manager::prepare_message(2,"JOIN",game_data->at(FEN_INDEX));
+			string out = Frame::prepare_message(2,"JOIN",game_data->at(FEN_INDEX));
 			delete game_data;
 			return out;
 		}
@@ -124,7 +105,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 		case GET_LOBBY_MESSAGES:
 		{
 			Game_Manager::GM->lobby_chat->connect(*c->username);
-			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string());
+			return Frame::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string());
 		}
 
 		case GET_LOBBY_USERS:
@@ -150,14 +131,14 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			if(!Game_Manager::GM->lobby->has_games()){
 				return "";
 			}
-			return Game_Manager::prepare_message(2,"LOBBY_GAMES",Game_Manager::GM->lobby->get_games());
+			return Frame::prepare_message(2,"LOBBY_GAMES",Game_Manager::GM->lobby->get_games());
 		}
 		case GET_LOBBY_ALL:
 		{
 			Game_Manager::GM->lobby->add_user(*c->username);
 			Game_Manager::GM->lobby_chat->connect(*c->username);
 			Game_Manager::GM->lobby->notify();
-			return Game_Manager::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string());
+			return Frame::prepare_message(2,string("CHAT_ALL"),Game_Manager::GM->lobby_chat->to_string());
 		}
 
 		case REMOVE_LOBBY_GAME:
@@ -189,10 +170,13 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			try{
 				game = Game_Manager::GM->games->at(Game_Manager::find_game(id));
 			}catch(const out_of_range& err){
-				return prepare_message(2,"ERROR","Game Not Found");
+				return Frame::prepare_message(2,"ERROR","Game Not Found");
 			}
-			game->chat->send_all(c->sd);
+			game->notify_sides();
+			game->chat->send_all(c->sd);	
 			game->send_board();
+			game->notify_turn();
+			game->send_time();
 			return "";
 		}
 
@@ -207,7 +191,7 @@ string Game_Manager::process(Client* c,string data, int command, Game* out_game,
 			try{
 				game = Game_Manager::GM->games->at(Game_Manager::find_game(id));
 			}catch(const out_of_range& err){
-				return prepare_message(2,"ERROR","Game Not Found");
+				return Frame::prepare_message(2,"ERROR","Game Not Found");
 			}
 			game->message(*c->username,msg_data->at(1));
 			delete msg_data;
