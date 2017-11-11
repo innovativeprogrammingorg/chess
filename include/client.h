@@ -33,7 +33,7 @@ class Client{
 		static void init();
 		static Client* find_client_by_ip(string ip);
 		static Client* find_client(string username);
-		static void add_client(Client* c);
+		static Client* add_client(Client* c);
 		static void drop_client(Client* c);
 		static void drop_client(int i);
 		static Client* client_at(int i);

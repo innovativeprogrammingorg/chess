@@ -22,7 +22,7 @@ OBJECTS =  $(LIB_OBJ) $(INCLUDE_OBJ) $(WS_OBJ) $(SQL_OBJ)
 all:  $(LIB_OBJ) $(INCLUDE_OBJ) $(WS_OBJ) $(SQL_OBJ) server
 
 server: 
-	$(CC) server_main.cpp -o server $(CFLAGS) $(OBJECTS) -lssl -lcrypto
+	$(CC) -g server_main.cpp -o server $(CFLAGS) $(OBJECTS) -lssl -lcrypto
 
 clean: 
 	rm -f server chess 
@@ -33,13 +33,13 @@ fclean:
 re: clean all
 
 $(LIB_OBJ): lib/%.o : lib/%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@ $(LIB) 
+	$(CC) -g $(CFLAGS) -c $< -o $@ $(LIB) 
 
 $(INCLUDE_OBJ): include/%.o : include/%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@ $(LIB) 
+	$(CC) -g $(CFLAGS) -c $< -o $@ $(LIB) 
 
 $(WS_OBJ): include/WebSocket/%.o : include/WebSocket/%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@ -lssl -lcrypto
+	$(CC) -g $(CFLAGS) -c $< -o $@ -lssl -lcrypto
 
 $(SQL_OBJ): lib/sql/%.o : lib/sql/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@ $(LIB) 

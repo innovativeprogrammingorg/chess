@@ -50,7 +50,7 @@ Client* Client::find_client_by_ip(string ip){
 	return nullptr;
 }
 
-void Client::add_client(Client* c){
+Client* Client::add_client(Client* c){
 	pthread_mutex_lock(Client::check_lock);
 	Client::clients->push_back(c);
 	pthread_mutex_unlock(Client::check_lock);

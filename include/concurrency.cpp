@@ -16,10 +16,10 @@ WThread new_WThread(Request r){
 	return out;
 }
 
-void handshake(Client* c, char* data){
+void handshake(Client* c, char* data,size_t size){
 	//cout<<"Creating new thread to handle request"<<endl;
-	char* dat = (char*)calloc(sizeof(char),strlen(data)+1);
-	strcpy(dat,data);
+	char* dat = (char*)calloc(sizeof(char),size+1);
+	memcpy(dat,data,size);
 	//cout<<"PASSED TO PARAM:::::\n"<<dat<<endl;
 	//threads++;
 	WThread t = new_WThread(new_request((void*)c,dat));
@@ -28,7 +28,6 @@ void handshake(Client* c, char* data){
 
 void* handle_handshake(void * wt){
 	WThread t = (WThread)wt;
-	//cout<<"Preparing to respond"<<endl;
 	pthread_mutex_lock(((Client*)t->req->client)->lock);
 	string* data = new string(t->req->data);
 	HTTP_Request* request = new HTTP_Request(data);

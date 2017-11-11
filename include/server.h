@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>   
-#include <stdlib.h>
+#include <cstdlib>
 #include <errno.h>
 #include <unistd.h>   
 #include <arpa/inet.h>    
@@ -23,11 +23,15 @@
 #include <openssl/x509_vfy.h>*/
 #include <resolv.h>
 
+
+#include <sys/epoll.h>
+
 #include <vector>
+#include <iostream>
+
 #include "client.h"
 #include "WebSocket/handshake.h"
 #include "concurrency.h"
-#include "str.h"
 
 #ifndef TRUE
 #define TRUE   1
