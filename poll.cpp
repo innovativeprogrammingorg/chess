@@ -28,20 +28,20 @@ int main(){
 	srand(time(NULL));
 
 	int opt = TRUE;
-	int master_socket , addrlen , new_socket, sd;
+	int master_socket , addrlen , new_socket, activity, valread , sd;
 	//int max_sd;
 	int port = 8989;
-	size_t valread;
 	struct sockaddr_in address;
 	char buffer[BUFFER_SIZE];  
 	//fd_set readfds;
 	//Client* c;
 	Client::init();
 	int n;
-	struct epoll_event event;// = (struct epoll_event*)calloc(sizeof(struct epoll_event),1);
-	struct epoll_event* events = nullptr;
-	int efd;
-	memset(&event,0,sizeof(struct epoll_event));
+	int s;
+	struct epoll_event* event = (struct epoll_event*)malloc(sizeof(struct epoll_event));
+		struct epoll_event* events;
+		int efd;
+
 	//signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
 	signal(SIGPIPE,SIG_IGN);
@@ -78,21 +78,22 @@ int main(){
 		perror ("epoll_create");
 		abort();
 	}
-	event.data.fd = master_socket;
-	event.events = EPOLLIN | EPOLLET;
-	if(epoll_ctl (efd, EPOLL_CTL_ADD, master_socket, &event) == -1){
+	event->data.fd = master_socket;
+	event->events = EPOLLIN | EPOLLET;
+	if(epoll_ctl (efd, EPOLL_CTL_ADD, master_socket, event) == -1){
 		perror("epoll_ctl");
 		abort();
 	}
 
-	events = (struct epoll_event*) calloc(sizeof(struct epoll_event),MAX_EVENTS);
+	events = (struct epoll_event*) calloc(sizeof(struct epoll_event),64);
 
 	/*puts("Listener created successfully");*/
 	
 	addrlen = sizeof(address);	 
 	for(;;) {
 		
-		n = epoll_wait(efd, events,MAX_EVENTS, -1);//select(max_sd + 1 , &readfds , NULL , NULL , NULL);
+			/*printf("The max process id is %i\n",max_sd);*/
+		n = epoll_wait(efd, events, 64, -1);//select(max_sd + 1 , &readfds , NULL , NULL , NULL);
 		if((n < 0) && (errno!=EINTR)) {
 			cout<<"select error"<<endl;
 		}
@@ -102,21 +103,21 @@ int main(){
 						/* An error has occured on this fd, or the socket is not
 							 ready for reading (why were we notified then?) */
 				cerr<< "epoll error\n";
-				close(events[i].data.fd);
+				close (events[i].data.fd);
 				continue;
 			}else if (master_socket == events[i].data.fd){
 						/* We have a notification on the listening socket, which
 							 means one or more incoming connections. */
 				for(;;){
 
-					new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+					new_socket = accept (master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen);
 					if (new_socket == -1){
 						if (!((errno == EAGAIN) ||(errno == EWOULDBLOCK))) {
 							cout<<"accept"<<endl;
 						}
 						break;
 					}
-					//event = (struct epoll_event*)calloc(sizeof(struct epoll_event),1);
+					event = (struct epoll_event*)malloc(sizeof(struct epoll_event));
 
 					/*getnameinfo(&in_addr, in_len,
 												 hbuf, sizeof(hbuf),
@@ -124,15 +125,16 @@ int main(){
 												 NI_NUMERICHOST | NI_NUMERICSERV);*/
 					(void*)Client::add_client(new Client(new_socket,inet_ntoa(address.sin_addr),ntohs(address.sin_port)));
 				
-					
+					event->data.fd = new_socket;
 				/* Make the incoming socket non-blocking and add it to the
 					 list of fds to monitor. */
 					if (make_socket_non_blocking (new_socket) == -1){
 						abort();
 					}
-					event.data.fd = new_socket;
-					event.events = EPOLLIN | EPOLLET;
-					if (epoll_ctl (efd, EPOLL_CTL_ADD, new_socket, &event) == -1){
+
+					//event->data.fd = new_socket;
+					event->events = EPOLLIN | EPOLLET;
+					if (epoll_ctl (efd, EPOLL_CTL_ADD, new_socket, event) == -1){
 						perror("epoll_ctl");
 						abort();
 					}
@@ -167,8 +169,15 @@ int main(){
 					handshake(active_client,buffer,valread);
 				}
 				memset(&buffer,0,BUFFER_SIZE);
+							
+
+						
 			}
 		}
+		
+		
+		
+		
 	}
 	return EXIT_SUCCESS;
 } 
@@ -187,7 +196,6 @@ void segfault_catch(int signum){
 
 void kill_all(int signum){
 	delete Client::clients;
-	delete Control::lookup_table;
 	puts("Killed\n");
 	exit(EXIT_SUCCESS);
 }

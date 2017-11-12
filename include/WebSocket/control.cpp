@@ -121,10 +121,13 @@ int Control::get_action(Frame* frame,string* data){
 void Control::handle_request(Client* c,char* raw_data){
 	Frame* received = new Frame((uint8_t*)raw_data);
 	//received->debug();
-	cout<<(char*)received->get_cstr()<<endl;
+	char* debug_receive = (char*)received->get_cstr();
+	cout<<debug_receive<<endl;
+	free(debug_receive);
 	if(received->opcode == PING){
 		received->opcode = PONG;
 		received->send(c->sd);
+		delete received;
 		return;
 	}
 	if(received->fin != 1){
@@ -139,9 +142,11 @@ void Control::handle_request(Client* c,char* raw_data){
 			received->merge(buffer->data->at(i));
 		}
 		Control::flush_frames(c);
+		delete buffer;
 	}
 	string data;
 	int action = Control::get_action(received,&data);
+	delete received;
 	Game g;
 	int sd = 0;
 	string reply = Game_Manager::process(c,data,action,&g,&sd);

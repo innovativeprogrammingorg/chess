@@ -42,8 +42,10 @@ string get_server_line(){
 
 string get_SWA_line(HTTP_Request* r){
 	string out("Sec-WebSocket-Accept: ");
-	out.append(string(WS_accept(*r->header->at("Sec-WebSocket-Key")->data[0])));
+	char* key = WS_accept(*r->header->at("Sec-WebSocket-Key")->data[0]);
+	out.append(string(key));
 	out.append("\r\n");
+	free(key);
 	return out;
 }
 

@@ -22,24 +22,27 @@ void handshake(Client* c, char* data,size_t size){
 	memcpy(dat,data,size);
 	//cout<<"PASSED TO PARAM:::::\n"<<dat<<endl;
 	//threads++;
-	WThread t = new_WThread(new_request((void*)c,dat));
-	pthread_create(t->thread,NULL,handle_handshake,t);
+	pthread_t thread;
+	Request r = new_request((void*)c,dat);
+	pthread_create(&thread,NULL,handle_handshake,r);
 }
 
 void* handle_handshake(void * wt){
-	WThread t = (WThread)wt;
-	pthread_mutex_lock(((Client*)t->req->client)->lock);
-	string* data = new string(t->req->data);
+	Request req = (Request)wt;
+	pthread_mutex_lock(((Client*)req->client)->lock);
+
+	string* data = new string(req->data);
 	HTTP_Request* request = new HTTP_Request(data);
-	IO::respond(((Client*)t->req->client)->sd,build_response(request));
-	((Client*)t->req->client)->handshaked = true;
-	pthread_mutex_unlock(((Client*)t->req->client)->lock);
+	Response res = build_response(request);
+
+	IO::respond(((Client*)req->client)->sd,res);
+	((Client*)req->client)->handshaked = true;
+	pthread_mutex_unlock(((Client*)req->client)->lock);
 	delete data;
 	delete request;
-	free(t->req->data);
-	free(t->req);
-	free(t->thread);
-	free(t);
+	free(req->data);
+	free(req);
+	free(res);
 	//threads--;
 	return NULL;
 }

@@ -53,13 +53,13 @@ Frame::Frame(uint8_t* in){
 		loc += 4;
 	}
 	this->data = new vector<uint8_t>();
-	//loc+=2;
 	loc--;
 	this->mask_key = (in[loc++]<<24) + (in[loc++]<<16) + (in[loc++]<<8) + in[loc++];
 	uint8_t* mask = Frame::c32_to_8(this->mask_key);
 	for(uint32_t i = 0;i<this->length;i++){
 		this->data->push_back(in[i+loc] ^ mask[i%4]);
 	}
+	free(mask);
 }
 
 Frame::~Frame(){
@@ -156,9 +156,15 @@ uint8_t* Frame::encode(uint32_t* out_size){
 
 
 void Frame::send(int sd){
+	if(sd<0){
+		cerr<<"SD cannot be less than zero!"<<endl;
+		cerr<<"Aborting send"<<endl;
+		return;
+	}
 	uint32_t size;
 	uint8_t* data = this->encode(&size);
 	write(sd,(void*)data,size);
+	free(data);
 }
 
 void Frame::merge(Frame* frame){

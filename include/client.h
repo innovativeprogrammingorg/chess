@@ -32,6 +32,7 @@ class Client{
 		Client(int fd,string ip,int port);
 		static void init();
 		static Client* find_client_by_ip(string ip);
+		static Client* find_client(int sd);
 		static Client* find_client(string username);
 		static Client* add_client(Client* c);
 		static void drop_client(Client* c);

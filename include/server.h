@@ -41,7 +41,8 @@
 #define FALSE  0
 #endif
 
-#define BUFFER_SIZE 200000 
+#define BUFFER_SIZE 200000
+#define MAX_EVENTS 128 
 
 void segfault_catch(int signum);
 void kill_all(int signum);

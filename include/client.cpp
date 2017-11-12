@@ -21,15 +21,32 @@ bool Client::equals(Client* c){
 	return this->sd == c->sd && this->ip.compare(c->ip) == 0 && this->port == c->port;
 }
 
-Client* Client::find_client(string username){
+Client* Client::find_client(int sd){
 	pthread_mutex_lock(Client::check_lock);
 	size_t length = Client::clients->size();
 	Client* c = nullptr;
 	for(uint_fast64_t i = 0;i<length;i++){
 		c = Client::clients->at(i);
-		if(username.compare(*c->username) == 0){
+		if(c->sd == sd){
 			pthread_mutex_unlock(Client::check_lock);
 			return c;
+		}
+	}
+	pthread_mutex_unlock(Client::check_lock);
+	return nullptr;
+}
+
+Client* Client::find_client(string username){
+	pthread_mutex_lock(Client::check_lock);
+	if(Client::clients->size() == 0){
+		pthread_mutex_unlock(Client::check_lock);
+		return nullptr;
+	}	
+
+	for(auto it = Client::clients->begin();it != Client::clients->end();it++){
+		if(username.compare(*(*it)->username) == 0){
+			pthread_mutex_unlock(Client::check_lock);
+			return *it;
 		}
 	}
 	pthread_mutex_unlock(Client::check_lock);
@@ -103,6 +120,6 @@ static void* check_clients_activity(void* ign){
 
 void Client::init(){
 	pthread_mutex_init(Client::check_lock,NULL);
-	pthread_t* checker = (pthread_t*)malloc(sizeof(pthread_t));
-	pthread_create(checker,NULL,check_clients_activity,NULL);
+	pthread_t checker;// = (pthread_t*)malloc(sizeof(pthread_t));
+	pthread_create(&checker,NULL,check_clients_activity,NULL);
 }

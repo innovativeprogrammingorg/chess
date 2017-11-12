@@ -103,7 +103,7 @@ int main(){
 						data_frame(active_client,buffer,valread);
 					}else{
 						//write(0, buffer, strlen(buffer));
-						handshake(active_client,buffer);
+						handshake(active_client,buffer,valread);
 					}
 					
 					

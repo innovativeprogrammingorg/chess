@@ -61,6 +61,7 @@ string HTTP_Header::to_string(){
 
 HTTP_Header::HTTP_Header(string* header){
 	this->data = new map<string,Header_Field*>();
+	
 	vector<string>* parameters = explode("\r\n",*header);
 	size_t length = parameters->size();
 	string key;
@@ -94,6 +95,7 @@ HTTP_Header::HTTP_Header(string* header){
 			arr = explode(";",*tmp);
 			value =  new Header_Field(HTTP_Header::vector_to_array(arr));
 			this->data->insert(pair <string,Header_Field*> (key,value));
+			delete tmp;
 			delete arr;
 		}else if(tmp->find(",")!=string::npos){
 			/*puts("Value is an array delim = ,");
@@ -102,6 +104,7 @@ HTTP_Header::HTTP_Header(string* header){
 			value =  new Header_Field(HTTP_Header::vector_to_array(arr));
 			this->data->insert(pair<string,Header_Field*>(key,value));
 			delete arr;
+			delete tmp;
 		}else{
 			value = new Header_Field(tmp);
 			this->data->insert(pair<string,Header_Field*>(key,value));
@@ -115,7 +118,7 @@ HTTP_Header::HTTP_Header(string* header){
 
 
 HTTP_Header::~HTTP_Header(){
-	if(this->data!=nullptr ){
+	if(this->data != nullptr ){
 		delete this->data;
 	}
 	
