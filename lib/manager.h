@@ -29,7 +29,7 @@ class Manager{
 		static Manager* GM;
 
 		pthread_mutex_t* lock;
-		vector<Chess*>* games;
+		Game_Manager* games;
 		Chat* lobby_chat;
 		Lobby* lobby;
 

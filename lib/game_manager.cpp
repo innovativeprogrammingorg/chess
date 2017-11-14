@@ -31,9 +31,9 @@ void Game_Manager::add_game(Chess* game){
 
 }
 
-void add_game(Chess* game,int64_t id){
+void Game_Manager::add_game(Chess* game,int64_t id){
 	game->game->id = id;
-	this->games->insert(pair<int64_t id,Chess*>(id,game));
+	this->games->insert(pair<int64_t,Chess*>(id,game));
 }
 
 Chess* Game_Manager::get_game(int64_t id){
@@ -44,17 +44,17 @@ Chess* Game_Manager::load_game(int64_t id){
 
 }
 
-void drop_game(int64_t id){
+void Game_Manager::drop_game(int64_t id){
 	try{
-		this->games->erase(this->games->at(id));
+		this->games->erase(this->games->find(id));
 	}catch(const out_of_range& oor){
 		return;
 	}
 	
 }
 
-void save_game(int64_t id){
-	
+void Game_Manager::save_game(int64_t id){
+
 }
 
 void Game_Manager::save(){

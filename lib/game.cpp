@@ -10,7 +10,7 @@ Game::Game(){
 	this->inc = 0;
 }
 
-Game::Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t duration,uint64_t inc){
+Game::Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t duration,int inc){
 	this->board = b;
 	this->black = black;
 	this->white = white;
@@ -27,8 +27,6 @@ Game::~Game(){
 	delete this->black;
 	delete this->white;
 }
-
-
 
 bool Game::isDraw(){
 	int wPieces = 0;
@@ -225,6 +223,7 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 		}
 		this->board->forceChange(r2,c2,this->board->getTile(r,c)->p->FEN);
 		this->board->forceChange(r,c,EMPTY_SPACE);
+		this->board->special = "false";
 		if(p->is(PAWN) && abs(r-r2)==2){
 			cout<<"possible special pawn move\n";
 			if(!this->board->getTile(r2,c2+1)->empty() && this->board->getTile(r2,c2+1)->p->is(PAWN) && this->board->getTile(r2,c2+1)->p->side != p->side){
@@ -236,7 +235,6 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 				}else{
 					this->board->special = this->board->special + "|" + itoa(r2) +itoa(c2-1) + "r";
 				}
-				
 			}
 		}
 		if(this->inCheck(side)){

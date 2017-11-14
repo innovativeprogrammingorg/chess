@@ -1,7 +1,7 @@
 #include "chess.h"
 using namespace std;
 
-static char rows[8] = {'a','b','c','d','e','f','g'};
+static const char rows[8] = {'a','b','c','d','e','f','g'};
 
 Chess::Chess(Game* game){
 	this->game = game;
@@ -12,6 +12,8 @@ Chess::Chess(Game* game){
 	this->history = new vector<string>();
 	this->waiting_for_promotion = false;
 	this->moves = new vector<string>();
+	this->btaken = new vector<char>();
+	this->wtaken = new vector<char>();
 	
 }
 Chess::~Chess(){
@@ -38,7 +40,7 @@ void Chess::init(){
 		"n",
 		"Regular",
 		(int)this->game->inc,
-		this->game->board->generateFEN();
+		this->game->board->generateFEN()
 		);
 	delete conn;
 }
@@ -50,8 +52,7 @@ void Chess::start(){
 	msg += ltos(this->game->id);
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd());
-	frame->send(this->game->black->sd());
+	this->broadcast(frame);
 	delete frame;
 }
 
@@ -73,8 +74,7 @@ void Chess::notify_turn(){
 	msg += (char)this->game->turn;
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd());
-	frame->send(this->game->black->sd());
+	this->broadcast(frame);
 	delete frame;
 }
 
@@ -148,7 +148,7 @@ void Chess::resign(string user){
 }
 
 void Chess::take_back(string user){
-	if(this->history->size()==0){
+	if(this->history->size() == 0){
 		Frame* frame = new Frame(1,0,0,0,0,TEXT);
 		string msg = "NA";
 		frame->add((uint8_t*)msg.c_str());
@@ -174,8 +174,7 @@ void Chess::message(string user,string msg){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string res = Frame::prepare_message(2,"CHAT",this->chat->get_last());
 	frame->add((uint8_t*)res.c_str());
-	frame->send(this->game->white->sd());
-	frame->send(this->game->black->sd());
+	this->broadcast(frame);
 	delete frame;
 }
 
@@ -183,24 +182,15 @@ void Chess::send_board(){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = Frame::prepare_message(2,"BOARD",this->game->board->generateFEN());
 	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd());
-	frame->send(this->game->black->sd());
+	this->broadcast(frame);
 	delete frame;
 }
 
 void Chess::send_time(){
-	string wtime = Chess::format_time(this->game->white_time);
-	string btime = Chess::format_time(this->game->black_time);
-	btime += ":";
-	if(bsec<10){
-		btime += "0";	
-	}
-	btime += itoa(bsec);
-	string msg = Frame::prepare_message(3,"TIME",wtime,btime);
+	string msg = Frame::prepare_message(3,"TIME",Chess::format_time(this->game->white_time),Chess::format_time(this->game->black_time));
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd());
-	frame->send(this->game->black->sd());
+	this->broadcast(frame);
 	delete frame;
 }
 
@@ -208,8 +198,7 @@ void Chess::send_move(string move){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = Frame::prepare_message(2,"MOVE",move);
 	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd());
-	frame->send(this->game->black->sd());
+	this->broadcast(frame);
 	delete frame;
 }
 
@@ -228,13 +217,62 @@ void Chess::send_moves(){
 		}
 	}
 	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd());
-	frame->send(this->game->black->sd());
+	this->broadcast(frame);
+	delete frame;
+}
+
+void Chess::send_taken(){
+	Frame* frame;
+	string msg; 
+	if(this->wtaken->size()>0){
+		frame = new Frame(1,0,0,0,0,TEXT);
+		msg = "WHITE_TAKEN_ALL";
+		msg += COMMAND;
+		for(auto it = this->wtaken->begin();it != this->wtaken->end();it++){
+			if(it != this->wtaken->begin()){
+				msg += DATA_SEP;
+			}
+			msg += *it;
+		}
+		frame->add((uint8_t*)msg.c_str());
+		this->broadcast(frame);
+		delete frame;
+	}
+	if(this->btaken->size()>0){
+		frame = new Frame(1,0,0,0,0,TEXT);
+		msg = "BLACK_TAKEN_ALL";
+		msg += COMMAND;
+		for(auto it = this->btaken->begin();it != this->btaken->end();it++){
+			if(it != this->btaken->begin()){
+				msg += DATA_SEP;
+			}
+			msg += *it;
+		}
+		frame->add((uint8_t*)msg.c_str());
+		this->broadcast(frame);
+		delete frame;
+	}
+	
+
+}
+
+void Chess::send_taken(uint8_t side,char piece){
+	string msg = (side == WHITE)? "WHITE_TAKEN" : "BLACK TAKEN";
+	Frame* frame = new Frame(1,0,0,0,0,TEXT);
+	msg += COMMAND;
+	msg += piece;
+	frame->add((uint8_t*)msg.c_str());
+	this->broadcast(frame);
 	delete frame;
 }
 
 void Chess::send_all(){
 
+}
+
+void Chess::broadcast(Frame* frame){
+	frame->send(this->game->white->sd());
+	frame->send(this->game->black->sd());
 }
 
 void Chess::invalid_move(){
@@ -256,7 +294,28 @@ void Chess::promote(char piece){
 
 void Chess::save(){
 	SQLConn* conn = new SQLConn("chessClub");
+	string taken = "";
+	taken += this->game->board->taken;
+	string bt = "";
+	string wt = "";
+	if(this->wtaken->size()>0){
+		for(auto it = this->wtaken->begin();it != this->wtaken->end();it++){
+			if(it != this->wtaken->begin()){
+				wt += DATA_SEP;
+			}
+			wt += *it;
+		}
+	}
+	if(this->btaken->size()>0){
+		for(auto it = this->btaken->begin();it != this->btaken->end();it++){
+			if(it != this->btaken->begin()){
+				bt += DATA_SEP;
+			}
+			bt += *it;
+		}
+	}
 	conn->execute("ssissssisssis","UPDATE chessgame SET "
+									  "Turn = ?"
 									  "WTime = ? "
 									  "BTime = ? "
 									  "turns = ? "
@@ -270,24 +329,27 @@ void Chess::save(){
 									  "Board = ? "
 									  "moves = ? "
 									  "Past = ? ",
+		(this->game->turn == WHITE) ? "w" : "b",							  
 		Chess::format_time(this->game->white_time),
 		Chess::format_time(this->game->black_time),
 		this->game->turns,
-		"false",
-		"false",
+		(this->game->turn == WHITE) ? this->game->board->special : "false" ,
+		(this->game->turn == BLACK) ? this->game->board->special : "false",
 		this->game->board->getCastleData(),
-		"X",
+		taken,
 		this->waiting_for_promotion ? 1 : 0,
+		wt,
+		bt,
+		this->game->board->generateFEN(),
 		"",
-		"",
-		this->game->board->generateFEN();
-		"",
-		*this->history->back()
+		this->history->back()
 	);
+	delete conn;
 
 }
 
-static string format_time(time_t seconds){
+
+string Chess::format_time(time_t seconds){
 	int sec = seconds % 60;
 	int min = (int)(seconds / 60);
 	string out = itoa(min);

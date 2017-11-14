@@ -151,6 +151,6 @@ Game* Lobby_Game::create_game(){
 	}
 	
 	Board* board = new Board(fen,"", "wkwqbkbq");
-	Game* out = new Game(black, white, this->id, board, WHITE,this->min * 60 + this->sec,this->inc);
+	Game* out = new Game(black, white, this->id, board, WHITE,this->min * 60 + this->sec,(int)this->inc);
 	return out;
 }	

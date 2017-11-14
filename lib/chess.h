@@ -17,6 +17,8 @@ class Chess{
 		Chat* chat;
 		vector<string>* history;
 		vector<string>* moves;
+		vector<char>* wtaken;
+		vector<char>* btaken;
 		time_t last;
 		bool waiting_for_promotion;
 		int promotion_row;
@@ -40,8 +42,11 @@ class Chess{
 		void send_board();
 		void send_time();
 		void send_move(string move);
+		void send_taken();
+		void send_taken(uint8_t side,char piece);
 		void send_moves();
 		void send_all();
+		void broadcast(Frame* frame);
 		void invalid_move();
 		void promote(char piece);
 		void save();

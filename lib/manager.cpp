@@ -22,12 +22,11 @@ string Manager::process(Client* c,string data, int command, Game* out_game, int*
 			if(c->username == nullptr){
 				c->username = new string(move_data->at(USER_INDEX));
 			}
-			int64_t gi = Manager::find_game(*c->username);
-			if(gi == -1){
+			Chess* game = Manager::find_game(stoi(move_data->at(0)));
+			if(game == nullptr){
 				cout<<"GAME NOT FOUND"<<endl;
 				return "ERROR";
 			}
-			Chess* game = Manager::GM->games->at(gi);
 			if(out_game != nullptr){
 				*out_game = *(game->game);
 			}
@@ -49,26 +48,26 @@ string Manager::process(Client* c,string data, int command, Game* out_game, int*
 		}
 		case OFFER_DRAW:
 		{
-			int64_t gid = Manager::find_game(*c->username);
-			Manager::GM->games->at(gid)->offer_draw(*c->username);
+			int64_t id = stoi(data);
+			Manager::find_game(id)->offer_draw(*c->username);
 			return "DRAW_OFFERED";
 		}
 		case ACCEPT_DRAW:
 		{
-			int64_t gid = Manager::find_game(*c->username);
-			Manager::GM->games->at(gid)->accept_draw(*c->username);
+			int64_t id = stoi(data);
+			Manager::find_game(id)->accept_draw(*c->username);
 			return "";
 		}
 		case DECLINE_DRAW:
 		{
-			int64_t gid = Manager::find_game(*c->username);
-			Manager::GM->games->at(gid)->decline_draw(*c->username);
+			int64_t id = stoi(data);
+			Manager::find_game(id)->decline_draw(*c->username);
 			return "DRAW_DECLINED";
 		}	
 		case RESIGN:
-		{
-			int64_t gid = Manager::find_game(*c->username);
-			Manager::GM->games->at(gid)->resign(*c->username);
+		{	
+			int64_t id = stoi(data);
+			Manager::find_game(id)->resign(*c->username);
 			return "RESIGN";
 		}
 		/**Chat Handlers**/
@@ -191,7 +190,7 @@ void Manager::create_game(Chess* g){
 
 int* Manager::processMoveData(vector<string>* data){
 	int* out = (int*)malloc(sizeof(int)*4);
-	uint8_t offset = 0;
+	uint8_t offset = 1;
 	out[0] = data->at(offset)[0];
 	out[1] = data->at(offset+1)[0];
 	out[2] = data->at(offset+2)[0];
