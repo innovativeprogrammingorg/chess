@@ -66,8 +66,6 @@ string get_SWA_line(HTTP_Request* r);
 #define CONNECT 7
 #endif
 
-#ifndef UNKNOWN
-#define UNKNOWN 8
-#endif
+
 
 #endif

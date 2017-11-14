@@ -5,13 +5,41 @@
 #include <string>
 #include <iostream>
 #include <stdio.h>
-#include <map>
-#include "../../include/io.h"
+#include <vector>
+#include <stdarg.h>
+#include "mysql_driver.h"
+#include "mysql_connection.h"
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
 
 using namespace std;
 
+class SQLConn{
+	private:
+		static sql::Driver* driver;
+	  	static string user;
+	  	static string password;
+	  	static string location;
+	public:
+		string database;
+		sql::Connection* conn;
+	  	//sql::Statement* stmt;
+	  	//sql::ResultSet* res;
+	  	//sql::PreparedStatement* prep_stmt;
 
-string get_game_info(map<string,string>* data);
-void store_game(map<string,string>* game);
+		SQLConn();
+		SQLConn(string database);
+		virtual ~SQLConn();
+		void update_database(string database = "");
+		void execute(string types,string query,...);
+		void execute(string query);
+		sql::ResultSet* fetch(string types,string query,...);
+		sql::ResultSet* fetch(string query);
+
+
+};	
 
 #endif

@@ -19,21 +19,20 @@ class Game{
 		Board* board;
 		uint8_t turn;
 		time_t last_move_time;
-		uint64_t inc;
+		int inc;
 		time_t white_time;
 		time_t black_time;
 		uint64_t id;
-		uint64_t turns;
+		int turns;
 		vector<string>* history;
 
 		Game();
-		Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t duration,uint64_t inc);
+		Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t duration,int inc);
 		virtual ~Game();
 		bool inCheck(char side);
 		bool isCheckmate(char side);
 		bool isDraw();
 		uint8_t move(int r,int c,int r2,int c2,char side);
-		void store();
 		bool send_state_to_opponent(int sd);
 		bool send_state(int sd);
 		static bool inCheck(Board* b, char side);

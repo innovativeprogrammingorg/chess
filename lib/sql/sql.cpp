@@ -3,33 +3,107 @@
 
 using namespace std;
 
-string parse_PHP_args(map<string,string>* args){
-	string out = "";
+string SQLConn::location = "tcp://127.0.0.1:3306";
+string SQLConn::user = "root";
+string SQLConn::password = "password";
+sql::Driver* SQLConn::driver = sql::mysql::get_driver_instance();
 
-	uint64_t i = 0;
-	for(auto it = args->begin();it != args->end();it++){
-		out += it->first + "=" + it->second + " ";
+SQLConn::SQLConn(){
+	this->conn = SQLConn::driver->connect(SQLConn::location,SQLConn::user,SQLConn::password);
+}
+
+SQLConn::SQLConn(string database){
+	this->conn = SQLConn::driver->connect(SQLConn::location,SQLConn::user,SQLConn::password);
+	this->update_database(database);
+}
+
+SQLConn::~SQLConn(){
+	delete this->conn;
+}
+
+void SQLConn::update_database(string database){
+	if(database.size()>0){
+		this->database = database;
 	}
-	return out;
-
+	this->conn->setSchema(this->database);
 }
-string process_through_PHP(map<string,string>* _POST,string dir){
 
-	string command = "/usr/bin/php -f " + dir + " " + parse_PHP_args(_POST);
-	FILE* fd = popen(command.c_str(),"r");
-	char* body;
-	if(!IO::read_file(fd,&body)){
-		return NULL;
+void SQLConn::execute(string types,string query,...){
+	va_list valist;
+	int args = types.size();
+	sql::PreparedStatement* prep_stmt = this->conn->prepareStatement(query);
+
+	va_start(valist, args);
+	for(int i = 1;i<=args;i++){
+		switch((char)types.at(i-1)){
+			case 's':
+			{
+				string arg = (string)va_arg(valist, string);
+				prep_stmt->setString(i,arg);
+				break;
+			}
+			case 'i':
+			{
+				int arg = (int)va_arg(valist,int);
+				prep_stmt->setInt(i,arg);
+				break;
+			}
+			default:
+			{
+				cerr<<"Unknown type given to execute"<<endl;
+			}
+		}
 	}
-	string out(body);
-	free(body);
-	return out;
+	va_end(valist);
+	prep_stmt->execute();
+	delete prep_stmt;
+	return;
 }
 
-string get_game_info(map<string,string>* data){
-	return process_through_PHP(data,"./lib/sql/getGame.php");
+void SQLConn::execute(string query){
+	sql::Statement* stmt;
+	stmt = this->conn->createStatement();
+	stmt->execute(query);
+	delete stmt;
 }
 
-void store_game(map<string,string>* game){
-	
+sql::ResultSet* SQLConn::fetch(string types,string query,...){
+	va_list valist;
+	int args = types.size();
+	sql::PreparedStatement* prep_stmt = this->conn->prepareStatement(query);
+
+	va_start(valist, args);
+	for(int i = 1;i<=args;i++){
+		switch((char)types.at(i-1)){
+			case 's':
+			{
+				string arg = (string)va_arg(valist, string);
+				prep_stmt->setString(i,arg);
+				break;
+			}
+			case 'i':
+			{
+				int arg = (int)va_arg(valist,int);
+				prep_stmt->setInt(i,arg);
+				break;
+			}
+			default:
+			{
+				cerr<<"Unknown type given to execute"<<endl;
+			}
+		}
+	}
+	va_end(valist);
+	sql::ResultSet* res = prep_stmt->executeQuery();
+	delete prep_stmt;
+	return res;
+}
+
+sql::ResultSet*  SQLConn::fetch(string query){
+	sql::Statement* stmt;
+	sql::ResultSet* res;
+	stmt = this->conn->createStatement();
+	res = stmt->executeQuery(query);
+	delete stmt;
+	return res;
 }

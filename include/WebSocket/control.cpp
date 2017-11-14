@@ -149,7 +149,7 @@ void Control::handle_request(Client* c,char* raw_data){
 	delete received;
 	Game g;
 	int sd = 0;
-	string reply = Game_Manager::process(c,data,action,&g,&sd);
+	string reply = Manager::process(c,data,action,&g,&sd);
 	if(reply.size() == 0){
 		return;
 	}

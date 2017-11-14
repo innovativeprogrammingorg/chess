@@ -316,7 +316,3 @@ bool Game::tileCovered(Board* b,int r,int c,char side){
 	delete loc;
 	return out;
 }
-
-void Game::store(){
-
-}

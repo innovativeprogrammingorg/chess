@@ -2,10 +2,17 @@
 
 #CFLAGS = -Wall -Werror --pedantic
 CC= g++
-LIB = -I /usr/local/lib/
+LIB = -L/usr/local/lib/
 VERSION = c++11
 CFLAGS = -std=$(VERSION)  -pthread 
 FILES = *.cpp 
+
+SQL_FLAGS = -I/usr/local/include -I/usr/local/include/cppconn -Wl,-Bdynamic 
+
+LINK_FLAGS = -lmysqlcppconn -lcrypto 
+
+CFLAGS += $(SQL_FLAGS)
+
 LIB_OBJ = $(foreach x, $(basename $(wildcard lib/*.cpp)), $(x).o)
 
 WS_OBJ = $(foreach x, $(basename $(wildcard include/WebSocket/*.cpp)), $(x).o)
@@ -22,8 +29,7 @@ OBJECTS =  $(LIB_OBJ) $(INCLUDE_OBJ) $(WS_OBJ) $(SQL_OBJ)
 all:  $(LIB_OBJ) $(INCLUDE_OBJ) $(WS_OBJ) $(SQL_OBJ) server
 
 server: 
-	$(CC) -g server_main.cpp -o server $(CFLAGS) $(OBJECTS) -lssl -lcrypto
-
+	$(CC) server_main.cpp -o server $(CFLAGS) $(OBJECTS) -lssl $(LINK_FLAGS)
 clean: 
 	rm -f server chess 
 
@@ -33,13 +39,13 @@ fclean:
 re: clean all
 
 $(LIB_OBJ): lib/%.o : lib/%.cpp
-	$(CC) -g $(CFLAGS) -c $< -o $@ $(LIB) 
+	$(CC) $(CFLAGS) -c $< -o $@ $(LIB) 
 
 $(INCLUDE_OBJ): include/%.o : include/%.cpp
-	$(CC) -g $(CFLAGS) -c $< -o $@ $(LIB) 
+	$(CC) $(CFLAGS) -c $< -o $@ $(LIB) 
 
 $(WS_OBJ): include/WebSocket/%.o : include/WebSocket/%.cpp
-	$(CC) -g $(CFLAGS) -c $< -o $@ -lssl -lcrypto
+	$(CC) $(CFLAGS) -c $< -o $@ -lssl -lcrypto
 
 $(SQL_OBJ): lib/sql/%.o : lib/sql/%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@ $(LIB) 
+	$(CC) $(CFLAGS)  -c $< -o $@ $(LIB) $(LINK_FLAGS)

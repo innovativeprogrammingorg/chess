@@ -8,6 +8,8 @@
 #include <string.h>
 #include "data_types.h"
 #include "client.h"
+#include "response.h"
+#include "io.h"
 #include "WebSocket/control.h"
 
 

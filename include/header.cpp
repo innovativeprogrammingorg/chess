@@ -127,7 +127,7 @@ uint8_t get_request_type(HTTP_Request* r){
 	if(status_line->find("CONNECT")!=string::npos){
 		return CONNECT;
 	}
-	return UNKNOWN;
+	return 0;
 }
 
 Response build_response(HTTP_Request* r){

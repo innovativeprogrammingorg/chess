@@ -28,6 +28,7 @@
 
 #include <vector>
 #include <iostream>
+#include <fcntl.h>
 
 #include "client.h"
 #include "WebSocket/handshake.h"

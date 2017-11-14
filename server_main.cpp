@@ -173,7 +173,6 @@ int main(){
 	return EXIT_SUCCESS;
 } 
 
-
 Client* get_active_client(){
 	return active_client;
 }

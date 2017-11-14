@@ -8,6 +8,7 @@
 #include "board.h"
 #include "../include/str.h"
 #include "../include/WebSocket/frame.h"
+#include "sql/sql.h"
 
 using namespace std;
 class Chess{
@@ -22,6 +23,9 @@ class Chess{
 		int promotion_col;
 		Chess(Game* game);
 		virtual ~Chess();
+	private:
+		void init();
+	public:
 		void start();
 		void notify_sides();
 		void notify_turn();
@@ -40,6 +44,9 @@ class Chess{
 		void send_all();
 		void invalid_move();
 		void promote(char piece);
+		void save();
+
+		static string format_time(time_t seconds);
 
 };
 

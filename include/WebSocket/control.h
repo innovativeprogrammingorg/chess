@@ -7,7 +7,7 @@
 #include <iostream>
 #include "frame.h"
 #include "../client.h"
-#include "../../lib/game_manager.h"
+#include "../../lib/manager.h"
 
 using namespace std;
 

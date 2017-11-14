@@ -21,7 +21,30 @@ Chess::~Chess(){
 	delete this->moves;
 }
 
+void Chess::init(){
+	SQLConn* conn = new SQLConn("chessClub");
+	sql::ResultSet* res = conn->fetch("i","SELECT * FROM chessgame WHERE ID = ?",this->game->id);
+	if(res->next()){
+		return;
+	}
+	delete res;
+	string turn = (this->game->turn == WHITE) ? "w" : "b";
+	conn->execute("sssssssis","INSERT INTO chessgame (Turn,WTime,BTime,White,Black,Winner,Type,I,Board) values (?,?,?,?,?,?,?,?,?)",
+		turn,
+		Chess::format_time(this->game->white_time),
+		Chess::format_time(this->game->black_time),
+		*this->game->white->username,
+		*this->game->black->username,
+		"n",
+		"Regular",
+		(int)this->game->inc,
+		this->game->board->generateFEN();
+		);
+	delete conn;
+}
+
 void Chess::start(){
+	this->init();
 	string msg = "GAME_START";
 	msg += COMMAND;
 	msg += ltos(this->game->id);
@@ -166,17 +189,8 @@ void Chess::send_board(){
 }
 
 void Chess::send_time(){
-	int wsec = this->game->white_time % 60;
-	int wmin = (int)(this->game->white_time / 60);
-	int bsec = this->game->black_time % 60;
-	int bmin = (int)(this->game->black_time / 60);
-	string wtime = itoa(wmin);
-	wtime += ":";
-	if(wsec<10){
-		wtime += "0";	
-	}
-	wtime += itoa(wsec);
-	string btime = itoa(bmin);
+	string wtime = Chess::format_time(this->game->white_time);
+	string btime = Chess::format_time(this->game->black_time);
 	btime += ":";
 	if(bsec<10){
 		btime += "0";	
@@ -238,4 +252,49 @@ void Chess::promote(char piece){
 	}
 	this->game->board->forceChange(promotion_row,promotion_col,piece);
 
+}
+
+void Chess::save(){
+	SQLConn* conn = new SQLConn("chessClub");
+	conn->execute("ssissssisssis","UPDATE chessgame SET "
+									  "WTime = ? "
+									  "BTime = ? "
+									  "turns = ? "
+									  "WEP = ? "
+									  "BEP = ? "
+									  "Castle = ? "
+									  "Last_Taken = ? "
+									  "Promote = ? "
+									  "White_Captured = ? "
+									  "Black_Captured = ? "
+									  "Board = ? "
+									  "moves = ? "
+									  "Past = ? ",
+		Chess::format_time(this->game->white_time),
+		Chess::format_time(this->game->black_time),
+		this->game->turns,
+		"false",
+		"false",
+		this->game->board->getCastleData(),
+		"X",
+		this->waiting_for_promotion ? 1 : 0,
+		"",
+		"",
+		this->game->board->generateFEN();
+		"",
+		*this->history->back()
+	);
+
+}
+
+static string format_time(time_t seconds){
+	int sec = seconds % 60;
+	int min = (int)(seconds / 60);
+	string out = itoa(min);
+	out += ":";
+	if(sec<10){
+		out += "0";	
+	}
+	out += itoa(sec);
+	return out;
 }
