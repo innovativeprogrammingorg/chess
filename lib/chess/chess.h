@@ -3,11 +3,11 @@
 
 #include <string>
 #include <vector>
-#include "game.h"
+#include "chess/game.h"
 #include "chat.h"
-#include "board.h"
-#include "../include/str.h"
-#include "../include/WebSocket/frame.h"
+#include "chess/board.h"
+#include "str.h"
+#include "server/WebSocket/frame.h"
 #include "sql/sql.h"
 
 using namespace std;
@@ -24,6 +24,7 @@ class Chess{
 		int promotion_row;
 		int promotion_col;
 		Chess(Game* game);
+		Chess(Game* game,string past,string moves,string white_taken,string black_taken);
 		virtual ~Chess();
 	private:
 		void init();

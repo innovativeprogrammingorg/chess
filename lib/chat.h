@@ -6,8 +6,8 @@
 #include <time.h>
 #include <pthread.h>
 #include <cstdint>
-#include "user.h"
-#include "../include/WebSocket/frame.h"
+#include "user/user.h"
+#include "server/WebSocket/frame.h"
 
 
 using namespace std;

@@ -7,16 +7,16 @@
 #include <cstdint>
 #include <map>
 #include <pthread.h>
-#include "game.h"
-#include "types.h"
+#include "chess/game.h"
+#include "chess/chess_types.h"
 #include "json.h"
-#include "user.h"
-#include "../include/client.h"
-#include "../include/WebSocket/frame.h"
+#include "user/user.h"
+#include "server/client.h"
+#include "server/WebSocket/frame.h"
 #include "sql/sql.h"
 #include "chat.h"
 #include "lobby.h"
-#include "chess.h"
+#include "chess/chess.h"
 #include "game_manager.h"
 
 using namespace std; 

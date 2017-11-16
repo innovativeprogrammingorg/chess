@@ -7,9 +7,9 @@
 #include <unistd.h>
 #include <cstdint>
 #include <iostream>
-#include "game.h"
-#include "../include/str.h"
-#include "user.h"
+#include "chess/game.h"
+#include "str.h"
+#include "user/user.h"
 
 enum Game_Type{
 	REGULAR = 0x1,

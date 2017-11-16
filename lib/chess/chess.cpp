@@ -16,6 +16,26 @@ Chess::Chess(Game* game){
 	this->wtaken = new vector<char>();
 	
 }
+
+Chess::Chess(Game* game,string past,string moves,string white_taken,string black_taken){
+	this->game = game;
+	this->chat = new Chat();
+	this->chat->connect(this->game->white);
+	this->chat->connect(this->game->black);
+	this->history = new vector<string>();
+	this->history->push_back(past);
+	this->moves = c_explode(DATA_SEP,moves);
+	this->btaken = new vector<char>();
+	this->wtaken = new vector<char>();
+	this->waiting_for_promotion = false;
+	for(int i = 0;i<white_taken.size();i++){
+		this->wtaken->push_back(white_taken[i]);
+	}
+	for(int i = 0;i<black_taken.size();i++){
+		this->btaken->push_back(black_taken[i]);
+	}
+}
+
 Chess::~Chess(){
 	delete this->game;
 	delete this->chat;

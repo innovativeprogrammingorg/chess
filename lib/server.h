@@ -30,9 +30,9 @@
 #include <iostream>
 #include <fcntl.h>
 
-#include "client.h"
-#include "WebSocket/handshake.h"
-#include "concurrency.h"
+#include "server/client.h"
+#include "server/WebSocket/handshake.h"
+#include "server/concurrency.h"
 
 #ifndef TRUE
 #define TRUE   1

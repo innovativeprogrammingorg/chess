@@ -4,7 +4,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <iostream>
-#include "../include/str.h"
+#include "str.h"
 
 using namespace std;
 

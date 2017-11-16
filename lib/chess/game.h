@@ -1,12 +1,12 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "board.h"
-#include "../include/str.h"
-#include "types.h"
-#include "user.h"
+#include "chess/board.h"
+#include "str.h"
+#include "chess/chess_types.h"
+#include "user/user.h"
 #include <time.h>
-#include "../include/WebSocket/frame.h"
+#include "server/WebSocket/frame.h"
 #include "sql/sql.h"
 
 
@@ -22,12 +22,13 @@ class Game{
 		int inc;
 		time_t white_time;
 		time_t black_time;
-		uint64_t id;
+		int64_t id;
 		int turns;
 		vector<string>* history;
 
 		Game();
-		Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t duration,int inc);
+		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t duration,int inc);
+		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int turns,int inc);
 		virtual ~Game();
 		bool inCheck(char side);
 		bool isCheckmate(char side);

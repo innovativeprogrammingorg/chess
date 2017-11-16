@@ -8,9 +8,9 @@
 #include <unistd.h>
 #include <cstdint>
 #include <iostream>
-#include "user.h"
-#include "../include/str.h"
-#include "../include/WebSocket/frame.h"
+#include "user/user.h"
+#include "str.h"
+#include "server/WebSocket/frame.h"
 #include "lobby_game.h"
 
 

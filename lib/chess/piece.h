@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "location.h"
-#include "types.h"
+#include "chess_types.h"
 
 
 

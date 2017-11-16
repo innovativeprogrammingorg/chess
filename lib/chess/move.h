@@ -5,7 +5,7 @@
 #include <vector>
 #include "piece.h"
 #include "location.h"
-#include "types.h"
+#include "chess_types.h"
 #include "board.h"
 #include "game.h"
 

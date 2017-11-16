@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <pthread.h>
 
-#include "chess.h"
+#include "chess/chess.h"
 #include "sql/sql.h"
 
 using namespace std;

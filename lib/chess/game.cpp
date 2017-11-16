@@ -10,7 +10,7 @@ Game::Game(){
 	this->inc = 0;
 }
 
-Game::Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t duration,int inc){
+Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t duration,int inc){
 	this->board = b;
 	this->black = black;
 	this->white = white;
@@ -20,6 +20,18 @@ Game::Game(User* black, User* white, uint64_t id, Board* b,uint8_t turn,time_t d
 	this->black_time = duration;
 	this->id = id;
 	
+}
+
+Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int turns,int inc){
+	this->black = black;
+	this->white = white;
+	this->id = id;
+	this->board = b;
+	this->turn = turn;
+	this->white_time = wtime;
+	this->black_time = btime;
+	this->last_move_time = last;
+	this->inc = inc;
 }
 
 Game::~Game(){
