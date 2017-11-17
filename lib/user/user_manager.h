@@ -21,6 +21,7 @@ class User_Manager{
 		pthread_mutex_t* lock;
 	public:
 		map<string*,User_Entry*,strptrcomp>* data;
+		static User_Manager* UM;
 		User_Manager();
 		virtual ~User_Manager();
 	private:
@@ -30,11 +31,14 @@ class User_Manager{
 		bool has_user(string* username);
 		void connect(string* username,string key,int sd);
 		void connect(string* username,int64_t key,int sd);
+		void connect(string* username,UEKey key,int sd);
 		void disconnect(string* username,int sd);
 		void drop(string* username,string key);
 		void drop(string* username,int64_t key);
+		void drop(string* username,UEKey key);
 		int lookup(string* username,string key);
 		int lookup(string* username,int64_t key);
+		int lookup(string* username,UEKey key);
 };	
 
 #endif

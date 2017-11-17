@@ -23,6 +23,7 @@ class Chess{
 		bool waiting_for_promotion;
 		int promotion_row;
 		int promotion_col;
+
 		Chess(Game* game);
 		Chess(Game* game,string past,string moves,string white_taken,string black_taken);
 		virtual ~Chess();

@@ -1,4 +1,4 @@
-#include "chess.h"
+#include "chess/chess.h"
 using namespace std;
 
 static const char rows[8] = {'a','b','c','d','e','f','g'};
@@ -7,21 +7,21 @@ Chess::Chess(Game* game){
 	this->game = game;
 	this->last = 0;
 	this->chat = new Chat();
-	this->chat->connect(this->game->black);
-	this->chat->connect(this->game->white);
+	this->chat->connect(this->game->black,User_Entry::new_key(this->game->id));
+	this->chat->connect(this->game->white,User_Entry::new_key(this->game->id));
 	this->history = new vector<string>();
 	this->waiting_for_promotion = false;
 	this->moves = new vector<string>();
 	this->btaken = new vector<char>();
 	this->wtaken = new vector<char>();
-	
+
 }
 
 Chess::Chess(Game* game,string past,string moves,string white_taken,string black_taken){
 	this->game = game;
 	this->chat = new Chat();
-	this->chat->connect(this->game->white);
-	this->chat->connect(this->game->black);
+	this->chat->connect(this->game->black,User_Entry::new_key(this->game->id));
+	this->chat->connect(this->game->white,User_Entry::new_key(this->game->id));
 	this->history = new vector<string>();
 	this->history->push_back(past);
 	this->moves = c_explode(DATA_SEP,moves);
@@ -80,11 +80,11 @@ void Chess::notify_sides(){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = Frame::prepare_message(2,"SIDE","w");
 	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd());
+	frame->send(this->game->white->sd(this->game->id));
 	frame->clear();
 	msg = msg = Frame::prepare_message(2,"SIDE","b");
 	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->black->sd());
+	frame->send(this->game->black->sd(this->game->id));
 	delete frame;
 }
 
@@ -291,8 +291,8 @@ void Chess::send_all(){
 }
 
 void Chess::broadcast(Frame* frame){
-	frame->send(this->game->white->sd());
-	frame->send(this->game->black->sd());
+	frame->send(this->game->white->sd(this->game->id));
+	frame->send(this->game->black->sd(this->game->id));
 }
 
 void Chess::invalid_move(){

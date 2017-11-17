@@ -1,5 +1,7 @@
-#include "user_manager.h"
+#include "user/user_manager.h"
 using namespace std;
+
+User_Manager* User_Manager::UM = new User_Manager();
 
 User_Manager::User_Manager(){
 	this->data = new map<string*,User_Entry*,strptrcomp>();
@@ -61,6 +63,14 @@ void User_Manager::connect(string* username,int64_t key,int sd){
 	pthread_mutex_unlock(this->lock);
 }
 
+void User_Manager::connect(string* username,UEKey key,int sd){
+	if(key->s_key == nullptr){
+		this->connect(username,key->i_key,sd);
+	}else{
+		this->connect(username,*key->s_key,sd);
+	}
+}
+
 void User_Manager::disconnect(string* username,int sd){
 	if(!this->has_user(username)){
 		cout<<"User_Manager::disconnect:Warning: User does not exist"<<endl;
@@ -89,6 +99,14 @@ void User_Manager::drop(string* username,int64_t key){
 	pthread_mutex_unlock(this->lock);
 }
 
+void User_Manager::drop(string* username,UEKey key){
+	if(key->s_key == nullptr){
+		this->drop(username,key->i_key);
+	}else{
+		this->drop(username,*key->s_key);
+	}
+}
+
 int User_Manager::lookup(string* username,string key){
 	int out;
 	if(!this->has_user(username)){
@@ -109,4 +127,11 @@ int User_Manager::lookup(string* username,int64_t key){
 	out = this->data->at(username)->find(key);
 	pthread_mutex_unlock(this->lock);
 	return out;
+}
+
+int User_Manager::lookup(string* username,UEKey key){
+	if(key->s_key == nullptr){
+		return this->lookup(username,key->i_key);
+	}
+	return this->lookup(username,*key->s_key);
 }

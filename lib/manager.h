@@ -1,7 +1,6 @@
 #ifndef _MANAGER_H_
 #define _MANAGER_H_
 
-
 #include <string>
 #include <vector>
 #include <cstdint>
@@ -18,6 +17,7 @@
 #include "lobby.h"
 #include "chess/chess.h"
 #include "game_manager.h"
+#include "user/user_manager.h"
 
 using namespace std; 
 class Manager{
@@ -27,7 +27,6 @@ class Manager{
 		 * 
 		 */
 		static Manager* GM;
-
 		pthread_mutex_t* lock;
 		Game_Manager* games;
 		Chat* lobby_chat;

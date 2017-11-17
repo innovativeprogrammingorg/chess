@@ -43,7 +43,17 @@ string Manager::process(Client* c,string data, int command, Game* out_game, int*
 		}
 		case LOGIN:
 		{
-			c->username = new string(data);
+
+			if(data.find(DATA_SEP)!= string::npos){//default to lobby
+				c->username = new string(data);
+				User_Manager::UM->connect(c->username,string("LOBBY"),c->sd);
+			}else{
+				vector<string>* msg_data = c_explode(DATA_SEP,data);
+				c->username = new string(msg_data->at(0));
+				User_Manager::UM->connect(c->username,stoi(msg_data->at(1)),c->sd);
+				delete msg_data;
+			}
+			
 			return "LOGGED_IN";
 		}
 		case OFFER_DRAW:

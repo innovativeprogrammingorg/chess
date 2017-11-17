@@ -1,4 +1,4 @@
-#include "user_entry.h"
+#include "user/user_entry.h"
 using namespace std;
 
 User_Entry::User_Entry(){
@@ -80,4 +80,42 @@ void User_Entry::remove(int64_t key){
 
 bool User_Entry::empty(){
 	return (this->i_map->size()==0 && this->s_map->size()==0);
+}
+
+void User_Entry::add(UEKey key,int sd){
+	if(key->s_key == nullptr){
+		this->add(key->i_key,sd);
+	}else{
+		this->add(*key->s_key,sd);
+	}
+}
+
+int User_Entry::find(UEKey key){
+	if(key->s_key == nullptr){
+		return this->find(key->i_key);
+	}
+	return this->find(*key->s_key);
+	
+}
+		
+void User_Entry::remove(UEKey key){
+	if(key->s_key == nullptr){
+		this->remove(key->i_key);
+	}else{
+		this->remove(*key->s_key);
+	}
+}
+
+UEKey User_Entry::new_key(string key){
+	UEKey out = (UEKey)malloc(sizeof(struct UEkey));
+	out->s_key = new string(key);
+	out->i_key = 0;
+	return out;
+}
+
+UEKey User_Entry::new_key(int64_t key){
+	UEKey out = (UEKey)malloc(sizeof(struct UEkey));
+	out->s_key = nullptr;
+	out->i_key = key;
+	return out;
 }

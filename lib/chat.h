@@ -6,12 +6,12 @@
 #include <time.h>
 #include <pthread.h>
 #include <cstdint>
+#include <map>
 #include "user/user.h"
 #include "server/WebSocket/frame.h"
 
 
 using namespace std;
-
 
 class Message{
 	public:
@@ -27,15 +27,15 @@ class Chat{
 		pthread_mutex_t* lock;
 	public:
 		vector<Message*>* messages;
-		vector<User*>* users;
+		map<User*,UEKey,usercomp>* users;
 		Chat();
 		virtual ~Chat();
 		void add(Message* m);
 		void add(string user, string msg);
 		void add(string* user, string* msg);
 		int64_t indexOf(string name);
-		void connect(User* user);
-		void connect(string name);
+		void connect(User* user,UEKey key = nullptr);
+		void connect(string name,UEKey key = nullptr);
 		void disconnect(User* user);
 		void disconnect(string name);
 		void broadcast(Frame* frame);

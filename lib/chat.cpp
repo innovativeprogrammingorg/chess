@@ -17,8 +17,9 @@ Chat::Chat(){
 	this->messages = new vector<Message*>();
 	this->lock = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(this->lock,NULL);
-	this->users = new vector<User*>();
+	this->users = new map<User*,UEKey,usercomp>();
 }
+
 
 Chat::~Chat(){
 	delete this->messages;
@@ -64,8 +65,9 @@ string Chat::to_string(){
 
 int64_t Chat::indexOf(string name){
 	pthread_mutex_lock(this->lock);
-	for(int64_t i = 0;i<this->users->size();i++){
-		if(this->users->at(i)->username->compare(name) == 0){
+	int64_t i = 0;
+	for(auto it = this->users->begin();it != this->users->end();i++,it++){
+		if(it->first->username->compare(name) == 0){
 			pthread_mutex_unlock(this->lock);
 			return i;
 		}
@@ -73,25 +75,28 @@ int64_t Chat::indexOf(string name){
 	pthread_mutex_unlock(this->lock);
 	return -1;
 }
-void Chat::connect(User* user){
+void Chat::connect(User* user,UEKey key){
 	if(this->indexOf(*user->username) != -1){
 		return;
 	}
 	pthread_mutex_lock(this->lock);
-	this->users->push_back(user);
+	this->users->insert(pair<User*,UEKey>(user,key));
 	pthread_mutex_unlock(this->lock);
 }
 
-void Chat::connect(string name){
-	this->connect(new User(name));	
+void Chat::connect(string name,UEKey key){
+	this->connect(new User(name),key);	
 }
 
 void Chat::disconnect(string name){
-	int64_t index = this->indexOf(name);
+	User* tmp = new User(name);
 	pthread_mutex_lock(this->lock);
-	if(index != -1){
-		this->users->erase(this->users->begin() + index);
+	try{
+		this->users->erase(tmp);
+	}catch(const out_of_range& oor){
+		cout<<"Chat::disconnect:Error disconnecting user"<<endl;
 	}
+	delete tmp;
 	pthread_mutex_unlock(this->lock);
 }
 
@@ -101,8 +106,11 @@ void Chat::disconnect(User* user){
 
 void Chat::broadcast(Frame* frame){
 	pthread_mutex_lock(this->lock);
-	for(int64_t i = 0;i<this->users->size();i++){
-		frame->send(this->users->at(i)->sd());
+	if(this->users->size()==0){
+		return;
+	}
+	for(auto it = this->users->begin();it != this->users->end();it++){
+		frame->send(it->first->sd(it->second));
 	}
 	pthread_mutex_unlock(this->lock);
 }
