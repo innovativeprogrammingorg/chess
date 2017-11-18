@@ -13,24 +13,18 @@ Manager::Manager(){
 	pthread_mutex_init(this->lock,NULL);
 }
 
-string Manager::process(Client* c,string data, int command, Game* out_game, int* sd){
+string Manager::process(Client* c,string data, int command){
 	switch(command){
 		case MOVE:
 		{
 			vector<string>* move_data = c_explode(DATA_SEP,data);
 			int* move = Manager::processMoveData(move_data);
-			if(c->username == nullptr){
-				c->username = new string(move_data->at(USER_INDEX));
-			}
 			Chess* game = Manager::find_game(stoi(move_data->at(0)));
 			if(game == nullptr){
 				cout<<"GAME NOT FOUND"<<endl;
 				return "ERROR";
 			}
-			if(out_game != nullptr){
-				*out_game = *(game->game);
-			}
-			game->move(move[0],move[1],move[2],move[3],move_data->at(SIDE_INDEX)[0]);
+			game->move(move[0],move[1],move[2],move[3],game->get_side_of(*c->username));
 			
 			return "";
 		}
@@ -44,7 +38,7 @@ string Manager::process(Client* c,string data, int command, Game* out_game, int*
 		case LOGIN:
 		{
 
-			if(data.find(DATA_SEP)!= string::npos){//default to lobby
+			if(data.find(DATA_SEP) == string::npos){//default to lobby
 				c->username = new string(data);
 				User_Manager::UM->connect(c->username,string("LOBBY"),c->sd);
 			}else{
@@ -153,7 +147,7 @@ string Manager::process(Client* c,string data, int command, Game* out_game, int*
 			int64_t id = stoi(data);
 			Chess* game = Manager::find_game(id);
 			if(game == nullptr){
-				return Frame::prepare_message(2,"ERROR","Game Not Found");
+				return Frame::prepare_message(2,string("ERROR"),string("Game Not Found"));
 			}
 			game->notify_sides();
 			game->chat->send_all(c->sd);	
@@ -201,10 +195,11 @@ void Manager::create_game(Chess* g){
 int* Manager::processMoveData(vector<string>* data){
 	int* out = (int*)malloc(sizeof(int)*4);
 	uint8_t offset = 1;
-	out[0] = data->at(offset)[0];
-	out[1] = data->at(offset+1)[0];
-	out[2] = data->at(offset+2)[0];
-	out[3] = data->at(offset+3)[0];
+	cout<<"Move data is: "<<data->at(offset)<<" "<<data->at(offset+1)<<" "<<data->at(offset+2)<<" "<<data->at(offset+3)<<endl;
+	out[0] = data->at(offset)[0] - 48;
+	out[1] = data->at(offset+1)[0] - 48;
+	out[2] = data->at(offset+2)[0] - 48;
+	out[3] = data->at(offset+3)[0] - 48;
 	return out;
 }
 

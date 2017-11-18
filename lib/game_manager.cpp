@@ -13,7 +13,7 @@ Game_Manager::Game_Manager(){
 	SQLConn* conn = new SQLConn("chessClub");
 	sql::ResultSet* res = conn->fetch("SELECT ID FROM chessgame ORDER BY ID DESC LIMIT 1");
 	if(res->next()){
-		this->id = res->getInt("ID");
+		this->id = res->getInt64("ID") + 1;
 	}else{
 		cout<<"Warning: no results found in chessgame"<<endl;
 		this->id = 0;
@@ -30,6 +30,8 @@ Game_Manager::~Game_Manager(){
 
 void Game_Manager::add_game(Chess* game){
 	pthread_mutex_lock(this->lock);
+	game->game->id = this->id;
+	this->id++;
 	this->games->insert(pair<int64_t,Chess*>((int64_t)game->game->id,game));
 	pthread_mutex_unlock(this->lock);
 }
@@ -42,12 +44,13 @@ void Game_Manager::add_game(Chess* game,int64_t id){
 }
 
 Chess* Game_Manager::get_game(int64_t id){
+	Chess* out = nullptr;
 	try{
-		return this->games->at(id);
+		out = this->games->at(id);
 	}catch(const out_of_range& oor){
-		return nullptr;
+		out = nullptr;
 	}
-	
+	return out;
 }
 
 Chess* Game_Manager::load_game(int64_t id){

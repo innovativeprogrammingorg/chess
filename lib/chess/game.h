@@ -1,11 +1,14 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
+#include <time.h>
+#include <cstdint>
+#include <vector>
+#include <string>
 #include "chess/board.h"
-#include "str.h"
+//#include "str.h"
 #include "chess/chess_types.h"
 #include "user/user.h"
-#include <time.h>
 #include "server/WebSocket/frame.h"
 #include "sql/sql.h"
 
@@ -18,10 +21,10 @@ class Game{
 		User* white;
 		Board* board;
 		uint8_t turn;
-		time_t last_move_time;
+		int last_move_time;
 		int inc;
-		time_t white_time;
-		time_t black_time;
+		int white_time;
+		int black_time;
 		int64_t id;
 		int turns;
 		vector<string>* history;

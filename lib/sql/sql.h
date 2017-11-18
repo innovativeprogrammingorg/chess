@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <vector>
 #include <stdarg.h>
+#include <cstdint>
 #include "mysql_driver.h"
 #include "mysql_connection.h"
 #include <cppconn/driver.h>
@@ -14,6 +15,14 @@
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 #include <cppconn/prepared_statement.h>
+
+/**
+ * double 'd'
+ * int32_t 'i'
+ * string 's'
+ * int64_t 'l'
+ * uint64_t 'u'
+ */
 
 using namespace std;
 
@@ -29,7 +38,6 @@ class SQLConn{
 	  	//sql::Statement* stmt;
 	  	//sql::ResultSet* res;
 	  	//sql::PreparedStatement* prep_stmt;
-
 		SQLConn();
 		SQLConn(string database);
 		virtual ~SQLConn();
@@ -40,6 +48,7 @@ class SQLConn{
 		sql::ResultSet* fetch(string query);
 
 
-};	
+};
+
 
 #endif

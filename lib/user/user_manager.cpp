@@ -16,6 +16,7 @@ User_Manager::~User_Manager(){
 }
 
 void User_Manager::login(string username){
+	//cout<<"Loggin in user "<<username<<" into the user management system"<<endl;
 	pthread_mutex_lock(this->lock);
 	this->data->insert(pair<string*,User_Entry*>(new string(username),new User_Entry()));
 	pthread_mutex_unlock(this->lock);
@@ -49,7 +50,11 @@ void User_Manager::connect(string* username,string key,int sd){
 		this->login(*username);
 	}
 	pthread_mutex_lock(this->lock);
-	this->data->at(username)->add(key,sd);
+	try{
+		this->data->at(username)->add(key,sd);
+	}catch(const out_of_range& oor){
+		cerr<<"User_Manager::connect:ERROR:"<<" Unexpected out of range exception when trying to find user"<<endl;
+	}
 	pthread_mutex_unlock(this->lock);
 
 }
@@ -59,7 +64,12 @@ void User_Manager::connect(string* username,int64_t key,int sd){
 		this->login(*username);
 	}
 	pthread_mutex_lock(this->lock);
-	this->data->at(username)->add(key,sd);
+	try{
+		this->data->at(username)->add(key,sd);
+	}catch(const out_of_range& oor){
+		cerr<<"User_Manager::connect:ERROR:"<<" Unexpected out of range exception when trying to find user"<<endl;
+	}
+	
 	pthread_mutex_unlock(this->lock);
 }
 
@@ -114,6 +124,7 @@ int User_Manager::lookup(string* username,string key){
 	}
 	pthread_mutex_lock(this->lock);
 	out = this->data->at(username)->find(key);
+	//cout<<"Found sd to be "<<out<<endl;
 	pthread_mutex_unlock(this->lock);
 	return out;
 }

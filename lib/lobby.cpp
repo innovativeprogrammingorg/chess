@@ -174,15 +174,13 @@ void Lobby::broadcast(Frame* frame){
 	pthread_mutex_lock(this->lock);
 	
 	for(int64_t i = 0;i<this->users->size();i++){
-		frame->send(this->users->at(i)->sd());
+		frame->send(this->users->at(i)->sd(string("LOBBY")));
 	}
 	pthread_mutex_unlock(this->lock);
 }
 
 void Lobby::notify_users(){
-	string msg = "LOBBY_USERS";
-	msg += COMMAND;
-	msg += this->get_users();
+	string msg = Frame::prepare_message(2,string("LOBBY_USERS"),this->get_users());
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	frame->add((uint8_t*)msg.c_str());
 	this->broadcast(frame);
@@ -190,9 +188,7 @@ void Lobby::notify_users(){
 }
 
 void Lobby::notify_games(){
-	string msg = "LOBBY_GAMES";
-	msg += COMMAND;
-	msg += this->get_games();
+	string msg = Frame::prepare_message(2,string("LOBBY_GAMES"),this->get_games());
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	frame->add((uint8_t*)msg.c_str());
 	this->broadcast(frame);

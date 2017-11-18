@@ -2,11 +2,7 @@
 
 using namespace std;
 
-/**
- * In the future, this should be updated from the database
- */
 int64_t Lobby_Game::game_id = 0;
-
 
 Lobby_Game::Lobby_Game(int type,int sec,int min,int inc,string host){
 	this->type = type;
@@ -57,6 +53,9 @@ int Lobby_Game::spots_open(){
 }
 
 char Lobby_Game::get_open_side(){
+	if(this->players->size() < 1 ){
+		return 'b';
+	}
 	auto it = this->players->begin();
 	switch((*it)->side){
 		case 'w':
@@ -139,7 +138,6 @@ Game* Lobby_Game::create_game(){
 		case 'r':
 		case 'R':
 		{
-			srand(time(NULL));
 			if(rand()%2 == 0){
 				white = this->players->at(0);
 				black = this->players->at(1);

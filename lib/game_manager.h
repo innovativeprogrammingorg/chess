@@ -17,7 +17,6 @@ class Game_Manager{
 		pthread_mutex_t* lock;
 		uint64_t id;
 	public:
-		 
 		map<int64_t,Chess*>* games;
 
 		Game_Manager();
@@ -30,7 +29,5 @@ class Game_Manager{
 		void save_game(int64_t id);
 		void save();
 };
-
-
 
 #endif

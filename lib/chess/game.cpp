@@ -19,7 +19,7 @@ Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t du
 	this->white_time = duration;
 	this->black_time = duration;
 	this->id = id;
-	
+	this->last_move_time = 0;
 }
 
 Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int turns,int inc){
@@ -185,6 +185,10 @@ bool Game::send_state_to_opponent(int sd){
 }
 
 uint8_t Game::move(int r,int c,int r2,int c2,char side){ 
+		if(this->board->getTile(r,c) == NULL){
+			cerr<<"Game::move: tile at ("<<r<<","<<c<<")"<<" is null"<<endl;
+		}
+		this->board->taken = 'X';
 		Piece* p = this->board->getTile(r,c)->p;
 		Location* move = new Location(r2,c2);
 		char t;

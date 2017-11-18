@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <sys/time.h>
+#include <time.h>
 #include "chess/game.h"
 #include "chat.h"
 #include "chess/board.h"
@@ -23,7 +25,7 @@ class Chess{
 		bool waiting_for_promotion;
 		int promotion_row;
 		int promotion_col;
-
+		int8_t winner;
 		Chess(Game* game);
 		Chess(Game* game,string past,string moves,string white_taken,string black_taken);
 		virtual ~Chess();
@@ -34,6 +36,7 @@ class Chess{
 		void notify_sides();
 		void notify_turn();
 		void move(int r,int c, int r2, int c2,char side);
+		void next_turn(time_t t = time(NULL));
 		void offer_draw(string user);
 		void accept_draw(string user);
 		void decline_draw(string user);
@@ -49,9 +52,11 @@ class Chess{
 		void send_moves();
 		void send_all();
 		void broadcast(Frame* frame);
+		void broadcast(string msg);
 		void invalid_move();
 		void promote(char piece);
 		void save();
+		char get_side_of(string username);
 
 		static string format_time(time_t seconds);
 

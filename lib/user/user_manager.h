@@ -12,7 +12,7 @@ using namespace std;
 
 struct strptrcomp{
     bool operator()(string* a, string* b) const {
-        return (a->compare(*b) != 0);
+        return a->compare(*b) > 0;
     }
 };
 

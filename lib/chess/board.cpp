@@ -12,7 +12,7 @@ Board::Board(string FEN, string spec, string castle){
 	this->bCastle = ((castle.find("bk")==string::npos)? 0 : KING_SIDE) | ((castle.find("bq")==string::npos)? 0 : QUEEN_SIDE);
 	this->wCastle = ((castle.find("wk")==string::npos)? 0 : KING_SIDE) | ((castle.find("wq")==string::npos)? 0 : QUEEN_SIDE);
 	//cout<<"done, WHITE - "<<(int)this->wCastle<<" : BLACK - "<<(int)this->bCastle<<endl;
-	this->taken = -1;
+	this->taken = 'X';
 	//cout<<"Creating the tiles\n";
 	for(int i = 0;i<8;i++){
 		this->tiles[i] = (Tile**)calloc(sizeof(Tile*),8);
@@ -137,10 +137,10 @@ string Board::generateFEN(){
 }
 
 string Board::getCastleData(){
-	string out = ((this->bCastle >> 1)&1)?"bk":"";
-	out += (this->bCastle & 1)?"bq":"";
-	out += ((this->wCastle >> 1)&1)?"wk":"";
-	out += (this->wCastle & 1)?"wq":"";
+	string out = (this->bCastle & KING_SIDE) ? "bk" : "";
+	out += (this->bCastle & QUEEN_SIDE)? "bq" : "";
+	out += (this->wCastle & KING_SIDE)? "wk" : "";
+	out += (this->wCastle & QUEEN_SIDE)? "wq" : "";
 	return out;
 }
 

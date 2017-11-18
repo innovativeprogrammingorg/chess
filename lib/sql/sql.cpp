@@ -51,6 +51,24 @@ void SQLConn::execute(string types,string query,...){
 				prep_stmt->setInt(i,arg);
 				break;
 			}
+			case 'l':
+			{
+				int64_t arg = (int64_t)va_arg(valist,int64_t);
+				prep_stmt->setInt64(i,arg);
+				break;
+			}
+			case 'd':
+			{
+				double arg = (double)va_arg(valist,double);
+				prep_stmt->setDouble(i,arg);
+				break;
+			}
+			case 'u':
+			{
+				uint64_t arg = (uint64_t)va_arg(valist,uint64_t);
+				prep_stmt->setUInt64(i,arg);
+				break;
+			}
 			default:
 			{
 				cerr<<"Unknown type given to execute"<<endl;
@@ -86,8 +104,26 @@ sql::ResultSet* SQLConn::fetch(string types,string query,...){
 			}
 			case 'i':
 			{
-				int arg = (int)va_arg(valist,int);
+				int32_t arg = (int32_t)va_arg(valist,int32_t);
 				prep_stmt->setInt(i,arg);
+				break;
+			}
+			case 'l':
+			{
+				int64_t arg = (int64_t)va_arg(valist,int64_t);
+				prep_stmt->setInt64(i,arg);
+				break;
+			}
+			case 'd':
+			{
+				double arg = (double)va_arg(valist,double);
+				prep_stmt->setDouble(i,arg);
+				break;
+			}
+			case 'u':
+			{
+				uint64_t arg = (uint64_t)va_arg(valist,uint64_t);
+				prep_stmt->setUInt64(i,arg);
 				break;
 			}
 			default:

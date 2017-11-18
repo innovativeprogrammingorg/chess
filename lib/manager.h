@@ -24,7 +24,6 @@ class Manager{
 	public:
 		/**
 		 * The one and only instance of this class in existence
-		 * 
 		 */
 		static Manager* GM;
 		pthread_mutex_t* lock;
@@ -34,7 +33,7 @@ class Manager{
 
 		Manager();
 
-		static string process(Client* c,string data,int command,Game* out_game = nullptr,int* sd = NULL);
+		static string process(Client* c,string data,int command);
 		static void create_game(Chess* g);
 		static Chess* find_game(int64_t id);
 		static int* processMoveData(vector<string>* data);

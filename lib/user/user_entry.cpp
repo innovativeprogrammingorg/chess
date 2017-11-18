@@ -12,25 +12,29 @@ User_Entry::~User_Entry(){
 }
 
 void User_Entry::add(string key,int sd){
+	//cout<<"Adding pair ("<<key<<","<<sd<<")"<<endl;
 	this->s_map->insert(pair<string,int>(key,sd));
 }
 
 void User_Entry::add(int64_t key,int sd){
+	//cout<<"Adding pair ("<<key<<","<<sd<<")"<<endl;
 	this->i_map->insert(pair<int64_t,int>(key,sd));
 }
 
 int User_Entry::find(string key){
 	try{
-		this->s_map->at(key);
+		return this->s_map->at(key);
 	}catch(const out_of_range& oor){
+		cout<<"User_Entry::find: Unable to find key: "<<key<<endl;
 		return -1;
 	}
 }
 
 int User_Entry::find(int64_t key){
 	try{
-		this->i_map->at(key);
+		return this->i_map->at(key);
 	}catch(const out_of_range& oor){
+		cout<<"User_Entry::find: Unable to find key: "<<key<<endl;
 		return -1;
 	}
 }
