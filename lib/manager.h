@@ -90,12 +90,10 @@ enum action{
 	GET_LOBBY_ALL = 0x305,
 	/***GAME ACTIONS***/
 	LOGIN = 0x400,
-	NEW = 0x401,
-	JOIN = 0x402,
-	CANCEL_GAME = 0x403,
-	TIME = 0x404,
-	TURN = 0x405,
-	GET_GAME_ALL = 0x406,
+	CANCEL_GAME = 0x401,
+	TIME = 0x402,
+	TURN = 0x403,
+	GET_GAME_ALL = 0x404,
 };
 
 

@@ -50,7 +50,7 @@ class Chess{
 		void send_taken();
 		void send_taken(uint8_t side,char piece);
 		void send_moves();
-		void send_all();
+		void send_all(int sd);
 		void broadcast(Frame* frame);
 		void broadcast(string msg);
 		void invalid_move();

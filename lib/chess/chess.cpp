@@ -310,7 +310,13 @@ void Chess::send_taken(uint8_t side,char piece){
 	this->broadcast(msg);
 }
 
-void Chess::send_all(){
+void Chess::send_all(int sd){
+	this->notify_sides();
+	this->chat->send_all(sd);
+	this->send_board();
+	this->notify_turn();
+	this->send_time();
+	this->send_moves();
 
 }
 

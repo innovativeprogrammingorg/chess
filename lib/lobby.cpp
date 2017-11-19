@@ -205,7 +205,7 @@ void Lobby::check(){
 		return;
 	}
 	for(auto it = this->users->begin();it != this->users->end();it++){
-		if((*it)->sd() == -1){
+		if((*it)->sd("LOBBY") == -1){
 			this->users->erase(it);
 			if(this->users->size()>0){
 				it = this->users->begin();

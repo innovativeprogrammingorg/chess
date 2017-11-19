@@ -28,13 +28,7 @@ string Manager::process(Client* c,string data, int command){
 			
 			return "";
 		}
-
-		case NEW:
-		case JOIN:
-		{
-			//No longer used
-			return "ERROR";
-		}
+		
 		case LOGIN:
 		{
 
@@ -149,11 +143,7 @@ string Manager::process(Client* c,string data, int command){
 			if(game == nullptr){
 				return Frame::prepare_message(2,string("ERROR"),string("Game Not Found"));
 			}
-			game->notify_sides();
-			game->chat->send_all(c->sd);	
-			game->send_board();
-			game->notify_turn();
-			game->send_time();
+			game->send_all(c->sd);
 			return "";
 		}
 
