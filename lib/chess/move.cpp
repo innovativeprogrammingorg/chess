@@ -18,6 +18,9 @@ bool Move::valid_queen(Piece* p,Location* move,Board* b){
 		delete spaces;
 		return false;
 	}
+	if(spaces == nullptr){
+		return true;
+	}
 	length = spaces->size();
 	if(length==0){
 		delete spaces;

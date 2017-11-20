@@ -13,13 +13,26 @@ Manager::Manager(){
 	pthread_mutex_init(this->lock,NULL);
 }
 
+Manager::~Manager(){
+	delete this->games;
+	delete this->lobby_chat;
+	delete this->lobby;
+	pthread_mutex_unlock(this->lock);
+	pthread_mutex_destroy(this->lock);
+}
+
 string Manager::process(Client* c,string data, int command){
 	switch(command){
 		case MOVE:
 		{
 			vector<string>* move_data = c_explode(DATA_SEP,data);
+			if(move_data->size()<5){
+				delete move_data;
+				return "INVALID_MOVE";
+			}
 			int* move = Manager::processMoveData(move_data);
 			Chess* game = Manager::find_game(stoi(move_data->at(0)));
+			delete move_data;
 			if(game == nullptr){
 				cout<<"GAME NOT FOUND"<<endl;
 				return "ERROR";
@@ -31,7 +44,7 @@ string Manager::process(Client* c,string data, int command){
 		
 		case LOGIN:
 		{
-
+			//cout<<"Logging the user in..."<<endl;
 			if(data.find(DATA_SEP) == string::npos){//default to lobby
 				c->username = new string(data);
 				User_Manager::UM->connect(c->username,string("LOBBY"),c->sd);
@@ -180,7 +193,6 @@ Chess* Manager::find_game(int64_t id){
 void Manager::create_game(Chess* g){
 	Manager::GM->games->add_game(g);
 }
-
 
 int* Manager::processMoveData(vector<string>* data){
 	int* out = (int*)malloc(sizeof(int)*4);

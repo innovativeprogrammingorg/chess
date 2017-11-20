@@ -20,13 +20,12 @@ class Game{
 		User* black;
 		User* white;
 		Board* board;
-		uint8_t turn;
 		Timer* timer;
 		int64_t id;
 
 		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t duration,int inc);
 		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int inc,int undo);
-		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,Timer* t);
+		Game(User* black, User* white, int64_t id, Board* b,Timer* t);
 		virtual ~Game();
 		bool inCheck(char side);
 		bool isCheckmate(char side);

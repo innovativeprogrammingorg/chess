@@ -100,6 +100,10 @@ int Timer::get_undo(){
 	return this->undo;
 }
 
+uint8_t Timer::get_turn(){
+	return this->turn;
+}
+
 string Timer::format_time(time_t seconds){
 	int sec = seconds % 60;
 	int min = (int)(seconds / 60);

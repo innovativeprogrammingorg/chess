@@ -32,6 +32,7 @@ class Timer{
 		int get_increment();
 		uint64_t get_last();
 		int get_undo();
+		uint8_t get_turn();
 		static string format_time(time_t seconds);
 };
 

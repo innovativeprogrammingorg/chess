@@ -3,8 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <sys/time.h>
-#include <time.h>
 #include "chess/game.h"
 #include "chat.h"
 #include "chess/board.h"
@@ -35,7 +33,6 @@ class Chess{
 		void notify_sides();
 		void notify_turn();
 		void move(int r,int c, int r2, int c2,char side);
-		void next_turn(time_t t = time(NULL));
 		void offer_draw(string user);
 		void accept_draw(string user);
 		void decline_draw(string user);

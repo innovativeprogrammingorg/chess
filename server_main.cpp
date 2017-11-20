@@ -25,6 +25,7 @@ static int make_socket_non_blocking (int sfd){
 }
 
 int main(){
+
 	srand(time(NULL));
 
 	int opt = TRUE;
@@ -34,8 +35,6 @@ int main(){
 	size_t valread;
 	struct sockaddr_in address;
 	char buffer[BUFFER_SIZE];  
-	//fd_set readfds;
-	//Client* c;
 	Client::init();
 	int n;
 	struct epoll_event event;// = (struct epoll_event*)calloc(sizeof(struct epoll_event),1);
@@ -102,6 +101,8 @@ int main(){
 						/* An error has occured on this fd, or the socket is not
 							 ready for reading (why were we notified then?) */
 				cerr<< "epoll error\n";
+				active_client = Client::find_client(events[i].data.fd);
+				Client::drop_client(active_client);
 				close(events[i].data.fd);
 				continue;
 			}else if (master_socket == events[i].data.fd){
@@ -140,11 +141,6 @@ int main(){
 				continue;
 
 			}else{
-						/* We have data on the fd waiting to be read. Read and
-							 display it. We must read whatever data is available
-							 completely, as we are running in edge-triggered mode
-							 and won't get a notification again for the same
-							 data. */
 							
 				active_client = Client::find_client(events[i].data.fd);
 				valread = read(events[i].data.fd, buffer, BUFFER_SIZE - 1);

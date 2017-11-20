@@ -32,15 +32,15 @@ OBJECTS =  $(LIB_OBJ) $(SERVER_OBJ) $(WS_OBJ) $(SQL_OBJ) $(CHESS_OBJ) $(USER_OBJ
 .PHONY: clean
 
 
-all:  $(LIB_OBJ) $(SERVER_OBJ) $(WS_OBJ) $(SQL_OBJ) $(CHESS_OBJ) $(USER_OBJ) server
+all:  $(OBJECTS) server
 
 server: 
 	$(CC) server_main.cpp -o server $(CFLAGS) $(INCLUDE) $(LIB) $(OBJECTS) -lssl  $(LINK_FLAGS) 
 clean: 
-	rm -f server chess 
+	rm -f server 
 
 fclean:
-	rm -f server chess $(OBJECTS)
+	rm -f server  $(OBJECTS)
 	
 re: clean all
 

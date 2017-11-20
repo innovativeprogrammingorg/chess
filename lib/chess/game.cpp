@@ -7,7 +7,6 @@ Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t du
 	this->board = b;
 	this->black = black;
 	this->white = white;
-	this->turn = turn;
 	this->timer = new Timer(duration,duration,inc,turn);
 	this->id = id;
 }
@@ -17,15 +16,13 @@ Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime
 	this->white = white;
 	this->id = id;
 	this->board = b;
-	this->turn = turn;
 	this->timer = new Timer(wtime,btime,inc,turn,last,undo);
 }
-Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,Timer* t){
+Game::Game(User* black, User* white, int64_t id, Board* b,Timer* t){
 	this->black = black;
 	this->white = white;
 	this->id = id;
 	this->board = b;
-	this->turn = turn;
 	this->timer = t;
 }
 
@@ -155,10 +152,12 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 		if(r == r2 && c == c2){
 			return FALSE;
 		}
+
 		if(this->board->getTile(r,c) == NULL){
 			cerr<<"Game::move: tile at ("<<r<<","<<c<<")"<<" is null"<<endl;
 			return FALSE;
 		}
+
 		this->board->taken = 'X';
 		Piece* p = this->board->getTile(r,c)->p;
 		char t;
@@ -176,12 +175,13 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 					return FALSE;
 				}
 				this->board->taken = t;
-				return TRUE;
+				
 			}
 			delete move;
 			return FALSE;
 		}
 		delete move;
+
 		if(!this->board->getTile(r2,c2)->empty()){
 			this->board->taken = this->board->getTile(r2,c2)->p->FEN;
 		}

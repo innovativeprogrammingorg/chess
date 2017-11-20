@@ -39,7 +39,7 @@ void Chess::init(){
 		return;
 	}
 	delete res;
-	string turn = (this->game->turn == WHITE) ? "w" : "b";
+	string turn = (this->game->timer->get_turn() == WHITE) ? "w" : "b";
 	conn->execute("siissssisl","INSERT INTO chessgame (Turn,WTime,BTime,White,Black,Winner,Type,I,Board,ID) values (?,?,?,?,?,?,?,?,?,?)",
 		turn,
 		this->game->timer->get_white_time(),
@@ -82,7 +82,7 @@ void Chess::notify_sides(){
 void Chess::notify_turn(){
 	string msg = "TURN";
 	msg += COMMAND;
-	msg += (char)this->game->turn;
+	msg += (char)this->game->timer->get_turn();
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	frame->add((uint8_t*)msg.c_str());
 	this->broadcast(frame);
@@ -90,9 +90,11 @@ void Chess::notify_turn(){
 }
 
 void Chess::move(int r,int c, int r2, int c2,char side){
-	time_t hold = time(NULL);
 	this->history->add_past(this->game->board->to_string());
 	uint8_t result = this->game->move(r,c,r2,c2,side);
+	if(this->game->inCheck(side)){
+		result = FALSE;
+	}
 	switch(result){
 		case FALSE:
 		{
@@ -122,27 +124,17 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 			mv += rows[r2-1];
 			mv += itoa(c2);
 			this->history->add_move(mv);
-			this->next_turn();
+			this->game->timer->next();
 			this->send_move(mv);
 			this->send_board();
 			this->send_time();
+			this->notify_turn();
 			this->save();
 			break;
 		}
 	}
 }
 
-void Chess::next_turn(time_t t){
-	uint8_t turn = this->game->turn;
-	if(turn == WHITE){
-		this->game->turn = BLACK;
-		this->notify_turn();
-	}else{
-		this->game->turn = WHITE;
-		this->notify_turn();
-	}
-	this->game->timer->next();
-}
 
 void Chess::offer_draw(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
@@ -264,7 +256,7 @@ void Chess::invalid_move(){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = "INVALID_MOVE";
 	frame->add((uint8_t*)msg.c_str());
-	int sd = (this->game->turn == WHITE) ? this->game->white->sd() : this->game->black->sd();
+	int sd = (this->game->timer->get_turn() == WHITE) ? this->game->white->sd(this->game->id) : this->game->black->sd(this->game->id);
 	frame->send(sd);
 	delete frame;
 }
@@ -274,8 +266,11 @@ void Chess::promote(char piece){
 		return;
 	}
 	this->game->board->forceChange(promotion_row,promotion_col,piece);
-	this->next_turn();
-
+	this->game->timer->next();
+	this->send_board();
+	this->send_time();
+	this->notify_turn();
+	this->send_moves();
 }
 
 void Chess::save(){
@@ -300,13 +295,13 @@ void Chess::save(){
 									  "`moves` = ?, "
 									  "`Past` = ? "
 									  "WHERE `ID` = ?",
-		(this->game->turn == WHITE) ? string("w") : string("b"),							  
+		(this->game->timer->get_turn() == WHITE) ? string("w") : string("b"),							  
 		this->game->timer->get_white_time(),
 		this->game->timer->get_black_time(),
 		this->game->timer->get_undo(),
 		this->history->turns,
-		(this->game->turn == WHITE) ? this->game->board->special : string("false") ,
-		(this->game->turn == BLACK) ? this->game->board->special : string("false"),
+		(this->game->timer->get_turn() == WHITE) ? this->game->board->special : string("false"),
+		(this->game->timer->get_turn() == BLACK) ? this->game->board->special : string("false"),
 		this->game->board->getCastleData(),
 		taken,
 		this->waiting_for_promotion ? 1 : 0,
@@ -326,4 +321,3 @@ char Chess::get_side_of(string username){
 	}
 	return BLACK;
 }	
-

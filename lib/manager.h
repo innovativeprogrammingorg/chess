@@ -32,26 +32,11 @@ class Manager{
 		Lobby* lobby;
 
 		Manager();
-
+		virtual ~Manager();
 		static string process(Client* c,string data,int command);
 		static void create_game(Chess* g);
 		static Chess* find_game(int64_t id);
 		static int* processMoveData(vector<string>* data);
-};
-
-
-/**
- * Obsolete
- */
-enum indexes{
-	SIDE_INDEX = 0x0,
-	USER_INDEX = 0x01,
-	ID_INDEX = 0x02,
-	FEN_INDEX = 0x03,
-	TURN_INDEX = 0x04,
-	INC_INDEX = 0x05,
-	WTIME_INDEX = 0x06,
-	BTIME_INDEX = 0x07
 };
 
 
