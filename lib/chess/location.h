@@ -18,6 +18,7 @@ class Location{
 		bool equals(Location* l);
 		bool isAdjacent(Location* l);
 		static vector<Location*>* locationsBetween(Location* l1,Location* l2);
+		static vector<Location*>* locationsBetween(int row1, int col1,int row2,int col2);
 };
 
 

@@ -23,7 +23,7 @@ Board::Board(string FEN, string spec, string castle){
 				c = getLast(f);
 				f.pop_back();
 			}
-			this->tiles[i][j] = new Tile(i+1,j+1,c);
+			this->tiles[i][j] = new Tile(c);
 		}	
 	}
 	cout<<"Created tiles\n";
@@ -50,7 +50,6 @@ Board::~Board(){
 Tile* Board::getTile(int row, int col){
 	if((uint32_t)row>8 || (uint32_t)col>8 ){
 		return nullptr;
-		
 	}
 	return this->tiles[row-1][col-1];
 }
@@ -79,11 +78,11 @@ void Board::specialData(string data){
 
 void Board::forceChange(int r,int c,char FEN){
 	delete this->tiles[r-1][c-1];
-	this->tiles[r-1][c-1] = new Tile(r,c,FEN);
+	this->tiles[r-1][c-1] = new Tile(FEN);
 }
 
 bool Board::placePiece(int r,int c,char FEN){
-	if(!this->getTile(r,c)->empty() || Piece::getName(FEN)==0){
+	if(!this->getTile(r,c)->empty() || Piece::getName(FEN) == 0){
 		return false;
 	}
 	this->forceChange(r,c,FEN);
@@ -96,16 +95,18 @@ Location* Board::findKing(char side){
 		for(int j = 1;j<9;j++){
 			t = this->getTile(i,j);
 			if(!t->empty() && t->p->is(KING) && t->p->side == side){
-				return t->p->loc;
+				return new Location(i,j);
 			}	
 	}
-	cerr<<"ERROR: Unable to the find the king\n";
+	cerr<<"ERROR: Unable to the find the king"<<endl;
 	return nullptr;
 }
 
 Piece* Board::getKing(char side){
 	Location* loc = this->findKing(side);
-	return this->getTile(loc->row,loc->col)->p;
+	Piece* out = this->getTile(loc->row,loc->col)->p;
+	delete loc;
+	return out;
 }
 
 char Board::otherSide(char side){

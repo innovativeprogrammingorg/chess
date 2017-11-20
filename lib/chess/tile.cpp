@@ -1,11 +1,18 @@
-#include "tile.h"
+#include "chess/tile.h"
 	
 using namespace std;
-Tile::Tile(int row, int col,char fen){
+
+Tile::Tile(char fen){
 	if(fen != EMPTY_SPACE){
-		this->p = new Piece(new Location(row,col),(fen>96)? BLACK : WHITE,fen);
+		this->p = new Piece((fen>96)? BLACK : WHITE, fen);
 	}else{
 		this->p = nullptr;
+	}
+}
+
+Tile::~Tile(){
+	if(this->p != nullptr){
+		delete this->p;
 	}
 }
 

@@ -1,10 +1,9 @@
-#include "piece.h"
+#include "chess/piece.h"
 
 using namespace std;
 
 
-Piece::Piece(Location* loc,char side,char FEN){
-	this->loc = loc;
+Piece::Piece(char side,char FEN){
 	this->side = side;
 	this->FEN = FEN;
 	this->name = Piece::getName(FEN);
@@ -69,9 +68,4 @@ void Piece::setSpecial(int side){
 		return;
 	}
 	this->special = side;
-}
-
-void Piece::move(Location* loc){
-	delete this->loc;
-	this->loc = loc;
 }

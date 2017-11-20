@@ -38,7 +38,7 @@ string Manager::process(Client* c,string data, int command){
 				return "ERROR";
 			}
 			game->move(move[0],move[1],move[2],move[3],game->get_side_of(*c->username));
-			
+			free(move);
 			return "";
 		}
 		

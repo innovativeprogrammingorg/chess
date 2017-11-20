@@ -8,6 +8,7 @@
 #include "str.h"
 #include "chess/chess_types.h"
 #include "chess/tile.h"
+#include "chess/location.h"
 #include "json.h"
 
 using namespace std;

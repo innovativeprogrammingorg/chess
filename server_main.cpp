@@ -102,7 +102,10 @@ int main(){
 							 ready for reading (why were we notified then?) */
 				cerr<< "epoll error\n";
 				active_client = Client::find_client(events[i].data.fd);
-				Client::drop_client(active_client);
+				if(active_client != nullptr){
+					Client::drop_client(active_client);
+				}
+				
 				close(events[i].data.fd);
 				continue;
 			}else if (master_socket == events[i].data.fd){

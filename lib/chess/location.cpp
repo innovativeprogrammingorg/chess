@@ -8,16 +8,16 @@ Location::Location(int row, int col){
 }
 
 vector<Location*>* Location::locationsBetween(Location* l1,Location* l2){
-	vector<Location*>* out = new vector<Location*>();
 	int i,r,c;
 	int col1 = l1->col;
 	int col2 = l2->col;
 	int row1 = l1->row;
-	int row2 = l2->row;     
+	int row2 = l2->row; 
+	    
 	if(l1->equals(l2)||l1->isAdjacent(l2)){	
-		delete out;
 		return nullptr;
 	}
+	vector<Location*>* out = new vector<Location*>();
 	if(row1==row2){
 		if(col1>col2){
 			for(i = col2 + 1;i<col1;i++){
@@ -80,6 +80,15 @@ vector<Location*>* Location::locationsBetween(Location* l1,Location* l2){
 		cerr<<"Location::locationsBetween:Error: Cannot find any locations between (";
 		cerr<<row1<<","<<col1<<") and ("<<row2<<","<<col2<<")"<<endl;
 	}
+	return out;
+}
+
+vector<Location*>* Location::locationsBetween(int row1, int col1,int row2,int col2){
+	Location* l1 = new Location(row1,col1);
+	Location* l2 = new Location(row2,col2);
+	vector<Location*>* out = Location::locationsBetween(l1,l2);
+	delete l1;
+	delete l2;
 	return out;
 }
 
