@@ -1,43 +1,39 @@
-#include "game.h"
+#include "chess/game.h"
 
 using namespace std;
 
-Game::Game(){
-	this->board = nullptr;
-	this->black = nullptr;
-	this->white = nullptr;
-	this->turn = WHITE;
-	this->inc = 0;
-}
 
 Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t duration,int inc){
 	this->board = b;
 	this->black = black;
 	this->white = white;
 	this->turn = turn;
-	this->inc = inc;
-	this->white_time = duration;
-	this->black_time = duration;
+	this->timer = new Timer(duration,duration,inc,turn);
 	this->id = id;
-	this->last_move_time = 0;
 }
 
-Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int turns,int inc){
+Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int inc,int undo){
 	this->black = black;
 	this->white = white;
 	this->id = id;
 	this->board = b;
 	this->turn = turn;
-	this->white_time = wtime;
-	this->black_time = btime;
-	this->last_move_time = last;
-	this->inc = inc;
+	this->timer = new Timer(wtime,btime,inc,turn,last,undo);
+}
+Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,Timer* t){
+	this->black = black;
+	this->white = white;
+	this->id = id;
+	this->board = b;
+	this->turn = turn;
+	this->timer = t;
 }
 
 Game::~Game(){
 	delete this->board;
 	delete this->black;
 	delete this->white;
+	delete this->timer;
 }
 
 bool Game::isDraw(){
@@ -155,58 +151,37 @@ bool Game::isCheckmate(char side){
 }
 
 
-bool Game::send_state(int sd){
-	JSON* json = new JSON("string");
-	json->add("Board",this->board->getBoardData());
-	json->add("Turn",string((char*)&(this->turn)));
-	json->add("WTime",itoa(this->white_time));
-	json->add("BTime",itoa(this->black_time));
-	json->add("ID",itoa(this->id));
-	string data = json->to_string();
-	Frame* out = new Frame();
-	out->add((uint8_t*)data.c_str());
-	out->fin = 1;
-	out->opcode = TEXT;
-	out->send(sd);
-	delete out;
-	delete json;
-	return true;
-}
-
-bool Game::send_state_to_opponent(int sd){
-	if(this->white == nullptr || this->black == nullptr){
-		return false;
-	}
-	if(this->white->sd() == sd){
-		return this->send_state(this->black->sd());
-	}else{
-		return this->send_state(this->white->sd());
-	}	
-}
-
 uint8_t Game::move(int r,int c,int r2,int c2,char side){ 
+		if(r == r2 && c == c2){
+			return FALSE;
+		}
 		if(this->board->getTile(r,c) == NULL){
 			cerr<<"Game::move: tile at ("<<r<<","<<c<<")"<<" is null"<<endl;
+			return FALSE;
 		}
 		this->board->taken = 'X';
 		Piece* p = this->board->getTile(r,c)->p;
-		Location* move = new Location(r2,c2);
 		char t;
 		if(p == nullptr||p->side != side){
 			return FALSE;
 		}
+		Location* move = new Location(r2,c2);
+		/**Check if it is a special move**/
 		if(!Move::validMove(p,move,this->board)){
 			cout<<"IT is not a valid move!\n";
 			if(p->is(PAWN) && p->canSpecial()){
 				t = Move::specialMove(p,move,this->board);
+				delete move;
 				if(t == 0){
 					return FALSE;
 				}
 				this->board->taken = t;
 				return TRUE;
 			}
+			delete move;
 			return FALSE;
 		}
+		delete move;
 		if(!this->board->getTile(r2,c2)->empty()){
 			this->board->taken = this->board->getTile(r2,c2)->p->FEN;
 		}

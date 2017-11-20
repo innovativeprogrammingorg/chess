@@ -5,10 +5,10 @@
 #include <vector>
 #include <iostream>
 #include <cstdint>
-#include "../str.h"
-#include "chess_types.h"
-#include "tile.h"
-#include "../json.h"
+#include "str.h"
+#include "chess/chess_types.h"
+#include "chess/tile.h"
+#include "json.h"
 
 using namespace std;
 

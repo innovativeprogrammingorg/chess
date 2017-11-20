@@ -1,5 +1,5 @@
-#include "board.h"
-#include "move.h"
+#include "chess/board.h"
+#include "chess/move.h"
 //const char columns[8] = {'a','b','c','d','e','f','g','h'};
 
 using namespace std;
@@ -112,8 +112,6 @@ char Board::otherSide(char side){
 	return (side == WHITE)? BLACK : WHITE;
 }
 
-
-
 string Board::generateFEN(){
 	string output = "";
 	Tile* t;
@@ -168,7 +166,3 @@ string Board::to_string(){
 char Board::numToCol(int c){
 	return (char)(c + 96);
 }
-
-
-
-

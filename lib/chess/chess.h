@@ -11,23 +11,22 @@
 #include "str.h"
 #include "server/WebSocket/frame.h"
 #include "sql/sql.h"
+#include "chess/history.h"
+#include "chess/timer.h"
 
 using namespace std;
 class Chess{
 	public:
 		Game* game;
 		Chat* chat;
-		vector<string>* history;
-		vector<string>* moves;
-		vector<char>* wtaken;
-		vector<char>* btaken;
+		History* history;
 		time_t last;
 		bool waiting_for_promotion;
 		int promotion_row;
 		int promotion_col;
 		int8_t winner;
 		Chess(Game* game);
-		Chess(Game* game,string past,string moves,string white_taken,string black_taken);
+		Chess(Game* game,string past,string moves,string white_taken,string black_taken,int turns);
 		virtual ~Chess();
 	private:
 		void init();
@@ -42,7 +41,6 @@ class Chess{
 		void decline_draw(string user);
 		void resign(string user);
 		void take_back(string user);
-		void store(Board* board);
 		void message(string user,string msg);
 		void send_board();
 		void send_time();
@@ -58,7 +56,7 @@ class Chess{
 		void save();
 		char get_side_of(string username);
 
-		static string format_time(time_t seconds);
+		
 
 };
 

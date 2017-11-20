@@ -69,11 +69,11 @@ Chess* Game_Manager::load_game(int64_t id){
 	User* black = new User(res->getString("Black"),BLACK);
 	User* white = new User(res->getString("White"),WHITE);
 	Board* board = new Board(res->getString("Board"),special, res->getString("Castle"));
+	Timer* timer = new Timer(res->getInt("WTime"),res->getInt("BTime"),res->getInt("I"),res->getString("Turn")[0],time(NULL),res->getInt("Undo_Time"));
+	Game* game = new Game(black,white,id,board,res->getString("Turn")[0],timer);
 
-	Game* game = new Game(black,white,id,board,res->getString("Turn")[0],
-				res->getInt("WTime"),res->getInt("BTime"),res->getInt("Undo_Time"),res->getInt("Turns"),
-				res->getInt("I"));
-	Chess* chess = new Chess(game,res->getString("Past"),res->getString("moves"),res->getString("White_Captured"),res->getString("Black_Captured"));
+	Chess* chess = new Chess(game,res->getString("Past"),res->getString("moves"),res->getString("White_Captured"),
+							res->getString("Black_Captured"),res->getInt("Turns"));
 	this->add_game(chess,id);
 	delete conn;
 	delete res;

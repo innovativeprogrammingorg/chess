@@ -1,4 +1,4 @@
-#include "location.h"
+#include "chess/location.h"
 
 using namespace std;
 
@@ -15,6 +15,7 @@ vector<Location*>* Location::locationsBetween(Location* l1,Location* l2){
 	int row1 = l1->row;
 	int row2 = l2->row;     
 	if(l1->equals(l2)||l1->isAdjacent(l2)){	
+		delete out;
 		return nullptr;
 	}
 	if(row1==row2){
@@ -75,6 +76,9 @@ vector<Location*>* Location::locationsBetween(Location* l1,Location* l2){
 				c--;
 			}
 		}	
+	}else{
+		cerr<<"Location::locationsBetween:Error: Cannot find any locations between (";
+		cerr<<row1<<","<<col1<<") and ("<<row2<<","<<col2<<")"<<endl;
 	}
 	return out;
 }
