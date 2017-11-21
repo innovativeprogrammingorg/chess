@@ -39,7 +39,7 @@ bool Game::isDraw(){
 	Tile* t;
 	Piece* king;
 	Location* king_loc;
-	vector<Location*>* moves;
+	vector<unique_ptr<Location>>* moves;
 	int numMoves; 
 	for(int i = 1;i<9;i++)
 		for(int j = 1;j<9;j++){
@@ -106,8 +106,8 @@ bool Game::isCheckmate(char side){
 	
 	Location* king_loc = this->board->findKing(side);
 	Piece* king = this->board->getTile(king_loc->row,king_loc->col)->p;
-	vector<Location*>* spots = king_loc->getAdjacent();//will never be null
-	vector<Location*> locations;
+	vector<unique_ptr<Location>>* spots = king_loc->getAdjacent();//will never be null
+	vector<unique_ptr<Location>> locations;
 	vector<Piece*> pieces;
 	Tile* t;
 
@@ -126,7 +126,7 @@ bool Game::isCheckmate(char side){
 			t = this->board->getTile(i,j);
 			if(!t->empty() && t->p->side != side && Move::valid(t->p,i,j,king_loc->row,king_loc->col,this->board)){
 				pieces.push_back(t->p);
-				locations.push_back(new Location(i,j));
+				locations.push_back(make_unique<Location>(i,j));
 			}
 	}
 	if(pieces.size() == 2){
@@ -134,8 +134,8 @@ bool Game::isCheckmate(char side){
 			delete king_loc;
 			return true;
 		}
-		vector<Location*>* v1 = Location::locationsBetween(king_loc,locations.at(0));
-		vector<Location*>* v2 = Location::locationsBetween(king_loc,locations.at(1));
+		vector<unique_ptr<Location>>* v1 = Location::locationsBetween(king_loc->row,king_loc->col,locations.at(0)->row,locations.at(0)->col);
+		vector<unique_ptr<Location>>* v2 = Location::locationsBetween(king_loc->row,king_loc->col,locations.at(1)->row,locations.at(1)->col);
 		if(v1 == nullptr || v2 == nullptr){
 			delete king_loc;
 			return true;
@@ -143,8 +143,8 @@ bool Game::isCheckmate(char side){
 
 		for(auto it = v1->begin();it != v1->end();it++)
 			for(auto jt = v2->begin();jt != v2->end();jt++){
-				if((*it)->equals(*jt)){
-					if(Game::tileCovered(this->board,*jt,side)){
+				if((*it)->row == (*jt)->row && (*it)->col == (*jt)->col){
+					if(Game::tileCovered(this->board,(*jt)->row,(*jt)->col,side)){
 						delete king_loc;
 						delete v1;
 						delete v2;
@@ -159,7 +159,7 @@ bool Game::isCheckmate(char side){
 		
 	}else{
 		Piece* p = pieces.at(0);
-		vector<Location*>* blockSpots = Location::locationsBetween(king_loc,locations.at(0));
+		vector<unique_ptr<Location>>* blockSpots = Location::locationsBetween(king_loc->row,king_loc->col,locations.at(0)->row,locations.at(0)->col);
 		delete king_loc;
 		if(blockSpots == nullptr){
 			return true;

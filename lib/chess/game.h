@@ -1,10 +1,10 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include <time.h>
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <memory>
 #include "chess/board.h"
 #include "chess/chess_types.h"
 #include "user/user.h"

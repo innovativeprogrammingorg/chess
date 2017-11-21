@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
@@ -14,11 +15,11 @@ class Location{
 		int row;
 	
 		Location(int row, int col);
-		vector<Location*>* getAdjacent();
+		vector<unique_ptr<Location>>* getAdjacent();
 		bool equals(Location* l);
 		bool isAdjacent(Location* l);
-		static vector<Location*>* locationsBetween(Location* l1,Location* l2);
-		static vector<Location*>* locationsBetween(int row1, int col1,int row2,int col2);
+		static vector<unique_ptr<Location>>* locationsBetween(Location* l1,Location* l2);
+		static vector<unique_ptr<Location>>* locationsBetween(int row1, int col1,int row2,int col2);
 };
 
 

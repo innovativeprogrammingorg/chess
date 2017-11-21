@@ -14,7 +14,7 @@ bool Move::valid_queen(Piece* p,int r,int c,int mr,int mc,Board* b){
 		return false;
 	}
 
-	vector<Location*>* spaces = Location::locationsBetween(r,c,mr,mc);
+	vector<unique_ptr<Location>>* spaces = Location::locationsBetween(r,c,mr,mc);
 	if(spaces == nullptr){
 		return true;
 	}
@@ -162,13 +162,13 @@ bool Move::valid_bishop(Piece* p,Move* move,Board* b){
 }
 
 bool Move::valid_bishop(Piece* p,int r,int c,int mr,int mc,Board* b){
-	if(c == mc||(abs((r-mr)/(c-mc)) != 1)||(mr>8||mr<1||mc>8||mc<1)){
+	if((abs(r-mr) != abs(c-mc))||(mr>8||mr<1||mc>8||mc<1)){
 		return false;
 	}
 	if(!b->getTile(mr,mc)->empty() && b->getTile(mr,mc)->p->side == p->side){
 		return false;
 	}
-	vector<Location*>* spaces = Location::locationsBetween(r,c,mr,mc);
+	vector<unique_ptr<Location>>* spaces = Location::locationsBetween(r,c,mr,mc);
 	if(spaces == nullptr){
 		return true;
 	}
@@ -201,7 +201,7 @@ bool Move::valid_rook(Piece* p,int r,int c,int mr,int mc,Board* b){
 	if(!b->getTile(mr,mc)->empty() && b->getTile(mr,mc)->p->side == p->side){
 		return false;
 	}
-	vector<Location*>* spaces = Location::locationsBetween(r,c,mr,mc);
+	vector<unique_ptr<Location>>* spaces = Location::locationsBetween(r,c,mr,mc);
 	if(spaces == nullptr){
 		return true;
 	}

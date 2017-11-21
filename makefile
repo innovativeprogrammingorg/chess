@@ -4,7 +4,7 @@
 CC= g++
 LIB = -L/usr/local/lib/
 INCLUDE = -Ilib/
-VERSION = c++11
+VERSION = c++14
 CFLAGS = -g -std=$(VERSION)  -pthread 
 FILES = *.cpp 
 
