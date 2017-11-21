@@ -15,9 +15,11 @@ class Piece{
 		bool promo;
 	
 		Piece(char side,char FEN);
+		virtual ~Piece();
 		bool is(int name);
 		bool canSpecial();
 		void setSpecial(int side);
+		void change(char side,char FEN);
 
 		static int getName(char FEN);
 };

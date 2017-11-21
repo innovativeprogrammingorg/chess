@@ -183,27 +183,29 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 			return FALSE;
 		}
 
-		if(this->board->getTile(r,c) == NULL){
+		if(this->board->getTile(r,c) == nullptr){
 			cerr<<"Game::move: tile at ("<<r<<","<<c<<")"<<" is null"<<endl;
 			return FALSE;
 		}
-
-		this->board->taken = 'X';
 		Piece* p = this->board->getTile(r,c)->p;
-		char t;
 		if(p == nullptr||p->side != side){
+			cout<<"Unable to find piece to move"<<endl;
+			Location::debug(r,c);
 			return FALSE;
 		}
+		this->board->taken = 'X';
+		
+	
+		
 		/**Check if it is a special move**/
 		if(!Move::valid(p,r,c,r2,c2,this->board)){
 			cout<<"IT is not a valid move!\n";
 			if(p->is(PAWN) && p->canSpecial()){
-				t = Move::specialMove(p,r,c,r2,c2,this->board);
+				char t = Move::specialMove(p,r,c,r2,c2,this->board);
 				if(t == 0){
 					return FALSE;
 				}
 				this->board->taken = t;
-				
 			}
 			return FALSE;
 		}
@@ -238,13 +240,12 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 				return FALSE;
 			}
 		}
-		this->board->forceChange(r2,c2,this->board->getTile(r,c)->p->FEN);
-		this->board->forceChange(r,c,EMPTY_SPACE);
+		this->board->forceMove(r,c,r2,c2);
 		this->board->special = "false";
 		if(p->is(PAWN) && abs(r-r2)==2){
 			cout<<"possible special pawn move\n";
 			if(!this->board->getTile(r2,c2+1)->empty() && this->board->getTile(r2,c2+1)->p->is(PAWN) && this->board->getTile(r2,c2+1)->p->side != p->side){
-				this->board->special = itoa(r2) + itoa(c2+1) +"r";
+				this->board->special = itoa(r2) + itoa(c2+1) + "r";
 			}
 			if(!this->board->getTile(r2,c2-1)->empty() && this->board->getTile(r2,c2-1)->p->is(PAWN) && this->board->getTile(r2,c2-1)->p->side != p->side){
 				if(this->board->special.compare("false") != 0){
@@ -261,14 +262,13 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 			cout<<"The king is not in check\n";
 		}
 		if(p->is(KING)){
-			if(p->side==WHITE){
+			if(p->side == WHITE){
 				this->board->wCastle = false;
 			}else{
 				this->board->bCastle = false;
 			}
 		}
-		if((p->FEN==WHITE_PAWN && r2==8) || (p->FEN==BLACK_PAWN && r2==1)){
-			//delete this->board->getTile(r,c);
+		if((p->FEN == WHITE_PAWN && r2==8) || (p->FEN==BLACK_PAWN && r2==1)){
 			this->board->forceChange(r,c,'X');
 			return PROMOTION;
 		}
@@ -289,13 +289,12 @@ bool Game::inCheck(Board* b,char side){
 	for(int i = 1;i<9;i++)
 		for(int j = 1;j<9;j++){
 			t = b->getTile(i,j);
-			if(!t->empty() && t->p->side != side && t->p->is(KING) && Move::valid(t->p,i,j,r,c,b)){
+			if(!t->empty() && t->p->side != side && !t->p->is(KING) && Move::valid(t->p,i,j,r,c,b)){
 				return true;
 			}
 	}
 	return false;
 }
-
 
 bool Game::isProtected(Board* b,int r,int c,char side){
 	Tile* t;
@@ -304,7 +303,7 @@ bool Game::isProtected(Board* b,int r,int c,char side){
 		for(int j = 1;j<9;j++){
 			t = b->getTile(i,j);
 			if(!t->empty() && t->p->side == side && !(i == r && j == c)){
-					FEN = b->getTile(r,c)->p->FEN;
+					FEN = b->getTile(i,j)->p->FEN;
 					b->forceChange(r,c,EMPTY_SPACE);
 					if(Move::valid(t->p,i,j,r,c,b)){
 						b->forceChange(r,c,FEN);
@@ -328,6 +327,7 @@ bool Game::tileCovered(Board* b,int r,int c,char side){
 		for(int j = 1;j<9;j++){
 			t = b->getTile(i,j);
 			if(!t->empty() && t->p->side == side && !t->p->is(KING) && Move::valid(t->p,i,j,r,c,b)){
+				printf("The tile (%d,%d) is covered by %c at (%d,%d)\n",r,c,t->p->FEN,i,j);
 				return true;
 			}
 		}

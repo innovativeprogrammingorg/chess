@@ -9,7 +9,6 @@
 #include "chess/chess_types.h"
 #include "chess/tile.h"
 #include "chess/location.h"
-#include "json.h"
 
 using namespace std;
 
@@ -24,15 +23,14 @@ class Board{
 		Board(string FEN, string special, string castle);
 		virtual ~Board();
 		Tile* getTile(int row, int col);
-		//void setSpecial(string data);
 		void specialData(string data);
 		bool placePiece(int r,int c,char FEN);
 		void forceChange(int r,int c,char FEN);
+		void forceMove(int r,int c,int r2, int c2);
 		Location* findKing(char side);
 		Piece* getKing(char side);		
 		string generateFEN();
 		string getCastleData();
-		string getBoardData();
 		string to_string();
 		static char numToCol(int c);
 		static char otherSide(char side);

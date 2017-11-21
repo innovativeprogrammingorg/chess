@@ -1,6 +1,5 @@
 #include "server.h"
 
-
 using namespace std;
 
 Client* active_client = nullptr;
@@ -120,7 +119,6 @@ int main(){
 						}
 						break;
 					}
-					//event = (struct epoll_event*)calloc(sizeof(struct epoll_event),1);
 
 					/*getnameinfo(&in_addr, in_len,
 												 hbuf, sizeof(hbuf),

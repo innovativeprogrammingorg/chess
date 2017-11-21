@@ -20,6 +20,9 @@ class Location{
 		bool isAdjacent(Location* l);
 		static vector<unique_ptr<Location>>* locationsBetween(Location* l1,Location* l2);
 		static vector<unique_ptr<Location>>* locationsBetween(int row1, int col1,int row2,int col2);
+		static void debug(int row,int col);
+		void debug();
+
 };
 
 

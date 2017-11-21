@@ -133,3 +133,12 @@ vector<unique_ptr<Location>>* Location::getAdjacent(){
 
 	return out;
 }
+
+
+void Location::debug(int row,int col){
+	cout<<"Location is ("<<row<<","<<col<<")"<<endl;
+}
+
+void Location::debug(){
+	Location::debug(this->row,this->col);
+}

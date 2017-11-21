@@ -8,7 +8,9 @@ using namespace std;
 class Tile{
 	public:
 		Piece* p;
+		bool is_empty;
 		Tile(char fen);
+		void change(char fen);
 		virtual ~Tile();
 		bool empty();
 };

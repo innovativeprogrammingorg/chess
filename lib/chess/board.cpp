@@ -49,6 +49,7 @@ Board::~Board(){
 
 Tile* Board::getTile(int row, int col){
 	if((uint32_t)row>8 || (uint32_t)col>8 ){
+		cerr<<"oard::getTile:Error:Tried to get a tile which is out of bounds"<<endl;
 		return nullptr;
 	}
 	return this->tiles[row-1][col-1];
@@ -76,9 +77,15 @@ void Board::specialData(string data){
 	}
 }
 
-void Board::forceChange(int r,int c,char FEN){
+void Board::forceChange(int r,int c,char FEN){ 
 	delete this->tiles[r-1][c-1];
 	this->tiles[r-1][c-1] = new Tile(FEN);
+	//this->tiles[r-1][c-1]->change(FEN);
+}
+
+void Board::forceMove(int r,int c,int r2, int c2){
+	this->tiles[r2-1][c2-1]->p = this->tiles[r-1][c-1]->p;
+	this->tiles[r-1][c-1]->p = nullptr;
 }
 
 bool Board::placePiece(int r,int c,char FEN){
@@ -140,18 +147,6 @@ string Board::getCastleData(){
 	out += (this->bCastle & QUEEN_SIDE)? "bq" : "";
 	out += (this->wCastle & KING_SIDE)? "wk" : "";
 	out += (this->wCastle & QUEEN_SIDE)? "wq" : "";
-	return out;
-}
-
-string Board::getBoardData(){
-	JSON* data = new JSON("string");
-	string history = "";
-	data->add("FEN",this->generateFEN());
-	data->add("Castle",this->getCastleData());
-	data->add("Taken",new string((char*)&(this->taken)));
-	data->add("Special",this->special);
-	string out = data->to_string();
-	delete data;
 	return out;
 }
 

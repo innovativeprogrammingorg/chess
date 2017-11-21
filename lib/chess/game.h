@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <cstdio>
 #include "chess/board.h"
 #include "chess/chess_types.h"
 #include "user/user.h"

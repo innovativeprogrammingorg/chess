@@ -2,8 +2,27 @@
 
 using namespace std;
 
-
 Piece::Piece(char side,char FEN){
+	this->side = side;
+	this->FEN = FEN;
+	this->name = Piece::getName(FEN);
+	if((this->name & PROMOTED_PAWN) != 0){
+		this->promo = true;
+		this->name -= PROMOTED_PAWN;
+	}else{
+		this->promo = false;
+	}
+	this->special = false;
+}
+Piece::~Piece(){
+	this->side = 0;
+	this->FEN = 0;
+	this->name = 0;
+	this->promo = false;
+	this->special = false;
+}
+
+void Piece::change(char side,char FEN){
 	this->side = side;
 	this->FEN = FEN;
 	this->name = Piece::getName(FEN);

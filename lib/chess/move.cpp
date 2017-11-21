@@ -45,7 +45,7 @@ bool Move::valid_king(Piece* p,int r,int c,int mr,int mc, Board* b){
 			return true;
 		}
 		if(c<mc && !Game::tileCovered(b,r,c+1,Board::otherSide(p->side)) && !Game::tileCovered(b,r,c+2,Board::otherSide(p->side)) && !Game::inCheck(b,p->side)){
-			return false;
+			return true;
 		}
 		cout<<"The move is a failed attempt to castle\n";
 		return false;
@@ -80,10 +80,10 @@ bool Move::valid_king(Piece* p,int r,int c,int mr,int mc, Board* b){
 	if(t1==1 && t2==1){
 		if(b->getTile(mr,mc)->empty()){
 			cout<<"Diagonal Move\n";
-			return Game::tileCovered(b,mr,mc,Board::otherSide(p->side));
+			return !Game::tileCovered(b,mr,mc,Board::otherSide(p->side));
 		}else if(b->getTile(mr,mc)->p->side != p->side){
 			cout<<"Can the king take the piece?\n";
-			return Game::isProtected(b,mr,mc,Board::otherSide(p->side));		
+			return !Game::isProtected(b,mr,mc,Board::otherSide(p->side));		
 		}else{
 			return false;
 		}
@@ -97,7 +97,7 @@ bool Move::valid_pawn(Piece* p, Move* move,Board* b){
 }
 
 bool Move::valid_pawn(Piece* p,int r,int c,int mr,int mc,Board* b){
-	cout<<"Seeing if it is a valid pawn move ("<<r<<","<<c<<")-->("<<mr<<","<<mc<<")"<<endl;
+	//cout<<"Seeing if it is a valid pawn move ("<<r<<","<<c<<")-->("<<mr<<","<<mc<<")"<<endl;
 	if(mr>8||mr<1||mc>8||mc<1){
 		return false;
 	}
@@ -117,7 +117,7 @@ bool Move::valid_pawn(Piece* p,int r,int c,int mr,int mc,Board* b){
 			return true;
 		}
 	}
-	cout<<"Move is invalid by default!\n";
+	//cout<<"Move is invalid by default!\n";
 	return false;
 }
 
