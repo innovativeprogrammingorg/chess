@@ -49,10 +49,21 @@ Board::~Board(){
 
 Tile* Board::getTile(int row, int col){
 	if((uint32_t)row>8 || (uint32_t)col>8 ){
-		cerr<<"oard::getTile:Error:Tried to get a tile which is out of bounds"<<endl;
+		cerr<<"Board::getTile:Error:Tried to get a tile which is out of bounds"<<endl;
 		return nullptr;
 	}
 	return this->tiles[row-1][col-1];
+}
+
+bool Board::empty(int row,int col){
+	if(row == 0 || col == 0){
+		return true;
+	}
+	Tile* t = this->getTile(row,col);
+	if(t== nullptr){
+		return true;
+	}
+	return t->empty();
 }
 
 void Board::specialData(string data){

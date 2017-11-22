@@ -23,6 +23,7 @@ class Board{
 		Board(string FEN, string special, string castle);
 		virtual ~Board();
 		Tile* getTile(int row, int col);
+		bool empty(int row,int col);
 		void specialData(string data);
 		bool placePiece(int r,int c,char FEN);
 		void forceChange(int r,int c,char FEN);
@@ -32,6 +33,7 @@ class Board{
 		string generateFEN();
 		string getCastleData();
 		string to_string();
+
 		static char numToCol(int c);
 		static char otherSide(char side);
 };

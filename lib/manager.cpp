@@ -164,16 +164,36 @@ string Manager::process(Client* c,string data, int command){
 		{	
 			vector<string>* msg_data = c_explode(DATA_SEP,data);
 			if(msg_data->size()<2){
+				delete msg_data;
 				return "ERROR";
 			}
 			int64_t id = stoi(msg_data->at(0));
 			Chess* game = Manager::find_game(id);
 			if(game == nullptr){
+				delete msg_data;
 				return Frame::prepare_message(2,"ERROR","Game Not Found");
 			}
 			game->message(*c->username,msg_data->at(1));
 			delete msg_data;
 			return "";
+		}
+
+		case PROMOTE:
+		{
+			
+			vector<string>* msg_data = c_explode(DATA_SEP,data);
+			if(msg_data->size()<2){
+				return "ERROR";
+			}
+			int64_t id = stoi(msg_data->at(0));
+			Chess* game = Manager::find_game(id);
+			if(game == nullptr){
+				delete msg_data;
+				return Frame::prepare_message(2,string("ERROR"),string("Game Not Found"));
+			}
+			char piece = msg_data->at(1)[0];
+			game->promote(piece);
+			return "PROMOTED";
 		}
 
 			

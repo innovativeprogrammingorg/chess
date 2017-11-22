@@ -1,7 +1,7 @@
 #include "chess/chess.h"
 using namespace std;
 
-static const char rows[8] = {'a','b','c','d','e','f','g'};
+static const char columns[8] = {'a','b','c','d','e','f','g'};
 
 Chess::Chess(Game* game){
 	this->game = game;
@@ -90,6 +90,9 @@ void Chess::notify_turn(){
 }
 
 void Chess::move(int r,int c, int r2, int c2,char side){
+	if(this->waiting_for_promotion){
+		return;
+	}
 	this->history->add_past(this->game->board->to_string());
 	uint8_t result = this->game->move(r,c,r2,c2,side);
 	if(this->game->inCheck(side)){
@@ -99,30 +102,34 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 		case FALSE:
 		{
 			this->history->remove_last_past();
-			invalid_move();
+			this->invalid_move();
 			break;
 		}
 		case PROMOTION:
 		{
 			this->waiting_for_promotion = true;
-			promotion_row = r2;
-			promotion_col = c2;
+			this->promotion_row = r2;
+			this->promotion_col = c2;
 			char fen = this->game->board->getTile(r2,c2)->p->FEN;
 			string mv = "";
 			mv += fen;
-			mv += rows[r2-1];
-			mv += itoa(c2);
+			mv += columns[c2-1];
+			mv += itoa(r2);
 			this->history->add_move(mv);
+			this->send_promotion();
 			break;
 		}
 		case CASTLE:
+		{
+			
+		}
 		case TRUE:
 		{
 			char fen = this->game->board->getTile(r2,c2)->p->FEN;
 			string mv = "";
 			mv += fen;
-			mv += rows[r2-1];
-			mv += itoa(c2);
+			mv += columns[8-c2];
+			mv += itoa(r2);
 			this->history->add_move(mv);
 			this->game->timer->next();
 			this->send_move(mv);
@@ -230,6 +237,17 @@ void Chess::send_taken(uint8_t side,char piece){
 	this->broadcast(msg);
 }
 
+void Chess::send_promotion(){
+	if(!this->waiting_for_promotion){
+		return;
+	}
+	string msg = Frame::prepare_message(3,string("PROMOTION"),itoa(this->promotion_row),itoa(this->promotion_col));
+	Frame* frame = new Frame(1,0,0,0,0,TEXT);
+	frame->add((uint8_t*)msg.c_str());
+	frame->send((this->game->timer->get_turn() == WHITE)? this->game->white->sd(this->game->id) : this->game->black->sd(this->game->id));
+	delete frame;
+}
+
 void Chess::send_all(int sd){
 	this->notify_sides();
 	this->chat->send_all(sd);
@@ -271,6 +289,7 @@ void Chess::promote(char piece){
 	this->send_time();
 	this->notify_turn();
 	this->send_moves();
+	this->waiting_for_promotion = false;
 }
 
 void Chess::save(){

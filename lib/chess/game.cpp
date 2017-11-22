@@ -179,6 +179,9 @@ bool Game::isCheckmate(char side){
 
 
 uint8_t Game::move(int r,int c,int r2,int c2,char side){ 
+		if(!Location::validate(r,c) || !Location::validate(r2,c2)){
+			return FALSE;
+		}
 		if(r == r2 && c == c2){
 			return FALSE;
 		}
@@ -194,8 +197,6 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 			return FALSE;
 		}
 		this->board->taken = 'X';
-		
-	
 		
 		/**Check if it is a special move**/
 		if(!Move::valid(p,r,c,r2,c2,this->board)){
@@ -244,10 +245,10 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 		this->board->special = "false";
 		if(p->is(PAWN) && abs(r-r2)==2){
 			cout<<"possible special pawn move\n";
-			if(!this->board->getTile(r2,c2+1)->empty() && this->board->getTile(r2,c2+1)->p->is(PAWN) && this->board->getTile(r2,c2+1)->p->side != p->side){
+			if(!this->board->empty(r2,c2+1) && this->board->getTile(r2,c2+1)->p->is(PAWN) && this->board->getTile(r2,c2+1)->p->side != p->side){
 				this->board->special = itoa(r2) + itoa(c2+1) + "r";
 			}
-			if(!this->board->getTile(r2,c2-1)->empty() && this->board->getTile(r2,c2-1)->p->is(PAWN) && this->board->getTile(r2,c2-1)->p->side != p->side){
+			if(!this->board->empty(r2,c2-1) && this->board->getTile(r2,c2-1)->p->is(PAWN) && this->board->getTile(r2,c2-1)->p->side != p->side){
 				if(this->board->special.compare("false") != 0){
 					this->board->special = itoa(r2) + itoa(c2-1) + "r";
 				}else{

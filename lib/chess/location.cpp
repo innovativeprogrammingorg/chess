@@ -134,6 +134,15 @@ vector<unique_ptr<Location>>* Location::getAdjacent(){
 	return out;
 }
 
+static bool validate(int row,int col){
+	if(row>9 || row<1){
+		return false;
+	}
+	if(col>9||col<1){
+		return false;
+	}
+	return true;
+}
 
 void Location::debug(int row,int col){
 	cout<<"Location is ("<<row<<","<<col<<")"<<endl;
