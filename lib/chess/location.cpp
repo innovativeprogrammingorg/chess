@@ -134,7 +134,7 @@ vector<unique_ptr<Location>>* Location::getAdjacent(){
 	return out;
 }
 
-static bool validate(int row,int col){
+bool Location::validate(int row,int col){
 	if(row>9 || row<1){
 		return false;
 	}

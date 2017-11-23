@@ -5,7 +5,9 @@
 #define KING_SIDE 2
 #define QUEEN_SIDE 1
 #define PROMOTION 64
-#define CASTLE 32
+#define QUEEN_CASTLE 32
+#define KING_CASTLE 16
+#define CASTLE 8
 #define WHITE 'w'
 #define BLACK 'b'
 
@@ -43,5 +45,8 @@
 #define PROMOTED_WHITE_ROOK 'S'
 #define PROMOTED_BLACK_QUEEN 't'
 #define PROMOTED_WHITE_QUEEN 'T'
+
+#define WHITE_KING_CHECK 'C'
+#define BLACK_KING_CHECK 'c'
 
 #endif

@@ -40,7 +40,6 @@ bool Game::isDraw(){
 	Piece* king;
 	Location* king_loc;
 	vector<unique_ptr<Location>>* moves;
-	int numMoves; 
 	for(int i = 1;i<9;i++)
 		for(int j = 1;j<9;j++){
 			t = this->board->getTile(i,j);
@@ -59,9 +58,6 @@ bool Game::isDraw(){
 	if(wPieces<3 && bPieces<3){
 		return true;
 	}
-	/**
-	 * Logic is incorrect, or rather is incomplete
-	 */
 	if(wPieces==1 && !this->inCheck(WHITE)){
 		king = this->board->getKing(WHITE);
 		king_loc = this->board->findKing(WHITE);
@@ -79,9 +75,6 @@ bool Game::isDraw(){
 		delete king_loc;
 		return true;
 	}
-	/**
-	 * Logic is incorrect, or rather is incomplete
-	 */
 	if(bPieces==1 && !this->inCheck(BLACK)){
 		king = this->board->getKing(BLACK);
 		king_loc = this->board->findKing(BLACK);
@@ -97,6 +90,9 @@ bool Game::isDraw(){
 		delete king_loc;
 		return true;
 	}
+	/**
+	 * Needs to handle more cases
+	 */
 	return false;
 }
 
@@ -138,6 +134,11 @@ bool Game::isCheckmate(char side){
 		vector<unique_ptr<Location>>* v2 = Location::locationsBetween(king_loc->row,king_loc->col,locations.at(1)->row,locations.at(1)->col);
 		if(v1 == nullptr || v2 == nullptr){
 			delete king_loc;
+			if(v1 != nullptr){
+				delete v1;
+			}else if(v2 != nullptr){
+				delete v2;
+			}
 			return true;
 		}
 
@@ -219,24 +220,24 @@ uint8_t Game::move(int r,int c,int r2,int c2,char side){
 				if(c-c2==2 && (this->board->wCastle & 1)){
 					this->board->wCastle = FALSE;
 					Move::castle(this->board,QUEEN_SIDE,side);
-					return CASTLE;//f
+					return QUEEN_CASTLE;//f
 				}
 				if(c2-c==2 && ((this->board->wCastle >> 1) & 1)){
 					this->board->wCastle = FALSE;
 					Move::castle(this->board,KING_SIDE,side);
-					return CASTLE;
+					return KING_CASTLE;
 				}
 				return FALSE;
 			}else{
 				if(c-c2==2 && (this->board->bCastle & 1)){
 					this->board->bCastle = FALSE;
 					Move::castle(this->board,QUEEN_SIDE,side);
-					return CASTLE;
+					return QUEEN_CASTLE;
 				}
 				if(c2-c==2 && ((this->board->bCastle >> 1) & 1)){
 					this->board->bCastle = FALSE;
 					Move::castle(this->board,KING_SIDE,side);
-					return CASTLE;//f
+					return KING_CASTLE;
 				}				
 				return FALSE;
 			}

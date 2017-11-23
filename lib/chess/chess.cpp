@@ -119,9 +119,17 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 			this->send_promotion();
 			break;
 		}
-		case CASTLE:
+		case QUEEN_CASTLE:
 		{
-			
+			string mv = "o-o-o";
+			this->next(mv);
+			break;
+		}
+		case KING_CASTLE:
+		{
+			string mv = "o-o";
+			this->next(mv);
+			break;
 		}
 		case TRUE:
 		{
@@ -130,16 +138,25 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 			mv += fen;
 			mv += columns[8-c2];
 			mv += itoa(r2);
-			this->history->add_move(mv);
-			this->game->timer->next();
-			this->send_move(mv);
-			this->send_board();
-			this->send_time();
-			this->notify_turn();
-			this->save();
+			
+			this->next(mv);
 			break;
 		}
 	}
+}
+
+void Chess::next(string mv){
+	this->send_board();
+	if(mv.compare("")!= 0){
+		this->history->add_move(mv);
+		this->send_move(mv);
+	}else{
+		this->send_moves();
+	}
+	this->game->timer->next();
+	this->send_time();
+	this->notify_turn();
+	this->save();
 }
 
 
@@ -284,11 +301,7 @@ void Chess::promote(char piece){
 		return;
 	}
 	this->game->board->forceChange(promotion_row,promotion_col,piece);
-	this->game->timer->next();
-	this->send_board();
-	this->send_time();
-	this->notify_turn();
-	this->send_moves();
+	this->next();
 	this->waiting_for_promotion = false;
 }
 
