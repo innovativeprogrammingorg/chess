@@ -10,6 +10,7 @@
 #include "chess/chess.h"
 #include "sql/sql.h"
 #include "chess/timer.h"
+#include "chess/history.h"
 
 using namespace std;
 

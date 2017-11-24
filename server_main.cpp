@@ -5,14 +5,11 @@ using namespace std;
 Client* active_client = nullptr;
 
 static int make_socket_non_blocking (int sfd){
-	int flags;
-
-	flags = fcntl(sfd, F_GETFL, 0);
+	int flags = fcntl(sfd, F_GETFL, 0);
 	if(flags == -1){
 		perror("fcntl");
 		return -1;
 	}
-
 	flags |= O_NONBLOCK;
 
 	if (fcntl(sfd, F_SETFL, flags) == -1){
@@ -45,12 +42,12 @@ int main(){
 	signal(SIGPIPE,SIG_IGN);
 
 	if( (master_socket = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-		perror("socket failed");
+		cerr<<"socket failed"<<endl;
 		abort();
 	}
  
 	if(setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 ){
-		perror("setsockopt");
+		cerr<<"setsockopt"<<endl;
 		abort();
 	}
 	
@@ -59,27 +56,27 @@ int main(){
 	address.sin_port = htons(port);
 	
 	if (bind(master_socket, (struct sockaddr *)&address, sizeof(address))<0) {
-		perror("bind failed");
+		cerr<<"bind failed"<<endl;
 		abort();
 	}
 	if(make_socket_non_blocking (master_socket) == -1){
-		perror("non block");
+		cerr<<"non block"<<endl;
 		abort();
 	}
 	/*printf("Listener on port %d \n", port);*/	
 	if (listen(master_socket, SOMAXCONN) < 0){
-		perror("listen");
+		cerr<<"listen"<<endl;
 		abort();
 	}
 	efd = epoll_create1(0);
 	if (efd == -1){
-		perror ("epoll_create");
+		cerr<<"epoll_create"<<endl;
 		abort();
 	}
 	event.data.fd = master_socket;
 	event.events = EPOLLIN | EPOLLET;
 	if(epoll_ctl (efd, EPOLL_CTL_ADD, master_socket, &event) == -1){
-		perror("epoll_ctl");
+		cerr<<"epoll_ctl"<<endl;
 		abort();
 	}
 
@@ -97,9 +94,8 @@ int main(){
 
 		for(int i = 0; i < n; i++){
 			if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (!(events[i].events & EPOLLIN))){
-						/* An error has occured on this fd, or the socket is not
-							 ready for reading (why were we notified then?) */
-				cerr<< "epoll error\n";
+						/* An error has occured on this fd */
+				cerr<<"epoll error"<<endl;
 				active_client = Client::find_client(events[i].data.fd);
 				if(active_client != nullptr){
 					Client::drop_client(active_client);
@@ -124,7 +120,7 @@ int main(){
 												 hbuf, sizeof(hbuf),
 												 sbuf, sizeof(sbuf),
 												 NI_NUMERICHOST | NI_NUMERICSERV);*/
-					(void*)Client::add_client(new Client(new_socket,inet_ntoa(address.sin_addr),ntohs(address.sin_port)));
+					Client::add_client(new_socket,inet_ntoa(address.sin_addr),ntohs(address.sin_port));
 				
 					
 				/* Make the incoming socket non-blocking and add it to the
@@ -135,7 +131,7 @@ int main(){
 					event.data.fd = new_socket;
 					event.events = EPOLLIN | EPOLLET;
 					if (epoll_ctl (efd, EPOLL_CTL_ADD, new_socket, &event) == -1){
-						perror("epoll_ctl");
+						cerr<<"epoll_ctl"<<endl;
 						abort();
 					}
 				}
@@ -175,7 +171,7 @@ Client* get_active_client(){
 }
 
 void segfault_catch(int signum){
-	puts("Server encountered a segmentation fault");
+	cout<<"Server encountered a segmentation fault"<<endl;
 	/*printf("Showing the breaks... \n %s\n ",str_replace("\n","<cl>",str_replace("\r\n","<clrf>",last_input)));*/
 	execl("./server","./server",NULL);
 	//exit(EXIT_FAILURE);
@@ -184,6 +180,6 @@ void segfault_catch(int signum){
 void kill_all(int signum){
 	delete Client::clients;
 	delete Control::lookup_table;
-	puts("Killed\n");
+	cout<<"Killed"<<endl;
 	exit(EXIT_SUCCESS);
 }

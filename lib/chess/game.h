@@ -11,6 +11,7 @@
 #include "user/user.h"
 #include "server/WebSocket/frame.h"
 #include "sql/sql.h"
+#include "chess/history.h"
 #include "chess/timer.h"
 #include "chess/move.h"
 
@@ -23,10 +24,10 @@ class Game{
 		Board* board;
 		Timer* timer;
 		int64_t id;
-
+		History* history;
 		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t duration,int inc);
 		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int inc,int undo);
-		Game(User* black, User* white, int64_t id, Board* b,Timer* t);
+		Game(User* black, User* white, int64_t id, Board* b,Timer* t,History* hist);
 		virtual ~Game();
 		bool inCheck(char side);
 		bool isCheckmate(char side);

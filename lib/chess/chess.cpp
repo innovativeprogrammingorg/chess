@@ -9,27 +9,13 @@ Chess::Chess(Game* game){
 	this->chat = new Chat();
 	this->chat->connect(this->game->black,User_Entry::new_key(this->game->id));
 	this->chat->connect(this->game->white,User_Entry::new_key(this->game->id));
-	this->history = new History();
 	this->waiting_for_promotion = false;
 	this->winner = 0;
-}
-
-Chess::Chess(Game* game,string past,string moves,string white_taken,string black_taken, int turns){
-	this->game = game;
-	this->last = 0;
-	this->chat = new Chat();
-	this->chat->connect(this->game->black,User_Entry::new_key(this->game->id));
-	this->chat->connect(this->game->white,User_Entry::new_key(this->game->id));
-	this->history = new History(past,moves,white_taken,black_taken,turns);
-	this->waiting_for_promotion = false;
-	this->winner = 0;
-	
 }
 
 Chess::~Chess(){
 	delete this->game;
 	delete this->chat;
-	delete this->history;
 }
 
 void Chess::init(){
@@ -93,7 +79,7 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 	if(this->waiting_for_promotion){
 		return;
 	}
-	this->history->add_past(this->game->board->to_string());
+	this->game->history->add_past(this->game->board->to_string());
 	uint8_t result = this->game->move(r,c,r2,c2,side);
 	if(this->game->inCheck(side)){
 		result = FALSE;
@@ -101,7 +87,7 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 	switch(result){
 		case FALSE:
 		{
-			this->history->remove_last_past();
+			this->game->history->remove_last_past();
 			this->invalid_move();
 			break;
 		}
@@ -115,19 +101,19 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 			mv += fen;
 			mv += columns[c2-1];
 			mv += itoa(r2);
-			this->history->add_move(mv);
+			this->game->history->add_move(mv);
 			this->send_promotion();
 			break;
 		}
 		case QUEEN_CASTLE:
 		{
-			string mv = "o-o-o";
+			string mv = "o-o";
 			this->next(mv);
 			break;
 		}
 		case KING_CASTLE:
 		{
-			string mv = "o-o";
+			string mv = "o-o-o";
 			this->next(mv);
 			break;
 		}
@@ -148,7 +134,7 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 void Chess::next(string mv){
 	this->send_board();
 	if(mv.compare("")!= 0){
-		this->history->add_move(mv);
+		this->game->history->add_move(mv);
 		this->send_move(mv);
 	}else{
 		this->send_moves();
@@ -197,7 +183,7 @@ void Chess::resign(string user){
 }
 
 void Chess::take_back(string user){
-	if(!this->history->has_past()){
+	if(!this->game->history->has_past()){
 		Frame* frame = new Frame(1,0,0,0,0,TEXT);
 		string msg = "NA";
 		frame->add((uint8_t*)msg.c_str());
@@ -235,17 +221,17 @@ void Chess::send_move(string move){
 }
 
 void Chess::send_moves(){
-	if(this->history->has_moves()>0){
-		this->broadcast(Frame::prepare_message(2,string("MOVES_ALL"),this->history->get_moves()));
+	if(this->game->history->has_moves()>0){
+		this->broadcast(Frame::prepare_message(2,string("MOVES_ALL"),this->game->history->get_moves()));
 	}
 }
 
 void Chess::send_taken(){
-	if(this->history->has_white_taken()){
-		this->broadcast(Frame::prepare_message(2,string("WHITE_TAKEN_ALL"),this->history->get_white_taken()));
+	if(this->game->history->has_white_taken()){
+		this->broadcast(Frame::prepare_message(2,string("WHITE_TAKEN_ALL"),this->game->history->get_white_taken()));
 	}
-	if(this->history->has_black_taken()){
-		this->broadcast(Frame::prepare_message(2,string("BLACK_TAKEN_ALL"),this->history->get_black_taken()));
+	if(this->game->history->has_black_taken()){
+		this->broadcast(Frame::prepare_message(2,string("BLACK_TAKEN_ALL"),this->game->history->get_black_taken()));
 	}
 }
 
@@ -331,17 +317,17 @@ void Chess::save(){
 		this->game->timer->get_white_time(),
 		this->game->timer->get_black_time(),
 		this->game->timer->get_undo(),
-		this->history->turns,
+		this->game->history->turns,
 		(this->game->timer->get_turn() == WHITE) ? this->game->board->special : string("false"),
 		(this->game->timer->get_turn() == BLACK) ? this->game->board->special : string("false"),
 		this->game->board->getCastleData(),
 		taken,
 		this->waiting_for_promotion ? 1 : 0,
-		this->history->get_white_taken(),
-		this->history->get_black_taken(),
+		this->game->history->get_white_taken(),
+		this->game->history->get_black_taken(),
 		this->game->board->generateFEN(),
-		this->history->get_moves(),
-		this->history->get_past(),
+		this->game->history->get_moves(),
+		this->game->history->get_past(),
 		this->game->id
 	);
 	delete conn;

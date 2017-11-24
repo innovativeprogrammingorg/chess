@@ -1,6 +1,4 @@
 #include "chess/board.h"
-#include "chess/move.h"
-//const char columns[8] = {'a','b','c','d','e','f','g','h'};
 
 using namespace std;
 
@@ -26,7 +24,7 @@ Board::Board(string FEN, string spec, string castle){
 			this->tiles[i][j] = new Tile(c);
 		}	
 	}
-	cout<<"Created tiles\n";
+	//cout<<"Created tiles\n";
 	if(spec.size()>1){
 		this->specialData(spec);
 	}

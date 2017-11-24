@@ -2,13 +2,13 @@
 
 using namespace std;
 
-
 Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t duration,int inc){
 	this->board = b;
 	this->black = black;
 	this->white = white;
 	this->timer = new Timer(duration,duration,inc,turn);
 	this->id = id;
+	this->history = new History();
 }
 
 Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int inc,int undo){
@@ -17,13 +17,15 @@ Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime
 	this->id = id;
 	this->board = b;
 	this->timer = new Timer(wtime,btime,inc,turn,last,undo);
+	this->history = new History();;
 }
-Game::Game(User* black, User* white, int64_t id, Board* b,Timer* t){
+Game::Game(User* black, User* white, int64_t id, Board* b,Timer* t,History* hist){
 	this->black = black;
 	this->white = white;
 	this->id = id;
 	this->board = b;
 	this->timer = t;
+	this->history = hist;
 }
 
 Game::~Game(){
@@ -31,6 +33,7 @@ Game::~Game(){
 	delete this->black;
 	delete this->white;
 	delete this->timer;
+	delete this->history;
 }
 
 bool Game::isDraw(){
