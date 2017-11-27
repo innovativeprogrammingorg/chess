@@ -29,6 +29,7 @@ class Chess{
 		void start();
 		void notify_sides();
 		void notify_turn();
+		void notify_game_over();
 		void move(int r,int c, int r2, int c2,char side);
 		void next(string mv = "");
 		void offer_draw(string user);

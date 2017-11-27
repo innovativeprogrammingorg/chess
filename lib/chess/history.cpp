@@ -89,6 +89,18 @@ string History::get_past(){
 	return this->past->back();
 }
 
+vector<string>* History::get_last_n_moves(int n){
+	if(this->turns < n){
+		return nullptr;
+	}
+	vector<string>* out = new vector<string>();
+	int i = 0;
+	for(auto it = this->moves->rbegin();i<n; it++,i++){
+		out->push_back(*it);
+	}
+	return out;
+}
+
 void History::add_white_taken(char p){
 	this->white_taken->push_back(p);
 }

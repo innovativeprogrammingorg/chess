@@ -105,7 +105,8 @@ uint8_t Timer::get_turn(){
 }
 
 string Timer::format_time(time_t seconds){
-	int sec = seconds % 60;
+	return ltos(seconds);
+	/*int sec = seconds % 60;
 	int min = (int)(seconds / 60);
 	string out = itoa(min);
 	out += ":";
@@ -113,5 +114,5 @@ string Timer::format_time(time_t seconds){
 		out += "0";	
 	}
 	out += itoa(sec);
-	return out;
+	return out;*/
 }

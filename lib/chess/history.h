@@ -23,6 +23,7 @@ class History{
 		string get_white_taken();
 		string get_black_taken();
 		string get_moves();
+		vector<string>* get_last_n_moves(int n);
 		string get_past();
 
 		void add_white_taken(char p);

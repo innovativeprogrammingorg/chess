@@ -26,14 +26,13 @@ int main(){
 
 	int opt = TRUE;
 	int master_socket , addrlen , new_socket, sd;
-	//int max_sd;
 	int port = 8989;
 	size_t valread;
 	struct sockaddr_in address;
 	char buffer[BUFFER_SIZE];  
 	Client::init();
 	int n;
-	struct epoll_event event;
+	struct epoll_event event;// = (struct epoll_event*)calloc(sizeof(struct epoll_event),1);
 	struct epoll_event* events = nullptr;
 	int efd;
 	memset(&event,0,sizeof(struct epoll_event));
@@ -111,15 +110,11 @@ int main(){
 					new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen);
 					if (new_socket == -1){
 						if (!((errno == EAGAIN) ||(errno == EWOULDBLOCK))) {
-							cout<<"accepst"<<endl;
+							cout<<"accept"<<endl;
 						}
 						break;
 					}
 
-					/*getnameinfo(&in_addr, in_len,
-												 hbuf, sizeof(hbuf),
-												 sbuf, sizeof(sbuf),
-												 NI_NUMERICHOST | NI_NUMERICSERV);*/
 					Client::add_client(new_socket,inet_ntoa(address.sin_addr),ntohs(address.sin_port));
 				
 					

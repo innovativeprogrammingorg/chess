@@ -75,21 +75,49 @@ void Chess::notify_turn(){
 	delete frame;
 }
 
+void Chess::notify_game_over(){
+	string msg;
+	switch(this->winner){
+		case DRAW:
+			msg = "DRAW";
+
+		case WHITE:
+			msg = Frame::prepare_message(2,string("WINNER"),string("WHITE"));
+			break;
+		case BLACK:
+			msg = Frame::prepare_message(2,string("WINNER"),string("BLACK"));
+			break;
+		default:
+			return;
+	}
+	this->broadcast(msg);
+}
+
 void Chess::move(int r,int c, int r2, int c2,char side){
 	if(this->waiting_for_promotion){
 		return;
 	}
+	if(side != this->game->timer->get_turn()){
+		return;
+	}
+
 	this->game->history->add_past(this->game->board->to_string());
+
 	uint8_t result = this->game->move(r,c,r2,c2,side);
+	string check_marker = "";
 	if(this->game->inCheck(side)){
 		result = FALSE;
+	}else if(this->game->inCheck(Board::otherSide(side))){
+		check_marker = "+";
+		
 	}
+	
 	switch(result){
 		case FALSE:
 		{
 			this->game->history->remove_last_past();
 			this->invalid_move();
-			break;
+			return;
 		}
 		case PROMOTION:
 		{
@@ -103,7 +131,7 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 			mv += itoa(r2);
 			this->game->history->add_move(mv);
 			this->send_promotion();
-			break;
+			return;
 		}
 		case QUEEN_CASTLE:
 		{
@@ -124,14 +152,29 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 			mv += fen;
 			mv += columns[8-c2];
 			mv += itoa(r2);
-			
+			mv += check_marker;
 			this->next(mv);
 			break;
 		}
 	}
+	if(this->game->isCheckmate(Board::otherSide(side))){
+		this->winner = side;
+		this->notify_game_over();
+	}
+	if(this->game->isDraw()){
+		this->winner = DRAW;
+		this->notify_game_over();
+	}
 }
 
 void Chess::next(string mv){
+	if(this->game->board->taken != 'X'){
+		if(this->game->timer->get_turn() == WHITE){
+			this->game->history->add_white_taken(this->game->board->taken);
+		}else{
+			this->game->history->add_black_taken(this->game->board->taken);
+		}
+	} 
 	this->send_board();
 	if(mv.compare("")!= 0){
 		this->game->history->add_move(mv);
@@ -142,6 +185,7 @@ void Chess::next(string mv){
 	this->game->timer->next();
 	this->send_time();
 	this->notify_turn();
+	this->send_taken();
 	this->save();
 }
 
@@ -240,6 +284,7 @@ void Chess::send_taken(uint8_t side,char piece){
 	this->broadcast(msg);
 }
 
+
 void Chess::send_promotion(){
 	if(!this->waiting_for_promotion){
 		return;
@@ -252,11 +297,13 @@ void Chess::send_promotion(){
 }
 
 void Chess::send_all(int sd){
+	this->game->timer->update();
 	this->notify_sides();
 	this->chat->send_all(sd);
 	this->send_board();
 	this->notify_turn();
 	this->send_time();
+	this->send_taken();
 	this->send_moves();
 
 }

@@ -29,10 +29,7 @@
 #include <vector>
 #include <iostream>
 #include <fcntl.h>
-
-#include "server/client.h"
-#include "server/WebSocket/handshake.h"
-#include "server/concurrency.h"
+#include "server/server.h"
 
 #ifndef TRUE
 #define TRUE   1
@@ -42,8 +39,8 @@
 #define FALSE  0
 #endif
 
-#define BUFFER_SIZE 200000
-#define MAX_EVENTS 128 
+
+
 
 void segfault_catch(int signum);
 void kill_all(int signum);

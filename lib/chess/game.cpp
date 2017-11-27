@@ -17,7 +17,7 @@ Game::Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime
 	this->id = id;
 	this->board = b;
 	this->timer = new Timer(wtime,btime,inc,turn,last,undo);
-	this->history = new History();;
+	this->history = new History();
 }
 Game::Game(User* black, User* white, int64_t id, Board* b,Timer* t,History* hist){
 	this->black = black;
@@ -42,6 +42,7 @@ bool Game::isDraw(){
 	Tile* t;
 	Piece* king;
 	Location* king_loc;
+	bool has_pawn = false;
 	vector<unique_ptr<Location>>* moves;
 	for(int i = 1;i<9;i++)
 		for(int j = 1;j<9;j++){
@@ -49,8 +50,11 @@ bool Game::isDraw(){
 			if(t->empty()){
 				continue;
 			}
-			if(t->p->is(PAWN) || t->p->is(QUEEN) ||t->p->is(ROOK)){
+			if(t->p->is(QUEEN) ||t->p->is(ROOK)){
 				return false;
+			}
+			if(t->p->is(PAWN)){
+				has_pawn = true;
 			}
 			if(t->p->side == WHITE){
 				wPieces++;
@@ -58,15 +62,13 @@ bool Game::isDraw(){
 				bPieces++;
 			}
 	}
-	if(wPieces<3 && bPieces<3){
+	if(wPieces<3 && bPieces<3 && !has_pawn){
 		return true;
 	}
 	if(wPieces==1 && !this->inCheck(WHITE)){
 		king = this->board->getKing(WHITE);
 		king_loc = this->board->findKing(WHITE);
-
 		moves = king_loc->getAdjacent();
-
 		for(auto it = moves->begin();it != moves->end(); it++){
 			if(Move::valid(king,king_loc->row,king_loc->col,(*it)->row,(*it)->col,this->board)){
 				delete moves;
@@ -93,9 +95,22 @@ bool Game::isDraw(){
 		delete king_loc;
 		return true;
 	}
-	/**
-	 * Needs to handle more cases
-	 */
+	if(this->history->turns<12){
+		return false;
+	}
+	vector<string>* last_moves = this->history->get_last_n_moves(12);
+	bool three_move_draw = true;
+	for(int i = 0;i<4;i++){
+		if(last_moves->at(i).compare(last_moves->at(i + 4)) != 0 || last_moves->at(i + 4).compare(last_moves->at(i + 8)) != 0){
+			three_move_draw = false;
+		}
+	}
+	delete last_moves;
+	if(three_move_draw){
+		return true;
+	}
+
+
 	return false;
 }
 

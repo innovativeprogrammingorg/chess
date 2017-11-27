@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <string>
 #include <cstdint>
+#include <thread>
 #include "chess/chess_types.h"
 #include "str.h"
 

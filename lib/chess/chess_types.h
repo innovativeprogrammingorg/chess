@@ -1,52 +1,60 @@
 #ifndef CHESS_TYPES_H
 #define CHESS_TYPES_H
 
-
 #define KING_SIDE 2
 #define QUEEN_SIDE 1
 #define PROMOTION 64
 #define QUEEN_CASTLE 32
 #define KING_CASTLE 16
 #define CASTLE 8
+
 #define WHITE 'w'
 #define BLACK 'b'
+
+#define DRAW 'd'
 
 #define RIGHT 1
 #define LEFT 2
 
-#define PAWN 0x01
-#define KNIGHT 0x02
-#define BISHOP 0x04
-#define ROOK 0x08
-#define QUEEN 0x010
-#define KING 0x020
-#define PROMOTED_PAWN 0x040
+enum pieces{
+	PAWN = 0x01,
+	KNIGHT = 0x02,
+	BISHOP = 0x04,
+	ROOK = 0x08,
+	QUEEN = 0x010,
+	KING = 0x020,
+	PROMOTED_PAWN = 0x040,
 
-#define BLACK_PAWN 'p'
-#define WHITE_PAWN 'P'
-#define BLACK_KNIGHT 'n'
-#define WHITE_KNIGHT 'N'
-#define BLACK_BISHOP 'b'
-#define WHITE_BISHOP 'B'
-#define BLACK_ROOK 'r'
-#define WHITE_ROOK 'R'
-#define BLACK_QUEEN 'q'
-#define WHITE_QUEEN 'Q'
-#define BLACK_KING 'k'
-#define WHITE_KING 'K'
+	BLACK_PAWN = 'p',
+	WHITE_PAWN = 'P',
+	BLACK_KNIGHT = 'n',
+	WHITE_KNIGHT = 'N',
+	BLACK_BISHOP = 'b',
+	WHITE_BISHOP = 'B',
+	BLACK_ROOK = 'r',
+	WHITE_ROOK = 'R',
+	BLACK_QUEEN = 'q',
+	WHITE_QUEEN = 'Q',
+	BLACK_KING = 'k',
+	WHITE_KING = 'K',
+	PROMOTED_BLACK_KNIGHT = 'o',
+	PROMOTED_WHITE_KNIGHT = 'O',
+	PROMOTED_BLACK_BISHOP = 'a',
+	PROMOTED_WHITE_BISHOP = 'A',
+	PROMOTED_BLACK_ROOK = 's',
+	PROMOTED_WHITE_ROOK = 'S',
+	PROMOTED_BLACK_QUEEN = 't',
+	PROMOTED_WHITE_QUEEN = 'T',
 
-#define EMPTY_SPACE 'X'
+	WHITE_KING_CHECK = 'C',
+	BLACK_KING_CHECK = 'c',
+	EMPTY_SPACE = 'X'
+};
 
-#define PROMOTED_BLACK_KNIGHT 'o'
-#define PROMOTED_WHITE_KNIGHT 'O'
-#define PROMOTED_BLACK_BISHOP 'a'
-#define PROMOTED_WHITE_BISHOP 'A'
-#define PROMOTED_BLACK_ROOK 's'
-#define PROMOTED_WHITE_ROOK 'S'
-#define PROMOTED_BLACK_QUEEN 't'
-#define PROMOTED_WHITE_QUEEN 'T'
 
-#define WHITE_KING_CHECK 'C'
-#define BLACK_KING_CHECK 'c'
+
+
+
+
 
 #endif
