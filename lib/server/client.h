@@ -12,34 +12,34 @@
 #include "user/user_manager.h"
 
 using namespace std;
-class Client{
+class client{
 	public:
-		static vector<Client*>* clients;
+		static vector<client*> clients;
 		static pthread_mutex_t* check_lock;
 		string ip;
 		int port;
 		int sd;
 		time_t last_active;
 		bool handshaked;
-		string* username;
-		pthread_mutex_t* lock;
+		string username;
+		pthread_mutex_t lock;
 		/**
 		 * Compares this client to another one
 		 * @param  c Another client
 		 * @return   Whether or not the clients are equal
 		 */
-		bool equals(Client* c);
-		Client(int fd,string ip,int port);
-		virtual ~Client();
+		bool equals(client* c);
+		client(int fd,const string& ip,int port);
+		virtual ~client();
 		static void init();
-		static Client* find_client_by_ip(string ip);
-		static Client* find_client(int sd);
-		static Client* find_client(string username);
-		static void add_client(Client* c);
-		static void add_client(int fd,string ip,int port);
-		static void drop_client(Client* c);
+		static client* find_client_by_ip(const string& ip);
+		static client* find_client(int sd);
+		static client* find_client(const string& username);
+		static void add_client(client* c);
+		static void add_client(int fd,const string& ip,int port);
+		static void drop_client(client* c);
 		static void drop_client(int i);
-		static Client* client_at(int i);
+		static client* client_at(int i);
 
 };
 
