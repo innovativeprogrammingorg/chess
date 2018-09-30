@@ -20,12 +20,12 @@
 #include "user/user_manager.h"
 
 using namespace std; 
-class Manager{
+class manager{
 	public:
 		/**
 		 * The one and only instance of this class in existence
 		 */
-		static Manager* GM;
+		static manager* GM;
 		pthread_mutex_t* lock;
 		Game_Manager* games;
 		Chat* lobby_chat;

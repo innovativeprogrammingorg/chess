@@ -17,27 +17,27 @@
 
 using namespace std;
 
-class Game{
+class game{
 	public:
-		User* black;
-		User* white;
-		Board* board;
-		Timer* timer;
+		user black;
+		user white;
+		board game_board;
+		timer game_timer;
 		int64_t id;
-		History* history;
-		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,time_t duration,int inc);
-		Game(User* black, User* white, int64_t id, Board* b,uint8_t turn,int wtime,int btime,int last,int inc,int undo);
-		Game(User* black, User* white, int64_t id, Board* b,Timer* t,History* hist);
-		virtual ~Game();
-		bool inCheck(char side);
-		bool isCheckmate(char side);
-		bool isDraw();
+		history hist;
+		game(User* black, User* white, int64_t id, board* b,uint8_t turn,time_t duration,int inc);
+		game(User* black, User* white, int64_t id, board* b,uint8_t turn,int wtime,int btime,int last,int inc,int undo);
+		game(User* black, User* white, int64_t id, board* b,Timer* t,History* hist);
+	
+		bool in_check(char side);
+		bool is_checkmate(char side);
+		bool is_draw();
 		uint8_t move(int r,int c,int r2,int c2,char side);
-		static bool inCheck(Board* b, char side);
-		static bool isProtected(Board* b,Location* loc,char side);
-		static bool isProtected(Board* b,int r,int c,char side);
-		static bool tileCovered(Board* b,Location* loc,char side);
-		static bool tileCovered(Board* b,int r,int c,char side);
+		static bool in_check(board* b, char side);
+		static bool is_protected(board* b,Location* loc,char side);
+		static bool is_protected(board* b,int r,int c,char side);
+		static bool tile_covered(board* b,Location* loc,char side);
+		static bool tile_covered(board* b,int r,int c,char side);
 
 };
 
