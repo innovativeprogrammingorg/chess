@@ -6,30 +6,29 @@
 #include "server/WebSocket/frame.h"
 #include "str.h"
 
-using namespace std;
+using std::string;
+using std::vector;
 
-class History{
+class history{
 	public:
-		vector<char>* white_taken;
-		vector<char>* black_taken;
-		vector<string>* moves;
-		vector<string>* past;
 		int turns;
-
-		History();
-		History(string past,string moves,string white_taken,string black_taken,int turns);
-		virtual ~History();
+		vector<char> white_taken;
+		vector<char> black_taken;
+		vector<string> moves;
+		vector<string> past;
+		history();
+		history(const string& past,const string& moves,const string& white_taken,const string& black_taken,int turns);
 
 		string get_white_taken();
 		string get_black_taken();
 		string get_moves();
-		vector<string>* get_last_n_moves(int n);
+		vector<string> get_last_n_moves(int n);
 		string get_past();
 
 		void add_white_taken(char p);
 		void add_black_taken(char p);
-		void add_move(string move);
-		void add_past(string past);
+		void add_move(const string& move);
+		void add_past(const string& past);
 
 		void remove_last_white_taken();
 		void remove_last_black_taken();

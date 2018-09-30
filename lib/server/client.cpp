@@ -41,7 +41,7 @@ client* client::find_client(const string& username){
 	}	
 
 	for(auto it = client::clients->begin();it != client::clients->end();it++){
-		if(username.compare(*(*it)->username) == 0){
+		if(username.compare((*it)->username) == 0){
 			pthread_mutex_unlock(client::check_lock);
 			return *it;
 		}

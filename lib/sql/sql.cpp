@@ -12,7 +12,7 @@ SQLConn::SQLConn(){
 	this->conn = SQLConn::driver->connect(SQLConn::location,SQLConn::user,SQLConn::password);
 }
 
-SQLConn::SQLConn(string database){
+SQLConn::SQLConn(const string& database){
 	if(SQLConn::driver == nullptr || SQLConn::driver == NULL){
 		SQLConn::driver = get_driver_instance();
 	}
@@ -24,14 +24,14 @@ SQLConn::~SQLConn(){
 	delete this->conn;
 }
 
-void SQLConn::update_database(string database){
+void SQLConn::update_database(const string& database){
 	if(database.size()>0){
 		this->database = database;
 	}
 	this->conn->setSchema(this->database);
 }
 
-void SQLConn::execute(string types,string query,...){
+void SQLConn::execute(const string& types,const string& query,...){
 	va_list valist;
 	int args = types.size();
 	sql::PreparedStatement* prep_stmt = this->conn->prepareStatement(query);
@@ -81,14 +81,14 @@ void SQLConn::execute(string types,string query,...){
 	return;
 }
 
-void SQLConn::execute(string query){
+void SQLConn::execute(const string& query){
 	sql::Statement* stmt;
 	stmt = this->conn->createStatement();
 	stmt->execute(query);
 	delete stmt;
 }
 
-sql::ResultSet* SQLConn::fetch(string types,string query,...){
+sql::ResultSet* SQLConn::fetch(const string& types,const string& query,...){
 	va_list valist;
 	int args = types.size();
 	sql::PreparedStatement* prep_stmt = this->conn->prepareStatement(query);

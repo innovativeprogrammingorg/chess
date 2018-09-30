@@ -31,7 +31,7 @@ class Server{
 	public:
 		Client* active_client;
 		Server(int port);
-		void run();
+		void run() __attribute__((noreturn));
 };
 
 #endif

@@ -39,13 +39,13 @@ class SQLConn{
 	  	//sql::ResultSet* res;
 	  	//sql::PreparedStatement* prep_stmt;
 		SQLConn();
-		SQLConn(string database);
+		SQLConn(const string& database);
 		virtual ~SQLConn();
-		void update_database(string database = "");
-		void execute(string types,string query,...);
-		void execute(string query);
-		sql::ResultSet* fetch(string types,string query,...);
-		sql::ResultSet* fetch(string query);
+		void update_database(const string& database = "");
+		void execute(const string& types,const string& query,...);
+		void execute(const string& query);
+		sql::ResultSet* fetch(const string& types,const string& query,...);
+		sql::ResultSet* fetch(const string& query);
 
 
 };
