@@ -48,7 +48,7 @@ http_header::http_header(const string& header){
 		//cout<<"Parsing parameter "<<i<<"/"<<length<<endl;
 		if(i == 0){
 			key = "REQUEST";
-			this->data.emplace(key,header_field(new string(parameters->at(i))));
+			this->data.emplace(key,header_field(parameters.at(i)));
 			continue;
 		}
 		key_value_pair = split(':',parameters.at(i));
@@ -60,18 +60,18 @@ http_header::http_header(const string& header){
 		if(key.find("User-Agent")!=string::npos){
 			this->data->emplace(key,header_field(tmp));
 			//printf("Added %s:%s\n",key,(char*)value);
-		}else if(tmp->find(";")!=string::npos){
+		}else if(tmp.find(";")!=string::npos){
 			/*puts("Value is an array delim = ;");
 			printf("Key is %s\n",key);*/
 
-			arr = explode(";",*tmp);
-			this->data->emplace(key,make_unique<header_field>(http_header::vector_to_array(arr)));
+			arr = explode(';',tmp);
+			this->data->emplace(key,make_unique<header_field>(arr));
 			
-		}else if(tmp->find(",")!=string::npos){
+		}else if(tmp.find(',')!=string::npos){
 			/*puts("Value is an array delim = ,");
 			printf("Key is %s\n",key);*/
-			arr = explode(",",tmp);
-			this->data.emplace(key,header_field(http_header::vector_to_array(arr)));
+			arr = explode(',',tmp);
+			this->data.emplace(key,header_field(arr));
 			d
 			
 		}else{
@@ -100,30 +100,20 @@ bool http_header::has_param(const string& key){
 void http_request::parse_http_body(char* body){
 	this->parse_http_body(string(body));
 }
-void http_request::parse_http_body(string body){
-	vector<string> data = explode("&",body);
-	size_t length = data->size();
+void http_request::parse_http_body(const string& body){
+	vector<string> data = explode('&',body);
+	size_t length = data.size();
 	
-	this->body = new map<string,string*>();
-	vector<string>* kv_pair;
-	string* value;
-	string key;
 	for(uint_fast64_t i = 0;i<length;i++){
-		kv_pair = split('=',data->at(i));
-		
-		key = kv_pair->at(0);
-		value = new string(kv_pair->at(1));
-		this->body->insert(pair<string,string*>(key,value));
-		delete kv_pair;
+		vector<string> kv_pair = split('=',data.at(i));
+		this->body.emplace(kv_pair->at(0),kv_pair.at(1));
 	}
-	delete data;
+
 }
 
 
 
-http_request::http_request(string* message){
-	this->header = nullptr;
-	this->body = nullptr;
+http_request::http_request(const string& message){
 	/*
 	char* directory;
 	char*  data;
@@ -132,33 +122,22 @@ http_request::http_request(string* message){
 		map_add(&out,"PHP_CGI",data,STRING_TYPE);
 		return out;
 	}*/
-	if(message->find("GET") == 0|| message->find("\r\n\r\n") == string::npos){
-			this->header = new http_header(message);
+	if(message.find("GET") == 0|| message.find("\r\n\r\n") == string::npos){
+			this->header = http_header(message);
 	}else{
 		try{
 			//cout<<"HTTP message has message data to be read"<<endl;
-			vector<string>* v = ssplit("\r\n\r\n",*message);
+			vector<string> v = split("\r\n\r\n",*message);
 			if(v->size()!=2){
-				printf("Unexpected vector length of  %lu\n",v->size());
+				printf("Unexpected vector length of  %lu\n",v.size());
 			//exit(0);
 			}
-			this->header = new http_header(new string(v->at(0)));
-			this->parse_HTTP_body(v->at(1));
+			this->header = http_header(v.at(0));
+			this->parse_http_body(v.at(1));
 			delete v;
 		}catch(const out_of_range& oor){
-			this->header = new http_header(message);
-			this->body = nullptr;
+			this->header = http_header(message);
 		}
 	}
 	
-}
-
-http_request::~http_request(){
-	if(this->header != nullptr){
-		delete this->header;
-	}
-	if(this->body != nullptr){
-		this->body->clear();
-		delete this->body;
-	}
 }

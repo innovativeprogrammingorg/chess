@@ -23,7 +23,6 @@ class http_header{
 	public:
 		map<string,header_field> data;
 		http_header(const string& header);
-		virtual ~http_header();
 		Header_Field& at(const string& key);
 		bool has_param(const string& key);
 		string to_string();

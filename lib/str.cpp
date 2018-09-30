@@ -2,18 +2,18 @@
 
 using namespace std;
 
-vector<string>* explode(string quan,string subject){
+vector<string> explode(const string& quan,const string& subject){
 	if(subject.size() == 0 || quan.size()==0){
 		throw "Gave an empty string into explode";
 	}
-	vector<string>* out = new vector<string>();
+	vector<string> out;
 	string subj = subject.substr(0);                                          
 	size_t qlength = quan.size();
 	size_t slength = subject.size();
 	
 	for(int_fast64_t i = 0;i<slength-qlength;i++){
 		if(quan.compare(subj.substr(i,qlength)) == 0){
-			out->push_back(subj.substr(0,i));
+			out.push_back(subj.substr(0,i));
 			//cout<<"added "<<subj.substr(0,i)<<" to vector"<<endl;
 			if(i+qlength<=subj.size()){
 				subj = subj.substr(i+qlength);
@@ -28,55 +28,55 @@ vector<string>* explode(string quan,string subject){
 	}
 	if(trim(subj).size()>0){
 		//cout<<"Adding the final part :"<<subj<<endl;
-		out->push_back(subj);
+		out.push_back(subj);
 	}
 	return out;
 }
 
 
-vector<string>* c_explode(char quan,string subject){
-	vector<string>* out = new vector<string>();
+vector<string> explode(char quan,const string& subject){
+	vector<string> out;
 	string subj = subject.substr(0);
 	uint_fast64_t i;   
 	size_t slength = subject.size();
 	
 	for(i = 0;i<slength-1;i++){
 		if(quan == subj.at(i)){
-			out->push_back(subj.substr(0,i));
+			out.push_back(subj.substr(0,i));
 			subj = subj.substr(i+1);
 			i = 0;
 			slength = subj.size();
 		}
 	}
 	if(trim(subj).size()>0){
-		out->push_back(subj);
+		out.push_back(subj);
 	}
 	return out;
 }
 
-vector<string>* split(char quan,string subject){
-	vector<string>* out = new vector<string>();
+vector<string> split(char quan,const string& subject){
+	vector<string> out = new vector<string>();
 	int index = subject.find(quan);
-	out->push_back(subject.substr(0,index));
-	out->push_back(subject.substr(index+1));
+	out.push_back(subject.substr(0,index));
+	out.push_back(subject.substr(index+1));
 	return out;
 }
 
-vector<string>* ssplit(string quan,string subject){
-	vector<string>* out;
+vector<string> split(const string& quan,const string& subject){
+	vector<string> out;
 	int index = subject.find(quan);
-	out->push_back(subject.substr(0,index));
-	out->push_back(subject.substr(index+quan.size()));
+	out.push_back(subject.substr(0,index));
+	out.push_back(subject.substr(index+quan.size()));
 	return out;
 }
 
-char * substring_f(char * subject,size_t index,size_t length){
+char* substring_f(char* subject,size_t index,size_t length){
 	char * out = substring(subject,index,length);
 	free(subject);
 	return out;
 }
 
-char * substr_f(char * subject,size_t index){
+char* substr_f(char* subject,size_t index){
 	char * out = substr(subject,index);
 	free(subject);
 	return out;

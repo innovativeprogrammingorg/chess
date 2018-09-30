@@ -10,10 +10,11 @@
 #include <vector>
 
 using namespace std;
-vector<string>* c_explode(char quan,string subject);
-vector<string>* explode(string quan,string subject);
-vector<string>* split(char quan,string subject);
-vector<string>* ssplit(string quan,string subject);
+vector<string> explode(const string& quan,const string& subject);
+vector<string> explode(char quan,const string& subject);
+
+vector<string> split(char quan,const string& subject);
+vector<string> split(const string& quan,const string& subject);
 
 char* str_reverse(char* str);
 char* substring(char * subject,size_t index,int length);
@@ -26,8 +27,8 @@ char* concat_all(int args,...);
 string itoa(int i);
 int64_t strpos(char * haystack, char * needle);
 char* substring_f(char * subject,size_t index,size_t length);
-char* substr_f(char * subject,size_t index);
-char lastChar(char * str);
+char* substr_f(char* subject,size_t index);
+char lastChar(char* str);
 char* strappend(char s,char * str);
 char* stradd(char * str,char s);
 char getLast(string str);
