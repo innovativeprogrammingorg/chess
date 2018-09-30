@@ -47,7 +47,7 @@ class chess: public IGame{
 		void send_moves();
 		void send_promotion();
 		void send_all(int sd);
-		void broadcast(Frame* frame);
+		void broadcast(const frame& f);
 		void broadcast(const string& msg);
 		void invalid_move();
 		void promote(char piece,const string& username);

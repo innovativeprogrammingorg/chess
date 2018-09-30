@@ -29,8 +29,8 @@ void chess::init()
 		this->chess_game.timer.get_black_time(),
 		this->chess_game.white.username,
 		this->chess_game.black.username,
-		string("n"),
-		string("Regular"),
+		"n",
+		"Regular",
 		this->chess_game.timer.get_increment(),
 		this->chess_game.board.generate_FEN(),
 		this->chess_game.id
@@ -53,11 +53,11 @@ void chess::start()
 void chess::notify_sides()
 {
 	frame f(1,0,0,0,0,TEXT);
-	string msg = frame::prepare_message(2,string("SIDE"),string("w"));
+	string msg = frame::prepare_message(2,"SIDE","w");
 	f.add((uint8_t*)msg.c_str());
 	f.send(this->chess_game.white.sd(this->chess_game.id));
 	f.clear();
-	msg = frame::prepare_message(2,string("SIDE"),string("b"));
+	msg = frame::prepare_message(2,"SIDE","b");
 	f.add((uint8_t*)msg.c_str());
 	f.send(this->game.black.sd(this->chess_game.id));
 }
@@ -81,10 +81,10 @@ void chess::notify_game_over()
 			msg = "DRAW";
 
 		case WHITE:
-			msg = Frame::prepare_message(2,string("WINNER"),string("WHITE"));
+			msg = frame::prepare_message(2,"WINNER","WHITE");
 			break;
 		case BLACK:
-			msg = Frame::prepare_message(2,string("WINNER"),string("BLACK"));
+			msg = frame::prepare_message(2,"WINNER","BLACK");
 			break;
 		default:
 			return;
