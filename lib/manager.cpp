@@ -41,7 +41,6 @@ string Manager::process(Client* c,string data, int command){
 			free(move);
 			return "";
 		}
-		
 		case LOGIN:
 		{
 			//cout<<"Logging the user in..."<<endl;
@@ -192,11 +191,9 @@ string Manager::process(Client* c,string data, int command){
 				return Frame::prepare_message(2,string("ERROR"),string("Game Not Found"));
 			}
 			char piece = msg_data->at(1)[0];
-			game->promote(piece);
+			game->promote(piece,c->username);
 			return "PROMOTED";
 		}
-
-			
 	}
 	return "ERROR";
 }

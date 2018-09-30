@@ -3,22 +3,19 @@ using namespace std;
 
 static const char columns[8] = {'a','b','c','d','e','f','g'};
 
-Chess::Chess(Game* game){
-	this->game = game;
-	this->last = 0;
-	this->chat = new Chat();
-	this->chat->connect(this->game->black,User_Entry::new_key(this->game->id));
-	this->chat->connect(this->game->white,User_Entry::new_key(this->game->id));
-	this->waiting_for_promotion = false;
-	this->winner = 0;
+chess::chess(const game& g) : chess_game(g),chat(),last(0),waiting_for_promotion(false),winner(0)
+{
+	this->chat->connect(this->chess_game.black,user_entry::new_key(this->chess_game.id));
+	this->chat->connect(this->chess_game.white,user_entry::new_key(this->chess_game.id));//CSMA is applicable for lan
 }
 
-Chess::~Chess(){
-	delete this->game;
-	delete this->chat;
+bool chess::has_game(int64_t id)
+{
+	return this->game->id == id;
 }
 
-void Chess::init(){
+void chess::init()
+{
 	SQLConn* conn = new SQLConn("chessClub");
 	sql::ResultSet* res = conn->fetch("i","SELECT * FROM chessgame WHERE ID = ?",this->game->id);
 	if(res->next()){
@@ -28,44 +25,44 @@ void Chess::init(){
 	string turn = (this->game->timer->get_turn() == WHITE) ? "w" : "b";
 	conn->execute("siissssisl","INSERT INTO chessgame (Turn,WTime,BTime,White,Black,Winner,Type,I,Board,ID) values (?,?,?,?,?,?,?,?,?,?)",
 		turn,
-		this->game->timer->get_white_time(),
-		this->game->timer->get_black_time(),
-		*this->game->white->username,
-		*this->game->black->username,
+		this->chess_game.timer.get_white_time(),
+		this->chess_game.timer.get_black_time(),
+		this->chess_game.white.username,
+		this->chess_game.black.username,
 		string("n"),
 		string("Regular"),
-		this->game->timer->get_increment(),
-		this->game->board->generateFEN(),
-		this->game->id
-		);
+		this->chess_game.timer.get_increment(),
+		this->chess_game.board.generate_FEN(),
+		this->chess_game.id
+	);
 	delete conn;
 }
 
-void Chess::start(){
+void chess::start()
+{
 	this->init();
 	string msg = "GAME_START";
 	msg += COMMAND;
-	msg += ltos(this->game->id);
-	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd("LOBBY"));
-	frame->send(this->game->black->sd("LOBBY"));
-	delete frame;
+	msg += to_string(this->chess_game.id);
+	frame f(1,0,0,0,0,TEXT);
+	f.add((uint8_t*)msg.c_str());
+	f.send(this->chess_game.white.sd("LOBBY"));
+	f.send(this->chess_game.black.sd("LOBBY"));
 }
 
-void Chess::notify_sides(){
-	Frame* frame = new Frame(1,0,0,0,0,TEXT);
-	string msg = Frame::prepare_message(2,string("SIDE"),string("w"));
-	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->white->sd(this->game->id));
-	frame->clear();
-	msg = msg = Frame::prepare_message(2,string("SIDE"),string("b"));
-	frame->add((uint8_t*)msg.c_str());
-	frame->send(this->game->black->sd(this->game->id));
-	delete frame;
+void chess::notify_sides()
+{
+	frame f(1,0,0,0,0,TEXT);
+	string msg = frame::prepare_message(2,string("SIDE"),string("w"));
+	f.add((uint8_t*)msg.c_str());
+	f.send(this->chess_game.white.sd(this->chess_game.id));
+	f.clear();
+	msg = frame::prepare_message(2,string("SIDE"),string("b"));
+	f.add((uint8_t*)msg.c_str());
+	f.send(this->game->black->sd(this->game->id));
 }
 
-void Chess::notify_turn(){
+void chess::notify_turn(){
 	string msg = "TURN";
 	msg += COMMAND;
 	msg += (char)this->game->timer->get_turn();
@@ -75,7 +72,7 @@ void Chess::notify_turn(){
 	delete frame;
 }
 
-void Chess::notify_game_over(){
+void chess::notify_game_over(){
 	string msg;
 	switch(this->winner){
 		case DRAW:
@@ -93,11 +90,16 @@ void Chess::notify_game_over(){
 	this->broadcast(msg);
 }
 
-void Chess::move(int r,int c, int r2, int c2,char side){
-	if(this->waiting_for_promotion){
-		return;
+void chess::move(int r,int c, int r2, int c2,string user){
+	char side;
+
+	if(this->game->black->username->compare(user) == 0){
+		side = BLACK;
+	}else{
+		side = WHITE;
 	}
-	if(side != this->game->timer->get_turn()){
+
+	if(this->waiting_for_promotion || side != this->game->timer->get_turn() ){
 		return;
 	}
 
@@ -105,11 +107,14 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 
 	uint8_t result = this->game->move(r,c,r2,c2,side);
 	string check_marker = "";
+	if(this->game->timer->get_timeout()){
+		this->winner = Board::otherSide(side);
+		this->notify_game_over();
+	}
 	if(this->game->inCheck(side)){
 		result = FALSE;
 	}else if(this->game->inCheck(Board::otherSide(side))){
 		check_marker = "+";
-		
 	}
 	
 	switch(result){
@@ -167,7 +172,7 @@ void Chess::move(int r,int c, int r2, int c2,char side){
 	}
 }
 
-void Chess::next(string mv){
+void chess::next(string mv){
 	if(this->game->board->taken != 'X'){
 		if(this->game->timer->get_turn() == WHITE){
 			this->game->history->add_white_taken(this->game->board->taken);
@@ -190,7 +195,7 @@ void Chess::next(string mv){
 }
 
 
-void Chess::offer_draw(string user){
+void chess::offer_draw(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	int sd = (this->game->white->username->compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
 	string msg = "DRAW_OFFERED";
@@ -199,7 +204,7 @@ void Chess::offer_draw(string user){
 	delete frame;
 }
 
-void Chess::accept_draw(string user){
+void chess::accept_draw(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	int sd = (this->game->white->username->compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
 	string msg = "DRAW_ACCEPTED";
@@ -208,7 +213,7 @@ void Chess::accept_draw(string user){
 	delete frame;
 }
 
-void Chess::decline_draw(string user){
+void chess::decline_draw(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	int sd = (this->game->white->username->compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
 	string msg = "DRAW_DECLINED";
@@ -217,7 +222,7 @@ void Chess::decline_draw(string user){
 	delete frame;
 }
 
-void Chess::resign(string user){
+void chess::resign(string user){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	int sd = (this->game->white->username->compare(user) != 0)? this->game->white->sd() : this->game->black->sd();
 	string msg = "RESIGN";
@@ -226,7 +231,7 @@ void Chess::resign(string user){
 	delete frame;
 }
 
-void Chess::take_back(string user){
+void chess::take_back(string user){
 	if(!this->game->history->has_past()){
 		Frame* frame = new Frame(1,0,0,0,0,TEXT);
 		string msg = "NA";
@@ -244,33 +249,33 @@ void Chess::take_back(string user){
 	delete frame;
 }
 
-void Chess::message(string user,string msg){
+void chess::message(string user,string msg){
 	this->chat->add(user,msg);
 	this->broadcast(Frame::prepare_message(2,string("CHAT"),this->chat->get_last()));
 }
 
-void Chess::send_board(){
+void chess::send_board(){
 	string msg = Frame::prepare_message(2,string("BOARD"),this->game->board->generateFEN());
 	this->broadcast(msg);
 }
 
-void Chess::send_time(){
+void chess::send_time(){
 	string msg = Frame::prepare_message(3,string("TIME"),Timer::format_time(this->game->timer->get_white_time()),
 											Timer::format_time(this->game->timer->get_black_time()));
 	this->broadcast(msg);
 }
 
-void Chess::send_move(string move){
+void chess::send_move(string move){
 	this->broadcast(Frame::prepare_message(2,string("MOVE"),move));
 }
 
-void Chess::send_moves(){
+void chess::send_moves(){
 	if(this->game->history->has_moves()>0){
 		this->broadcast(Frame::prepare_message(2,string("MOVES_ALL"),this->game->history->get_moves()));
 	}
 }
 
-void Chess::send_taken(){
+void chess::send_taken(){
 	if(this->game->history->has_white_taken()){
 		this->broadcast(Frame::prepare_message(2,string("WHITE_TAKEN_ALL"),this->game->history->get_white_taken()));
 	}
@@ -279,13 +284,13 @@ void Chess::send_taken(){
 	}
 }
 
-void Chess::send_taken(uint8_t side,char piece){
+void chess::send_taken(uint8_t side,char piece){
 	string msg = Frame::prepare_message(2,(side == WHITE)? string("WHITE_TAKEN") : string("BLACK TAKEN"),piece);
 	this->broadcast(msg);
 }
 
 
-void Chess::send_promotion(){
+void chess::send_promotion(){
 	if(!this->waiting_for_promotion){
 		return;
 	}
@@ -296,7 +301,7 @@ void Chess::send_promotion(){
 	delete frame;
 }
 
-void Chess::send_all(int sd){
+void chess::send_all(int sd){
 	this->game->timer->update();
 	this->notify_sides();
 	this->chat->send_all(sd);
@@ -305,22 +310,21 @@ void Chess::send_all(int sd){
 	this->send_time();
 	this->send_taken();
 	this->send_moves();
-
 }
 
-void Chess::broadcast(string msg){
+void chess::broadcast(string msg){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	frame->add((uint8_t*)msg.c_str());
 	this->broadcast(frame);
 	delete frame;
 }
 
-void Chess::broadcast(Frame* frame){
+void chess::broadcast(Frame* frame){
 	frame->send(this->game->white->sd(this->game->id));
 	frame->send(this->game->black->sd(this->game->id));
 }
 
-void Chess::invalid_move(){
+void chess::invalid_move(){
 	Frame* frame = new Frame(1,0,0,0,0,TEXT);
 	string msg = "INVALID_MOVE";
 	frame->add((uint8_t*)msg.c_str());
@@ -329,7 +333,7 @@ void Chess::invalid_move(){
 	delete frame;
 }
 
-void Chess::promote(char piece){
+void chess::promote(char piece,string username){
 	if(!this->waiting_for_promotion){
 		return;
 	}
@@ -338,7 +342,7 @@ void Chess::promote(char piece){
 	this->waiting_for_promotion = false;
 }
 
-void Chess::save(){
+void chess::save(){
 	SQLConn* conn = new SQLConn("chessClub");
 	string taken = "";
 	taken += this->game->board->taken;
@@ -380,7 +384,7 @@ void Chess::save(){
 	delete conn;
 }
 
-char Chess::get_side_of(string username){
+char chess::get_side_of(string username){
 	if(this->game->white->username->compare(username) == 0){
 		return WHITE;
 	}

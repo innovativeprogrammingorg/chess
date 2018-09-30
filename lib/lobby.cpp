@@ -93,7 +93,6 @@ void Lobby::add_game(vector<string>* data,string host){
 		stoi(data->at(3)),
 		(char)data->at(4)[0],
 		host);
-	//cout<<"Created game successfully"<<endl;
 }
 
 Lobby_Game* Lobby::get_game(int64_t id){

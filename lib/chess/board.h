@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <stdexcept>
+
 #include <cstdint>
 #include "str.h"
 #include "chess/chess_types.h"
@@ -12,30 +14,30 @@
 
 using namespace std;
 
-class Board{
+class board{
 	public:
-		Tile*** tiles;
-		uint8_t bCastle;
-		uint8_t wCastle;
+		tile** tiles;
+		uint8_t black_castle;
+		uint8_t white_castle;
 		char taken;
 		string special;
 	
-		Board(string FEN, string special, string castle);
-		virtual ~Board();
-		Tile* getTile(int row, int col);
+		board(const string& FEN, const string& special, const string& castle);
+		virtual ~board();
+		tile& get_tile(int row, int col);
 		bool empty(int row,int col);
-		void specialData(string data);
-		bool placePiece(int r,int c,char FEN);
-		void forceChange(int r,int c,char FEN);
-		void forceMove(int r,int c,int r2, int c2);
-		Location* findKing(char side);
-		Piece* getKing(char side);		
-		string generateFEN();
-		string getCastleData();
+		void special_data(string data);
+		bool place_piece(int r,int c,char FEN);
+		void force_change(int r,int c,char FEN);
+		void force_move(int r,int c,int r2, int c2);
+		location find_king(char side);
+		piece& get_king(char side);		
+		string generate_FEN();
+		string get_castle_data();
 		string to_string();
 
-		static char numToCol(int c);
-		static char otherSide(char side);
+		static char num_to_col(int c);
+		static char other_side(char side);
 };
 
 

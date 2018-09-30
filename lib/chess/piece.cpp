@@ -2,10 +2,21 @@
 
 using namespace std;
 
-Piece::Piece(char side,char FEN){
+piece::~piece() : side(0),FEN(EMPTY_SPACE),name(0),promo(false),special(false){}
+
+piece::piece(char side,char FEN): side(side),FEN(FEN),name(piece::get_name(FEN)),promo(false),special(false)
+{
+	if((this->name & PROMOTED_PAWN) != 0){
+		this->promo = true;
+		this->name ^= PROMOTED_PAWN;
+	}
+}
+
+
+void piece::change(char side,char FEN){
 	this->side = side;
 	this->FEN = FEN;
-	this->name = Piece::getName(FEN);
+	this->name = piece::get_name(FEN);
 	if((this->name & PROMOTED_PAWN) != 0){
 		this->promo = true;
 		this->name -= PROMOTED_PAWN;
@@ -14,37 +25,41 @@ Piece::Piece(char side,char FEN){
 	}
 	this->special = false;
 }
-Piece::~Piece(){
+
+bool piece::is(int name){
+	return this->name == name;
+}
+
+
+
+bool piece::can_special(){
+	return this->special;
+}
+
+void piece::set_special(int side){
+	if(!this->is(PAWN)){
+		cout<<"Tried to set a special move for a piece that was not a pawn\n";
+		return;
+	}
+	this->special = side;
+}
+
+bool piece::empty()
+{
+	return this->name == 0;
+}
+
+void piece::clear()
+{
 	this->side = 0;
-	this->FEN = 0;
+	this->FEN = EMPTY_SPACE;
 	this->name = 0;
 	this->promo = false;
 	this->special = false;
 }
 
-void Piece::change(char side,char FEN){
-	this->side = side;
-	this->FEN = FEN;
-	this->name = Piece::getName(FEN);
-	if((this->name & PROMOTED_PAWN) != 0){
-		this->promo = true;
-		this->name -= PROMOTED_PAWN;
-	}else{
-		this->promo = false;
-	}
-	this->special = false;
-}
-
-bool Piece::is(int name){
-	return this->name == name;
-}
-
-bool Piece::canSpecial(){
-	return this->special;
-}
-
-int Piece::getName(char FEN){
-	int out = 0;
+int piece::get_name(char FEN){
+	
 	switch(FEN){
 		case BLACK_PAWN:
 		case WHITE_PAWN:
@@ -77,14 +92,5 @@ int Piece::getName(char FEN){
 		case WHITE_KING:
 			return KING;	
 	}
-	return out;
-}
-
-
-void Piece::setSpecial(int side){
-	if(!this->is(PAWN)){
-		cout<<"Tried to set a special move for a piece that was not a pawn\n";
-		return;
-	}
-	this->special = side;
+	return 0;
 }

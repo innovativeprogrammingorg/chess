@@ -7,12 +7,12 @@ using namespace std;
 
 class Tile{
 	public:
-		Piece* p;
-		bool is_empty;
-		Tile(char fen);
+		piece p;
+		tile(char fen);
 		void change(char fen);
-		virtual ~Tile();
+		void change(const piece& p);
 		bool empty();
+		void clear();
 };
 
 #endif

@@ -9,6 +9,7 @@ Timer::Timer(int white_time,int black_time,int increment,uint8_t turn){
 	this->black_time = black_time;
 	this->increment = increment;
 	this->turn = turn;
+	this->timeout = 0;
 }
 
 Timer::Timer(int white_time,int black_time,int increment,uint8_t turn,uint64_t last,int undo){
@@ -18,6 +19,7 @@ Timer::Timer(int white_time,int black_time,int increment,uint8_t turn,uint64_t l
 	this->turn = turn;
 	this->last = last;
 	this->undo = undo;
+	this->timeout = 0;
 }
 
 void Timer::next(){
@@ -29,16 +31,32 @@ void Timer::next(){
 		this->turn = WHITE;
 		this->undo = white_time;
 	}
+	if(this->white_time == this->black_time && this->white_time == 0){
+		//infinite time 
+		return;
+	}
 	if(this->last == 0){
 		this->last = time(NULL);
 		return;
 	}
 	if(t == WHITE){
 		this->white_time -= time(NULL) - this->last;
-		this->white_time += this->increment;
+		if(this->white_time <= 0){
+			this->white_time = 0;
+			this->timeout = WHITE;
+		}else{
+			this->white_time += this->increment;
+		}
+		
 	}else{
 		this->black_time -= time(NULL) - this->last;
-		this->black_time += this->increment;
+		if(this->black_time <= 0){
+			this->black_time = 0;
+			this->timeout = BLACK;
+		}else{
+			this->black_time += this->increment;
+		}
+		
 	}
 	this->last = time(NULL);
 
@@ -50,10 +68,22 @@ void Timer::update(){
 	}
 	if(this->turn == WHITE){
 		this->white_time -= time(NULL) - this->last;
-		this->white_time += this->increment;
+		if(this->white_time <= 0){
+			this->white_time = 0;
+			this->timeout = WHITE;
+		}else{
+			this->white_time += this->increment;
+		}
+		
 	}else{
 		this->black_time -= time(NULL) - this->last;
-		this->black_time += this->increment;
+		if(this->black_time <= 0){
+			this->black_time = 0;
+			this->timeout = BLACK;
+		}else{
+			this->black_time += this->increment;
+		}
+		
 	}
 	this->last = time(NULL);
 
@@ -95,6 +125,9 @@ int Timer::get_increment(){
 uint64_t Timer::get_last(){
 	return this->last;
 }
+uint8_t Timer::get_timeout(){
+	return this->timeout;
+}
 
 int Timer::get_undo(){
 	return this->undo;
@@ -106,13 +139,4 @@ uint8_t Timer::get_turn(){
 
 string Timer::format_time(time_t seconds){
 	return ltos(seconds);
-	/*int sec = seconds % 60;
-	int min = (int)(seconds / 60);
-	string out = itoa(min);
-	out += ":";
-	if(sec<10){
-		out += "0";	
-	}
-	out += itoa(sec);
-	return out;*/
 }

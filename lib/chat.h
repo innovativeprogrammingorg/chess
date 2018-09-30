@@ -13,36 +13,36 @@
 
 using namespace std;
 
-class Message{
+class message{
 	public:
-		string* user;
-		string* message;
+		string user;
+		string msg;
 		time_t date;
-		Message(string* user, string* message);
-		virtual ~Message();
+		explicit message(const string& user, const string& msg);
+		virtual ~message();
 };
 
-class Chat{
+class chat{
 	private:
-		pthread_mutex_t* lock;
+		pthread_mutex_t lock;
 	public:
-		vector<Message*>* messages;
-		map<User*,UEKey,usercomp>* users;
-		Chat();
-		virtual ~Chat();
-		void add(Message* m);
-		void add(string user, string msg);
-		void add(string* user, string* msg);
-		int64_t indexOf(string name);
-		void connect(User* user,UEKey key = nullptr);
-		void connect(string name,UEKey key = nullptr);
-		void disconnect(User* user);
-		void disconnect(string name);
-		void broadcast(Frame* frame);
-		string to_string();
+		vector<message> messages;
+		map<User,UEKey,usercomp> users;
+		chat();
+		virtual ~chat();
+		void add(const Message& m);
+		void add(const string& user, const string& msg);
+		void add(const string* user, const string* msg);
+		int64_t index_of(const string& name);
+		void connect(const User& user,UEKey key = nullptr);
+		void connect(const string& name,const UEKey key = nullptr);
+		void disconnect(const user& u);
+		void disconnect(const string& name);
+		void broadcast(const frame& f);
+		string to_string() const;
 		string get_last();
 		void send_last();
-		void send_all(int sd);
+		void send_all(const int sd);
 
 };
 

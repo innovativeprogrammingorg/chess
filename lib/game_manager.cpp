@@ -3,11 +3,11 @@
 using namespace std;
 
 
-map<int64_t,Chess*>* games;
+static map<int64_t,Chess*>* games;
 
-Game_Manager::Game_Manager(){
-	this->games = new map<int64_t,Chess*>();
-	this->lock = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+game_manager::game_manager()
+{
+	
 	pthread_mutex_init(this->lock,NULL);
 
 	SQLConn* conn = new SQLConn("chessClub");
@@ -15,20 +15,18 @@ Game_Manager::Game_Manager(){
 	if(res->next()){
 		this->id = res->getInt64("ID") + 1;
 	}else{
-		cout<<"Warning: no results found in chessgame"<<endl;
+		cerr<<"Warning: no results found in chessgame"<<endl;
 		this->id = 0;
 	}
 	delete res;
 	delete conn;
 }
 
-Game_Manager::~Game_Manager(){
-	delete this->games;
-	pthread_mutex_unlock(this->lock);
-	pthread_mutex_destroy(this->lock);
+game_manager::~game_manager(){
+	pthread_mutex_destroy(&this->lock);
 }
 
-void Game_Manager::add_game(Chess* game){
+void game_manager::add_game(Chess game){
 	pthread_mutex_lock(this->lock);
 	game->game->id = this->id;
 	this->id++;
@@ -36,14 +34,14 @@ void Game_Manager::add_game(Chess* game){
 	pthread_mutex_unlock(this->lock);
 }
 
-void Game_Manager::add_game(Chess* game,int64_t id){
+void game_manager::add_game(chess* game,int64_t id){
 	pthread_mutex_lock(this->lock);
 	game->game->id = id;
 	this->games->insert(pair<int64_t,Chess*>(id,game));
 	pthread_mutex_unlock(this->lock);
 }
 
-Chess* Game_Manager::get_game(int64_t id){
+IGame* game_manager::get_game(int64_t id){
 	Chess* out = nullptr;
 	try{
 		out = this->games->at(id);
@@ -53,11 +51,11 @@ Chess* Game_Manager::get_game(int64_t id){
 	return out;
 }
 
-Chess* Game_Manager::load_game(int64_t id){
+IGame* game_manager::load_game(int64_t id){
 	SQLConn* conn = new SQLConn("chessClub");
 	sql::ResultSet* res = conn->fetch("i","SELECT * FROM chessgame WHERE ID = ?",(int)id);
 	if(!res->next()){
-		cout<<"Warning: Could not load requested game"<<endl;
+		cerr<<"Warning: Could not load requested game"<<endl;
 		return nullptr;
 	}
 	string special = "false";
@@ -66,10 +64,10 @@ Chess* Game_Manager::load_game(int64_t id){
 	}else if(res->getString("BEP").compare("false") != 0){
 		special = res->getString("BEP");
 	}
-	User* black = new User(res->getString("Black"),BLACK);
-	User* white = new User(res->getString("White"),WHITE);
-	Board* board = new Board(res->getString("Board"),special, res->getString("Castle"));
-	Timer* timer = new Timer(res->getInt("WTime"),res->getInt("BTime"),res->getInt("I"),res->getString("Turn")[0],time(NULL),res->getInt("Undo_Time"));
+	user black(res->getString("Black"),BLACK);
+	user white(res->getString("White"),WHITE);
+	board game_board(res->getString("Board"),special, res->getString("Castle"));
+	timer clck(res->getInt("WTime"),res->getInt("BTime"),res->getInt("I"),res->getString("Turn")[0],time(NULL),res->getInt("Undo_Time"));
 	
 	History* history = new History(res->getString("Past"),res->getString("moves"),res->getString("White_Captured"),
 									res->getString("Black_Captured"),res->getInt("Turns"));
@@ -81,7 +79,7 @@ Chess* Game_Manager::load_game(int64_t id){
 	return chess;
 }
 
-void Game_Manager::drop_game(int64_t id){
+void game_manager::drop_game(int64_t id){
 	pthread_mutex_lock(this->lock);
 	try{
 		this->games->erase(this->games->find(id));
@@ -91,15 +89,15 @@ void Game_Manager::drop_game(int64_t id){
 	pthread_mutex_unlock(this->lock);
 }
 
-void Game_Manager::save_game(int64_t id){
+void game_manager::save_game(int64_t id){
 	try{
-		this->games->at(id)->save();
+		this->games.at(id)->save();
 	}catch(const out_of_range& oor){
 		cout<<"Warning could not find game to save"<<endl;
 	}
 }
 
-void Game_Manager::save(){
+void game_manager::save(){
 	if(this->games->size() == 0){
 		return;
 	}

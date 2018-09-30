@@ -2,33 +2,27 @@
 	
 using namespace std;
 
-Tile::Tile(char fen){
+tile::tile(char fen) {
 	if(fen != EMPTY_SPACE){
-		this->p = new Piece((fen>96)? BLACK : WHITE, fen);
-	}else{
-		this->p = nullptr;
+		this->p = piece((fen>96)? BLACK : WHITE, fen);
 	}
-}
-
-Tile::~Tile(){
-	if(this->p != nullptr){
-		delete this->p;
-	}
+	
 }
 
 void Tile::change(char fen){
-	if(this->p != nullptr && fen != EMPTY_SPACE){
-		this->p->change((fen>96)? BLACK : WHITE, fen);
-	}else if(this->p != nullptr){
-		delete this->p;
-	}
 	if(fen != EMPTY_SPACE){
-		this->p = new Piece((fen>96)? BLACK : WHITE, fen);
+		this->p->change((fen>96)? BLACK : WHITE, fen);
 	}else{
-		this->p = nullptr;
+		this->p.clear();
 	}
 }
 
-bool Tile::empty(){
-	return (this->p == nullptr); 
+bool Tile::empty()
+{
+	return this->p.empty(); 
+}
+
+void tile::clear()
+{
+	this->p.clear();
 }

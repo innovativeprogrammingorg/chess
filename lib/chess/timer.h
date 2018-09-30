@@ -19,6 +19,7 @@ class Timer{
 		int black_time;
 		int increment;
 		uint8_t turn;
+		uint8_t timeout;
 	public:
 		Timer(int white_time,int black_time,int increment,uint8_t turn);
 		Timer(int white_time,int black_time,int increment,uint8_t turn,uint64_t last,int undo);
@@ -31,6 +32,7 @@ class Timer{
 		int get_white_time();
 		int get_black_time();
 		int get_increment();
+		uint8_t get_timeout();
 		uint64_t get_last();
 		int get_undo();
 		uint8_t get_turn();

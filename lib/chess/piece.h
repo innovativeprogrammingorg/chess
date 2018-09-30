@@ -6,22 +6,25 @@
 
 using namespace std;
 
-class Piece{
+class piece{
 	public:
 		char side;
-		int name;
 		char FEN;
+		int name;
 		bool special;
 		bool promo;
-	
-		Piece(char side,char FEN);
-		virtual ~Piece();
-		bool is(int name);
-		bool canSpecial();
-		void setSpecial(int side);
+		
+		piece();
+		piece(char side,char FEN);
+		virtual ~piece();
+		bool is(int name) const;
+		bool can_special() const;
+		void set_special(int side);
 		void change(char side,char FEN);
+		bool empty();
+		void clear();
 
-		static int getName(char FEN);
+		static int get_name(char FEN);
 };
 
 
